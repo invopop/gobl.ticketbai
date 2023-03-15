@@ -1,0 +1,146 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "12060fe4-b073-11ed-ac9b-3e7e00ce5635",
+		"dig": {
+			"alg": "sha256",
+			"val": "615ecd5e5aac68ccb5e7017f4c6a37a1d53721b433dc30150cd31df8a95b345f"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"series": "TEST",
+		"code": "001",
+		"currency": "EUR",
+		"issue_date": "2022-02-01",
+		"supplier": {
+			"tax_id": {
+				"country": "ES",
+				"zone": "BI",
+				"code": "A99805194"
+			},
+			"name": "HFPn5yhXZ9tdD4pHRbvwymaVPrGZQr",
+			"addresses": [
+				{
+					"num": "42",
+					"street": "Calle Pradillo",
+					"locality": "Madrid",
+					"region": "Madrid",
+					"code": "28002",
+					"country": "ES"
+				}
+			],
+			"emails": [
+				{
+					"addr": "billing@example.com"
+				}
+			]
+		},
+		"customer": {
+			"tax_id": {
+				"country": "ES",
+				"code": "54387763P"
+			},
+			"name": "Sample Customer",
+			"addresses": [
+				{
+					"num": "13",
+					"street": "Calle del Barro",
+					"locality": "Alcañiz",
+					"region": "Teruel",
+					"code": "44600",
+					"country": "ES"
+				}
+			],
+			"emails": [
+				{
+					"addr": "customer@example.com"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "10",
+				"item": {
+					"name": "Item being purchased",
+					"price": "100.00"
+				},
+				"sum": "1000.00",
+				"discounts": [
+					{
+						"percent": "10%",
+						"amount": "100.00"
+					}
+				],
+				"taxes": [
+					{
+						"cat": "VAT",
+						"rate": "standard+eqs",
+						"percent": "21.0%",
+						"surcharge": "5.2%"
+					},
+					{
+						"cat": "IRPF",
+						"rate": "pro",
+						"percent": "15.0%"
+					}
+				],
+				"total": "900.00"
+			}
+		],
+		"totals": {
+			"sum": "900.00",
+			"total": "900.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard+eqs",
+								"base": "900.00",
+								"percent": "21.0%",
+								"amount": "189.00",
+								"surcharge": {
+									"percent": "5.2%",
+									"amount": "46.80"
+								}
+							}
+						],
+						"base": "900.00",
+						"amount": "189.00",
+						"surcharge": "46.80"
+					},
+					{
+						"code": "IRPF",
+						"retained": true,
+						"rates": [
+							{
+								"key": "pro",
+								"base": "900.00",
+								"percent": "15.0%",
+								"amount": "135.00"
+							}
+						],
+						"base": "900.00",
+						"amount": "135.00"
+					}
+				],
+				"sum": "100.80"
+			},
+			"tax": "100.80",
+			"total_with_tax": "1000.80",
+			"payable": "1000.80"
+		},
+		"notes": [
+			{
+				"key": "general",
+				"text": "Some random description"
+			}
+		]
+	},
+	"sigs": [
+		"eyJhbGciOiJFUzI1NiIsImtpZCI6IjBhMjg2MDAwLTM2MGEtNGU2Ni04MWFhLTU2ZDQ0YmI4ZjEwNyJ9.eyJ1dWlkIjoiMTIwNjBmZTQtYjA3My0xMWVkLWFjOWItM2U3ZTAwY2U1NjM1IiwiZGlnIjp7ImFsZyI6InNoYTI1NiIsInZhbCI6IjYxNWVjZDVlNWFhYzY4Y2NiNWU3MDE3ZjRjNmEzN2ExZDUzNzIxYjQzM2RjMzAxNTBjZDMxZGY4YTk1YjM0NWYifX0.NdQ3CWRAjYFP2zxmP00E2r8ahj8L7IFkWrir_4p2ExychJHFx1smnEK7lwKkjWSOSsmoLu7nvDuCMsmh8U2S4g"
+	]
+}
