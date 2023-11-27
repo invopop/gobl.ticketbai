@@ -82,8 +82,8 @@ type DetalleIVA struct {
 	BaseImponible                                        string
 	TipoImpositivo                                       string
 	CuotaImpuesto                                        string
-	TipoRecargoEquivalencia                              string
-	CuotaRecargoEquivalencia                             string
+	TipoRecargoEquivalencia                              string `xml:",omitempty"`
+	CuotaRecargoEquivalencia                             string `xml:",omitempty"`
 	OperacionEnRecargoDeEquivalenciaORegimenSimplificado string `xml:",omitempty"`
 }
 

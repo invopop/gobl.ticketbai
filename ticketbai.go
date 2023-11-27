@@ -31,6 +31,7 @@ type Client struct {
 	list     *gateways.List
 	cert     *xmldsig.Certificate
 	env      string
+	curTime  time.Time
 }
 
 // Option is used to configure the client.
@@ -48,6 +49,12 @@ func WithCertificate(cert *xmldsig.Certificate) Option {
 func InProduction() Option {
 	return func(c *Client) {
 		c.env = gateways.EnvProduction
+	}
+}
+
+func WithCurrentTime(curTime time.Time) Option {
+	return func(c *Client) {
+		c.curTime = curTime
 	}
 }
 
@@ -118,12 +125,12 @@ func (c *Client) NewDocument(env *gobl.Envelope) (*Document, error) {
 	}
 
 	var err error
-	d.tbai, err = doc.NewTicketBAI(d.inv, time.Now())
+	d.tbai, err = doc.NewTicketBAI(d.inv, c.CurrentTime())
 	if err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	return d, nil
 }
 
 // Post will send the document to the TicketBAI gateway.
@@ -157,7 +164,7 @@ func (c *Client) Fingerprint(d *Document, prev *PreviousInvoice) error {
 // the QR codes that are generated.
 func (c *Client) Sign(d *Document) error {
 	dID := d.env.Head.UUID.String()
-	if err := d.tbai.Sign(dID, c.cert); err != nil {
+	if err := d.tbai.Sign(dID, c.cert, xmldsig.WithCurrentTime(c.CurrentTime)); err != nil {
 		return fmt.Errorf("signing: %w", err)
 	}
 
@@ -177,6 +184,13 @@ func (c *Client) Sign(d *Document) error {
 	)
 
 	return nil
+}
+
+func (c *Client) CurrentTime() time.Time {
+	if !c.curTime.IsZero() {
+		return c.curTime
+	}
+	return time.Now()
 }
 
 func (d *Document) hasExistingStamps() bool {

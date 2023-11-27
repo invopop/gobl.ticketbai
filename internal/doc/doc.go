@@ -130,7 +130,7 @@ func (doc *TicketBAI) Bytes() ([]byte, error) {
 
 func (doc *TicketBAI) buffer(base string) (*bytes.Buffer, error) {
 	buf := bytes.NewBufferString(base)
-	data, err := xml.Marshal(doc)
+	data, err := xml.MarshalIndent(doc, "", "  ")
 	if err != nil {
 		return nil, fmt.Errorf("marshal document: %w", err)
 	}

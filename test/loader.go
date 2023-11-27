@@ -16,7 +16,7 @@ import (
 // LoadEnvelope will load a test JSON document as a GOBL Envelope
 // from the test folder
 func LoadEnvelope(name string) (*gobl.Envelope, error) {
-	envelopeReader, err := os.Open(GetDataPath() + name)
+	envelopeReader, err := os.Open(TestPath("data", name))
 	if err != nil {
 		return nil, err
 	}
@@ -51,10 +51,10 @@ func LoadInvoice(name string) (*bill.Invoice, error) {
 	return inv, nil
 }
 
-// GetDataPath returns the path where test can find data files
-// to be used in tests
-func GetDataPath() string {
-	return RootPath() + "/test/"
+// TestPath joins the provided elements to the project's test folder
+func TestPath(elements ...string) string {
+	elements = append([]string{"test"}, elements...)
+	return Path(elements...)
 }
 
 // Path joins the provided elements to the project root

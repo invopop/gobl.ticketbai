@@ -7,7 +7,6 @@ import (
 
 	"github.com/invopop/gobl.ticketbai/internal/doc"
 	"github.com/invopop/gobl.ticketbai/test"
-	"github.com/invopop/gobl/bill"
 	"github.com/invopop/xmldsig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -15,7 +14,6 @@ import (
 
 func TestQRCodes(t *testing.T) {
 	type TestCase struct {
-		src     *bill.Invoice
 		invoice *doc.TicketBAI
 	}
 
@@ -62,8 +60,8 @@ func TestQRCodes(t *testing.T) {
 		assert.Equal(t, true, strings.HasPrefix(codes.TBAICode, "TBAI-"))
 		assert.Contains(t, codes.TBAICode, "-A99805194-")
 		assert.Contains(t, codes.TBAICode, "-010222-")
-		assert.Contains(t, codes.TBAICode, "-h0UFci6RYA1cl-")
-		assert.Contains(t, codes.TBAICode, "-107")
+		assert.Contains(t, codes.TBAICode, "-NIlmvJuN5VTaJ-")
+		assert.Contains(t, codes.TBAICode, "-146")
 	})
 
 	t.Run("should build QR code for an invoice", func(t *testing.T) {
@@ -73,9 +71,9 @@ func TestQRCodes(t *testing.T) {
 		codes := tbai.QRCodes()
 
 		assert.Equal(t, true, strings.HasPrefix(codes.QRCode, "https://batuz.eus/QRTBAI/"))
-		assert.Contains(t, codes.QRCode, "?id=TBAI-A99805194-010222-h0UFci6RYA1cl-107")
+		assert.Contains(t, codes.QRCode, "?id=TBAI-A99805194-010222-NIlmvJuN5VTaJ-146")
 		assert.Contains(t, codes.QRCode, "&nf=001")
 		assert.Contains(t, codes.QRCode, "&i="+testCase.invoice.Factura.DatosFactura.ImporteTotalFactura)
-		assert.Contains(t, codes.QRCode, "&cr=153") // changes according to test data
+		assert.Contains(t, codes.QRCode, "&cr=175") // changes according to test data
 	})
 }
