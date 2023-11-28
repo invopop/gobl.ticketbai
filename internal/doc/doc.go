@@ -53,7 +53,10 @@ func NewTicketBAI(inv *bill.Invoice, ts time.Time) (*TicketBAI, error) {
 		return nil, err
 	}
 
-	goblWithoutIncludedTaxes := inv.RemoveIncludedTaxes(2)
+	goblWithoutIncludedTaxes, err := inv.RemoveIncludedTaxes()
+	if err != nil {
+		return nil, err
+	}
 
 	doc := &TicketBAI{
 		TNamespace: ticketBAINamespace,

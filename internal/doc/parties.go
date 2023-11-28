@@ -2,7 +2,9 @@ package doc
 
 import (
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/gobl/tax"
 )
 
@@ -41,14 +43,6 @@ type IDOtro struct {
 	ID         string
 }
 
-var documentTypeMap = map[cbc.Key]string{
-	tax.SourceKeyTaxAgency: "02",
-	tax.SourceKeyPassport:  "03",
-	tax.SourceKeyNational:  "04",
-	tax.SourceKeyPermit:    "05",
-	tax.SourceKeyOther:     "06",
-}
-
 func newEmisor(party *org.Party) *Emisor {
 	return &Emisor{
 		NIF:                        party.TaxID.Code.String(),
@@ -66,7 +60,7 @@ func newDestinatario(party *org.Party) IDDestinatario {
 	} else {
 		destinatario.IDOtro = &IDOtro{
 			CodigoPais: party.TaxID.Country.String(),
-			IDType:     taxDocumentType(party.TaxID.Source),
+			IDType:     taxDocumentType(party).String(),
 			ID:         party.TaxID.Code.String(),
 		}
 	}
@@ -79,10 +73,19 @@ func newDestinatario(party *org.Party) IDDestinatario {
 	return destinatario
 }
 
-func taxDocumentType(src cbc.Key) string {
-	typ, ok := documentTypeMap[src]
-	if !ok {
-		return "02" // assume always from a tax-agency
+func taxDocumentType(party *org.Party) cbc.Code {
+	r := tax.RegimeFor(l10n.ES, party.TaxID.Zone)
+
+	t := party.TaxID.Type
+	if t == "" {
+		t = es.TaxIdentityTypeFiscal
 	}
-	return typ
+
+	for _, it := range r.IdentityTypeKeys {
+		if it.Key == t {
+			return it.Map[es.KeyTicketBAIIDType]
+		}
+	}
+
+	return ""
 }

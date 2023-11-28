@@ -11,7 +11,6 @@ import (
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
-	"github.com/invopop/gobl/regimes/common"
 	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
@@ -56,7 +55,7 @@ func TestDesgloseConversion(t *testing.T) {
 	t.Run("should distinguish goods from services when customer from other country",
 		func(t *testing.T) {
 			goblInvoice := invoiceFromCountry("GB")
-			goblInvoice.Lines[0].Item.Meta = map[cbc.Key]string{"product": "goods"}
+			goblInvoice.Lines[0].Item.Key = es.ItemGoods
 
 			invoice, _ := doc.NewTicketBAI(goblInvoice, ts)
 
@@ -68,7 +67,7 @@ func TestDesgloseConversion(t *testing.T) {
 	t.Run("should use services instead of goods as default when customer from other country",
 		func(t *testing.T) {
 			goblInvoice := invoiceFromCountry("GB")
-			goblInvoice.Lines[0].Item.Meta = map[cbc.Key]string{}
+			goblInvoice.Lines[0].Item.Key = cbc.KeyEmpty
 
 			invoice, _ := doc.NewTicketBAI(goblInvoice, ts)
 
@@ -91,7 +90,7 @@ func TestDesgloseConversion(t *testing.T) {
 				Item: &org.Item{
 					Name:  "A",
 					Price: num.MakeAmount(20, 0),
-					Meta:  map[cbc.Key]string{"product": "goods"},
+					Key:   es.ItemGoods,
 				},
 			},
 		}
@@ -120,7 +119,7 @@ func TestDesgloseConversion(t *testing.T) {
 					Item: &org.Item{
 						Name:  "A",
 						Price: num.MakeAmount(20, 0),
-						Meta:  map[cbc.Key]string{"product": "goods"},
+						Key:   es.ItemGoods,
 					},
 					Taxes: tax.Set{&tax.Combo{Category: "VAT", Rate: "standard"}},
 				},
@@ -143,7 +142,7 @@ func TestDesgloseConversion(t *testing.T) {
 			Quantity:  num.MakeAmount(100, 0),
 			Item:      &org.Item{Name: "A", Price: num.MakeAmount(10, 0)},
 			Discounts: []*bill.LineDiscount{DiscountOf(100)},
-			Taxes:     tax.Set{&tax.Combo{Category: "IRPF", Rate: "standard"}},
+			Taxes:     tax.Set{&tax.Combo{Category: "IRPF", Rate: "pro"}},
 		}}
 		_ = goblInvoice.Calculate()
 
@@ -156,7 +155,7 @@ func TestDesgloseConversion(t *testing.T) {
 
 	t.Run("should change No Sujeta cause when taxes are paid in other EU country", func(t *testing.T) {
 		goblInvoice := invoiceFromCountry("ES")
-		goblInvoice.Tax = &bill.Tax{Tags: []cbc.Key{common.TagCustomerRates}}
+		goblInvoice.Tax = &bill.Tax{Tags: []cbc.Key{tax.TagCustomerRates}}
 		goblInvoice.Lines = []*bill.Line{{
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
@@ -219,7 +218,7 @@ func TestDesgloseConversion(t *testing.T) {
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
 			Item:     &org.Item{Name: "A", Price: num.MakeAmount(10, 0)},
-			Taxes:    tax.Set{&tax.Combo{Category: common.TaxCategoryVAT, Rate: common.TaxRateStandard}},
+			Taxes:    tax.Set{&tax.Combo{Category: tax.CategoryVAT, Rate: tax.RateStandard}},
 		}}
 		_ = goblInvoice.Calculate()
 
@@ -267,7 +266,7 @@ func TestDesgloseConversion(t *testing.T) {
 				Item: &org.Item{
 					Name:  "A",
 					Price: num.MakeAmount(10, 0),
-					Meta:  cbc.Meta{"source": "provider"},
+					Key:   es.ItemResale,
 				},
 				Taxes: tax.Set{&tax.Combo{Category: "VAT", Rate: "standard"}},
 			},
@@ -290,7 +289,7 @@ func TestDesgloseConversion(t *testing.T) {
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
 			Item:     &org.Item{Name: "A", Price: num.MakeAmount(10, 0)},
-			Taxes:    tax.Set{&tax.Combo{Category: "VAT", Rate: "zero"}},
+			Taxes:    tax.Set{&tax.Combo{Category: tax.CategoryVAT, Rate: tax.RateExempt}},
 		}}
 		_ = goblInvoice.Calculate()
 
@@ -309,9 +308,16 @@ func TestDesgloseConversion(t *testing.T) {
 				Item: &org.Item{
 					Name:  "A",
 					Price: num.MakeAmount(10, 0),
-					Meta:  cbc.Meta{"exempt": "E1"},
 				},
-				Taxes: tax.Set{&tax.Combo{Category: "VAT", Rate: "zero"}},
+				Taxes: tax.Set{
+					&tax.Combo{
+						Category: tax.CategoryVAT,
+						Rate:     tax.RateExempt,
+						Ext: cbc.CodeMap{
+							es.ExtKeyTBAIExemption: "E1",
+						},
+					},
+				},
 			},
 			{
 				Index:    2,
@@ -319,9 +325,16 @@ func TestDesgloseConversion(t *testing.T) {
 				Item: &org.Item{
 					Name:  "A",
 					Price: num.MakeAmount(20, 0),
-					Meta:  cbc.Meta{"exempt": "E2"},
 				},
-				Taxes: tax.Set{&tax.Combo{Category: "VAT", Rate: "zero"}},
+				Taxes: tax.Set{
+					&tax.Combo{
+						Category: tax.CategoryVAT,
+						Rate:     tax.RateExempt,
+						Ext: cbc.CodeMap{
+							es.ExtKeyTBAIExemption: "E2",
+						},
+					},
+				},
 			},
 		}
 		_ = goblInvoice.Calculate()
@@ -357,7 +370,7 @@ func TestDesgloseConversion(t *testing.T) {
 
 	t.Run("should mark tax details if there is reverse charge", func(t *testing.T) {
 		goblInvoice := invoiceFromCountry("ES")
-		goblInvoice.Tax = &bill.Tax{Tags: []cbc.Key{common.TagReverseCharge}}
+		goblInvoice.Tax = &bill.Tax{Tags: []cbc.Key{tax.TagReverseCharge}}
 		goblInvoice.Lines = []*bill.Line{{
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),

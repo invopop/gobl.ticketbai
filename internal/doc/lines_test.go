@@ -9,7 +9,6 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
-	"github.com/invopop/gobl/regimes/common"
 	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
@@ -54,7 +53,7 @@ func TestLines(t *testing.T) {
 		invoice, _ := doc.NewTicketBAI(goblInvoice, ts)
 
 		line := invoice.Factura.DatosFactura.DetallesFactura.IDDetalleFactura[0]
-		assert.Equal(t, "100", line.Descuento)
+		assert.Equal(t, "100.00", line.Descuento)
 		assert.Equal(t, "1210.00", line.ImporteTotal)
 	})
 
@@ -86,7 +85,7 @@ func TestLines(t *testing.T) {
 				Index:    1,
 				Quantity: num.MakeAmount(100, 0),
 				Item:     &org.Item{Name: "A", Price: num.MakeAmount(10, 0)},
-				Taxes:    tax.Set{&tax.Combo{Category: common.TaxCategoryVAT, Rate: common.TaxRateStandard}},
+				Taxes:    tax.Set{&tax.Combo{Category: tax.CategoryVAT, Rate: tax.RateStandard}},
 			})
 		}
 		require.NoError(t, inv.Calculate())

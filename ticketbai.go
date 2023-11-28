@@ -11,7 +11,7 @@ import (
 	"github.com/invopop/gobl.ticketbai/internal/gateways"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
-	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/head"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/xmldsig"
@@ -171,13 +171,13 @@ func (c *Client) Sign(d *Document) error {
 	// now generate the QR codes and add them to the envelope
 	codes := d.tbai.QRCodes()
 	d.env.Head.AddStamp(
-		&cbc.Stamp{
+		&head.Stamp{
 			Provider: es.StampProviderTBAICode,
 			Value:    codes.TBAICode,
 		},
 	)
 	d.env.Head.AddStamp(
-		&cbc.Stamp{
+		&head.Stamp{
 			Provider: es.StampProviderTBAIQR,
 			Value:    codes.QRCode,
 		},

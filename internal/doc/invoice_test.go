@@ -11,7 +11,6 @@ import (
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
-	"github.com/invopop/gobl/regimes/common"
 	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
@@ -45,7 +44,7 @@ func TestFacturaConversion(t *testing.T) {
 	t.Run("should mark an invoice as simplified (ticket)", func(t *testing.T) {
 		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Tax = &bill.Tax{
-			Tags: []cbc.Key{common.TagSimplified},
+			Tags: []cbc.Key{tax.TagSimplified},
 		}
 
 		invoice, _ := doc.NewTicketBAI(goblInvoice, ts)
@@ -176,9 +175,14 @@ func TestFacturaConversion(t *testing.T) {
 			Item: &org.Item{
 				Name:  "A",
 				Price: num.MakeAmount(10, 0),
-				Meta:  cbc.Meta{"source": "provider"},
+				Key:   es.ItemResale,
 			},
-			Taxes: tax.Set{&tax.Combo{Category: "VAT", Rate: "standard"}},
+			Taxes: tax.Set{
+				&tax.Combo{
+					Category: "VAT",
+					Rate:     "standard",
+				},
+			},
 		}}
 		_ = goblInvoice.Calculate()
 

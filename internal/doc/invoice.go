@@ -7,8 +7,8 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
-	"github.com/invopop/gobl/regimes/common"
 	"github.com/invopop/gobl/regimes/es"
+	"github.com/invopop/gobl/tax"
 )
 
 // Factura contains the invoice info
@@ -50,7 +50,7 @@ type IDClave struct {
 
 func newCabeceraFactura(inv *bill.Invoice, ts time.Time) *CabeceraFactura {
 	simplifiedInvoice := "N"
-	if inv.Tax.ContainsTag(common.TagSimplified) {
+	if inv.Tax.ContainsTag(tax.TagSimplified) {
 		simplifiedInvoice = "S"
 	}
 
@@ -163,8 +163,7 @@ func newClaves(inv *bill.Invoice) []IDClave {
 
 func hasSurchargedLines(inv *bill.Invoice) bool {
 	for _, line := range inv.Lines {
-		ct := line.Taxes.Get(common.TaxCategoryVAT)
-		if ct != nil && es.TagProvider.In(ct.Tags...) {
+		if line.Item.Key == es.ItemResale {
 			return true
 		}
 	}

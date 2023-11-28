@@ -6,11 +6,5 @@ import (
 )
 
 func calculateDiscounts(line *bill.Line) num.Amount {
-	total := num.MakeAmount(0, 0)
-
-	for _, discount := range line.Discounts {
-		total = total.Add(discount.Amount)
-	}
-
-	return total
+	return line.Sum.Subtract(line.Total)
 }

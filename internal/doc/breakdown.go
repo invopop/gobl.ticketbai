@@ -6,7 +6,6 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/num"
-	"github.com/invopop/gobl/regimes/common"
 	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/gobl/tax"
 )
@@ -115,9 +114,9 @@ func newTipoDesglose(gobl *bill.Invoice) *TipoDesglose {
 			switch scheme {
 			case es.TagSimplifiedScheme:
 				taxInfo.simplifiedRegime = true
-			case common.TagReverseCharge:
+			case tax.TagReverseCharge:
 				taxInfo.reverseCharge = true
-			case common.TagCustomerRates:
+			case tax.TagCustomerRates:
 				taxInfo.customerRates = true
 			}
 		}
@@ -155,7 +154,7 @@ func filterGoodsLines(gobl *bill.Invoice) []*bill.Line {
 	lines := []*bill.Line{}
 
 	for _, line := range gobl.Lines {
-		if line.Item.Meta != nil && line.Item.Meta["product"] == goods {
+		if line.Item.Key == es.ItemGoods {
 			lines = append(lines, line)
 		}
 	}
@@ -167,7 +166,7 @@ func filterServiceLines(gobl *bill.Invoice) []*bill.Line {
 	lines := []*bill.Line{}
 
 	for _, line := range gobl.Lines {
-		if line.Item.Meta == nil || line.Item.Meta["product"] != goods {
+		if line.Item.Key != es.ItemGoods {
 			lines = append(lines, line)
 		}
 	}
@@ -314,32 +313,32 @@ func sumAmountsPerType(lines []*bill.Line) (map[string]sumDetail, map[string]sum
 		discount := calculateDiscounts(line)
 		// TODO: Handle charges
 		taxableAmount := line.Item.Price.Multiply(line.Quantity).Subtract(discount)
-		lineSurcharged := line.Item.Meta["source"] == "provider"
+		lineSurcharged := line.Item.Key == es.ItemResale
 
-		for _, tax := range line.Taxes {
-			if tax.Category == common.TaxCategoryVAT && tax.Percent.IsZero() {
+		for _, t := range line.Taxes {
+			if t.Category == tax.CategoryVAT && t.Rate == tax.RateExempt {
 				exempted = updateAmount(
 					exempted,
-					exemptionKey(line),
+					t.Ext[es.ExtKeyTBAIExemption].String(),
 					taxableAmount,
 					num.MakePercentage(0, 0),
-					surcharge(tax),
+					surcharge(t),
 				)
-			} else if tax.Category == common.TaxCategoryVAT && lineSurcharged {
+			} else if t.Category == tax.CategoryVAT && lineSurcharged {
 				surcharged = updateAmount(
 					surcharged,
-					taxKey(tax),
+					taxKey(t),
 					taxableAmount,
-					tax.Percent,
-					surcharge(tax),
+					*t.Percent,
+					surcharge(t),
 				)
-			} else if tax.Category == common.TaxCategoryVAT {
+			} else if t.Category == tax.CategoryVAT {
 				nonExempted = updateAmount(
 					nonExempted,
-					taxKey(tax),
+					taxKey(t),
 					taxableAmount,
-					tax.Percent,
-					surcharge(tax),
+					*t.Percent,
+					surcharge(t),
 				)
 			}
 		}
@@ -355,14 +354,6 @@ func formatPercent(percent num.Percentage) string {
 	}
 
 	return maybeNegative
-}
-
-func exemptionKey(line *bill.Line) string {
-	if line.Item.Meta != nil && line.Item.Meta["exempt"] != "" {
-		return line.Item.Meta["exempt"]
-	}
-
-	return "E6"
 }
 
 func taxKey(tax *tax.Combo) string {
