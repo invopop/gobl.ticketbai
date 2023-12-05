@@ -1,6 +1,7 @@
 package doc_test
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -63,7 +64,7 @@ func TestFingerprintGeneration(t *testing.T) {
 		conf.LastSeries = "A"
 		conf.LastCode = "1"
 		conf.LastIssueDate = cal.MakeDate(2022, 1, 1)
-		conf.LastSignature = "ASDF1234567890..."
+		conf.LastSignature = strings.Repeat("1234567890", 11)
 
 		err := testCase.Fingerprint(conf)
 		require.NoError(t, err)
@@ -71,6 +72,6 @@ func TestFingerprintGeneration(t *testing.T) {
 		chaining := fingerprint.EncadenamientoFacturaAnterior
 		assert.Equal(t, "1", chaining.NumFacturaAnterior)
 		assert.Equal(t, "01-01-2022", chaining.FechaExpedicionFacturaAnterior)
-		assert.Equal(t, "ASDF1234567890...", chaining.SignatureValueFirmaFacturaAnterior)
+		assert.Equal(t, strings.Repeat("1234567890", 10), chaining.SignatureValueFirmaFacturaAnterior)
 	})
 }

@@ -7,8 +7,6 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
-
-	"github.com/invopop/gobl.ticketbai/internal/doc"
 )
 
 // Bizkaia has extra complications when sending documents, so we define all the additional
@@ -116,11 +114,11 @@ type Supplier struct {
 
 // NewCreateRequest simplifies the process of creating a new request for a regular
 // company using Invopop.
-func NewCreateRequest(sup *Supplier, tbai *doc.TicketBAI) (*CreateRequest, error) {
+func NewCreateRequest(sup *Supplier, payload []byte) (*CreateRequest, error) {
 	req := new(CreateRequest)
 
 	head := newCabecera240Type(sup)
-	facs, err := newFacturasEmitidas(tbai)
+	facs, err := newFacturasEmitidas(payload)
 	if err != nil {
 		return nil, err
 	}
@@ -152,15 +150,11 @@ func NewCreateRequest(sup *Supplier, tbai *doc.TicketBAI) (*CreateRequest, error
 
 // newFacturasEmitidas will encode the invoice data to base64 and instantiate a
 // new object to include in the XML message body.
-func newFacturasEmitidas(tbais ...*doc.TicketBAI) (*FacturasEmitidasConSGCodificadoType, error) {
+func newFacturasEmitidas(payloads ...[]byte) (*FacturasEmitidasConSGCodificadoType, error) {
 	b := &FacturasEmitidasConSGCodificadoType{
-		FacturaEmitida: make([]*DetalleEmitidaConSGCodificadoType, len(tbais)),
+		FacturaEmitida: make([]*DetalleEmitidaConSGCodificadoType, len(payloads)),
 	}
-	for i, tbai := range tbais {
-		d, err := tbai.Bytes()
-		if err != nil {
-			return nil, fmt.Errorf("tbai %d: failed to encode to bytes: %w", i, err)
-		}
+	for i, d := range payloads {
 		b.FacturaEmitida[i] = &DetalleEmitidaConSGCodificadoType{
 			TicketBai: base64.StdEncoding.EncodeToString(d),
 		}

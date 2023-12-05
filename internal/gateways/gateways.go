@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/invopop/gobl.ticketbai/internal/doc"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/regimes/es"
@@ -22,7 +21,6 @@ type Error string
 
 // Standard gateway error responses
 var (
-	ErrRejected   Error = "rejected"
 	ErrConnection Error = "connection"
 )
 
@@ -35,31 +33,41 @@ func (e Error) Error() string {
 type Connection interface {
 	// Post sends the complete TicketBAI document to the remote end-point. We assume
 	// the document has been fully prepared and signed.
-	Post(ctx context.Context, inv *bill.Invoice, tbai *doc.TicketBAI) error
+	Post(ctx context.Context, inv *bill.Invoice, payload []byte) error
 }
 
 // List keeps together the list of connections
 type List struct {
-	ebizkaia *EBizkaiaConn
+	conns map[l10n.Code]Connection
 }
 
 // New instantiates a new set of connections using the provided config.
 func New(env string, cert *xmldsig.Certificate) (*List, error) {
 	l := new(List)
+
 	tlsConf, err := cert.TLSAuthConfig()
 	if err != nil {
 		return nil, fmt.Errorf("preparing TLS config: %w", err)
 	}
-	l.ebizkaia = newEbizkaia(env, tlsConf)
+
+	l.Register(es.ZoneBI, newEbizkaia(env, tlsConf))
+
 	return l, nil
 }
 
-// For provides the connection needed for the given locality, or nil,
-// if not supported.
-func (l *List) For(zone l10n.Code) Connection {
-	switch zone {
-	case es.ZoneBI:
-		return l.ebizkaia
+// Register adds a connection to use in a zone
+func (l *List) Register(zone l10n.Code, c Connection) {
+	if l.conns == nil {
+		l.conns = make(map[l10n.Code]Connection)
 	}
-	return nil
+	l.conns[zone] = c
+}
+
+// For provides the connection needed for the given zone, or nil, if not
+// supported.
+func (l *List) For(zone l10n.Code) Connection {
+	if l.conns == nil {
+		return nil
+	}
+	return l.conns[zone]
 }

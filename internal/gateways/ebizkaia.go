@@ -6,9 +6,9 @@ import (
 	"fmt"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/invopop/gobl.ticketbai/internal/doc"
 	"github.com/invopop/gobl.ticketbai/internal/gateways/ebizkaia"
 	"github.com/invopop/gobl/bill"
+	"golang.org/x/net/html/charset"
 )
 
 const (
@@ -52,13 +52,13 @@ func newEbizkaia(env string, tlsConfig *tls.Config) *EBizkaiaConn {
 
 // Post sends the complete TicketBAI document to the remote end-point. We assume
 // the document has been signed and prepared.
-func (c *EBizkaiaConn) Post(ctx context.Context, inv *bill.Invoice, tbai *doc.TicketBAI) error {
+func (c *EBizkaiaConn) Post(ctx context.Context, inv *bill.Invoice, payload []byte) error {
 	sup := &ebizkaia.Supplier{
 		Year: inv.IssueDate.Year,
 		NIF:  inv.Supplier.TaxID.Code.String(),
 		Name: inv.Supplier.Name,
 	}
-	doc, err := ebizkaia.NewCreateRequest(sup, tbai)
+	doc, err := ebizkaia.NewCreateRequest(sup, payload)
 	if err != nil {
 		return fmt.Errorf("create request: %w", err)
 	}
@@ -84,8 +84,16 @@ func (c *EBizkaiaConn) Post(ctx context.Context, inv *bill.Invoice, tbai *doc.Ti
 	code := res.Header().Get(eBizkaiaN3ResponseHeader)
 	if code == eBizkaiaN3ResponseInvalid {
 		msg := res.Header().Get(eBizkaiaN3MessageHeader)
-		return fmt.Errorf("ebizkaia: %v", msg)
+		return fmt.Errorf("ebizkaia: %v", convertToUTF8(msg))
 	}
 
 	return nil
+}
+
+// convertToValidUTF8 determines the encoding of a string and converts it to
+// UTF-8. Certain strings returned by eBizkaia aren't in UTF-8.
+func convertToUTF8(s string) string {
+	e, _, _ := charset.DetermineEncoding([]byte(s), "")
+	out, _ := e.NewDecoder().Bytes([]byte(s))
+	return string(out)
 }

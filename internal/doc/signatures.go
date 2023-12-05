@@ -36,10 +36,11 @@ func (doc *TicketBAI) SignatureValue() string {
 }
 
 func (doc *TicketBAI) canonical() ([]byte, error) {
-	buf, err := doc.buffer("")
+	buf, err := doc.buffer("", false)
 	if err != nil {
 		return nil, err
 	}
+
 	return buf.Bytes(), nil
 }
 

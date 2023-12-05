@@ -113,32 +113,40 @@ func (doc *TicketBAI) QRCodes() *Codes {
 	return doc.generateCodes(doc.zone)
 }
 
-// String converts a struct representation to its string representation
-func (doc *TicketBAI) String() (string, error) {
-	buf, err := doc.buffer(xml.Header)
-	if err != nil {
-		return "", err
-	}
-	return buf.String(), nil
-}
-
 // Bytes returns the XML document bytes
 func (doc *TicketBAI) Bytes() ([]byte, error) {
-	buf, err := doc.buffer(xml.Header)
+	buf, err := doc.buffer(xml.Header, false)
 	if err != nil {
 		return nil, err
 	}
+
 	return buf.Bytes(), nil
 }
 
-func (doc *TicketBAI) buffer(base string) (*bytes.Buffer, error) {
-	buf := bytes.NewBufferString(base)
-	data, err := xml.MarshalIndent(doc, "", "  ")
+// Bytes returns the idented XML document bytes
+func (doc *TicketBAI) BytesIndent() ([]byte, error) {
+	buf, err := doc.buffer(xml.Header, true)
 	if err != nil {
-		return nil, fmt.Errorf("marshal document: %w", err)
+		return nil, err
 	}
-	if _, err := buf.Write(data); err != nil {
-		return nil, fmt.Errorf("writing to buffer: %w", err)
+
+	return buf.Bytes(), nil
+}
+
+func (doc *TicketBAI) buffer(base string, indent bool) (*bytes.Buffer, error) {
+	buf := bytes.NewBufferString(base)
+
+	enc := xml.NewEncoder(buf)
+	if indent {
+		enc.Indent("", "  ")
 	}
+
+	if err := enc.Encode(doc); err != nil {
+		return nil, fmt.Errorf("encoding document: %w", err)
+	}
+	if err := enc.Close(); err != nil {
+		return nil, fmt.Errorf("closing encoder: %w", err)
+	}
+
 	return buf, nil
 }

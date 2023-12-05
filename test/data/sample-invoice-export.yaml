@@ -1,0 +1,84 @@
+$schema: "https://gobl.org/draft-0/bill/invoice"
+currency: "EUR"
+issue_date: "2022-02-01"
+series: "TEST"
+code: "001"
+
+supplier:
+  tax_id:
+    country: "ES"
+    zone: "BI"
+    code: "A99805194" # provided by Batuz
+  name: "HFPn5yhXZ9tdD4pHRbvwymaVPrGZQr" # Provided by Batuz
+  emails:
+    - addr: "billing@example.com"
+  addresses:
+    - num: "42"
+      street: "Calle Pradillo"
+      locality: "Madrid"
+      region: "Madrid"
+      code: "28002"
+      country: "ES"
+
+customer:
+  tax_id:
+    country: "MX"
+    code: "EKU9003173C9"
+    zone: "42501"
+  name: "ESCUELA KEMPER URGATE"
+  emails:
+    - addr: "customer@example.com"
+  addresses:
+    - code: "42501"
+      locality: "Actopan"
+      country: "MX"
+# customer:
+#   tax_id:
+#     country: "ES"
+#     code: "93542762Z"
+#   name: "Pere Sancho Latorre"
+#   emails:
+#     - addr: "mzkrme5v@blu.it"
+#   addresses:
+#     - num: "58"
+#       street: "Praza Real"
+#       locality: "Caudete de las Fuentes"
+#       region: "Valencia"
+#       code: "46701"
+#       country: "ES"
+
+lines:
+  - quantity: 6
+    item:
+      name: "Item being purchased"
+      price: "100.00"
+      key: "goods"
+    taxes:
+      - cat: "VAT"
+        rate: "exempt"
+        ext:
+          es-tbai-exemption: "E1"
+  - quantity: 5
+    item:
+      name: "Another item being purchased"
+      price: "20.00"
+      key: "goods"
+    taxes:
+      - cat: "VAT"
+        rate: "exempt"
+        ext:
+          es-tbai-exemption: "E2"
+  - quantity: 2
+    item:
+      name: "Service being paid"
+      price: "150.00"
+      key: "service"
+    taxes:
+      - cat: "VAT"
+        rate: "standard"
+      - cat: "IRPF"
+        rate: "pro"
+
+notes:
+  - key: "general"
+    text: "Some random description"

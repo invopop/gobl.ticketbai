@@ -1,6 +1,8 @@
 package doc
 
-import "github.com/invopop/gobl/cal"
+import (
+	"github.com/invopop/gobl/cal"
+)
 
 // HuellaTBAI contains info about the Tickebai fingerprint
 type HuellaTBAI struct {
@@ -32,7 +34,7 @@ type FingerprintConfig struct {
 
 // Software used to generate the Ticketbai invoice
 type Software struct {
-	LicenciaTBAI          string `xml:",omitempty"`
+	LicenciaTBAI          string
 	EntidadDesarrolladora *EntidadDesarrolladora
 	Nombre                string
 	Version               string
@@ -56,14 +58,23 @@ func (doc *TicketBAI) buildHuellaTBAI(conf *FingerprintConfig) error {
 			Version: conf.SoftwareVersion,
 		},
 	}
+
 	if conf.LastCode != "" {
 		dStr := conf.LastIssueDate.In(location).Format("02-01-2006")
 		doc.HuellaTBAI.EncadenamientoFacturaAnterior = &EncadenamientoFacturaAnterior{
 			SerieFacturaAnterior:               conf.LastSeries,
 			NumFacturaAnterior:                 conf.LastCode,
 			FechaExpedicionFacturaAnterior:     dStr,
-			SignatureValueFirmaFacturaAnterior: conf.LastSignature,
+			SignatureValueFirmaFacturaAnterior: trunc(conf.LastSignature, 100),
 		}
 	}
+
 	return nil
+}
+
+func trunc(s string, n int) string {
+	if len(s) <= n {
+		return s
+	}
+	return s[:n]
 }
