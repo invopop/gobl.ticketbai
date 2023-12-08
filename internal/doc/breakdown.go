@@ -97,8 +97,6 @@ type DetalleNoSujeta struct {
 	Importe string
 }
 
-const goods = "goods"
-
 type taxInfo struct {
 	simplifiedRegime bool
 	reverseCharge    bool

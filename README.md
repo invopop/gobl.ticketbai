@@ -37,70 +37,119 @@ The following is an example of how the GOBL TicketBAI package could be used:
 package main
 
 import (
-    "github.com/invopop/gobl.ticketbai"
+	"encoding/json"
+	"fmt"
+	"os"
+
+	"github.com/invopop/gobl"
+	ticketbai "github.com/invopop/gobl.ticketbai"
+	"github.com/invopop/xmldsig"
 )
 
-func main {
-	// Prepare software configuration
-	soft := &ticketbai.Software{
-		License: "XYZ",    // provided by tax agency
-		NIF: "B123456789", // Software company's tax code
-		Name: "Invopop",   // Name of application
-		Version: "v0.1.0", // Software version
+func main() {
+	// Load sample envelope:
+	data, _ := os.ReadFile("./test/data/sample-invoice.json")
+
+	env := new(gobl.Envelope)
+	if err := json.Unmarshal(data, env); err != nil {
+		panic(err)
 	}
 
-	// Instantiate a the TicketBAI client:
+	// Prepare software configuration:
+	soft := &ticketbai.Software{
+		License: "XYZ",        // provided by tax agency
+		NIF:     "B123456789", // Software company's tax code
+		Name:    "Invopop",    // Name of application
+		Version: "v0.1.0",     // Software version
+	}
 
-	// TODO!
+	// Load sample certificate:
+	cert, err := xmldsig.LoadCertificate(
+		"./test/certs/EnpresaZigilua_SelloDeEmpresa.p12", "IZDesa2021")
+	if err != nil {
+		panic(err)
+	}
+
+	// Instantiate the TicketBAI client:
+	tbai, err := ticketbai.New(soft, ticketbai.WithCertificate(cert))
+	if err != nil {
+		panic(err)
+	}
+
+	// Create a new TBAI document:
+	doc, err := tbai.NewDocument(env)
+	if err != nil {
+		panic(err)
+	}
+
+	// Create the document fingerprint:
+	if err = tbai.Fingerprint(doc, prev); err != nil {
+		panic(err)
+	}
+
+	// Sign the document:
+	if err := tbai.Sign(doc); err != nil {
+		panic(err)
+	}
+
+	// Create the XML output
+	bytes, err := doc.BytesIndent()
+	if err != nil {
+		panic(err)
+	}
+
+	// Do something with the output
+	fmt.Println("Document created:\n", string(bytes))
 }
 ```
 
-### CLI
+## Command Line
 
-If you cannot use the Golang packages directly, the CLI tool can be an easy way to generate and send XML documents to the TicketBAI services.
+The GOBL TicketBAI package tool also includes a command line helper. You can find pre-built [gobl.cfdi binaries](https://github.com/invopop/gobl.ticketbai/releases) in the github repository, or install manually in your Go environment with:
+
+```bash
+go install github.com/invopop/gobl.ticketbai
+```
+
+Usage is very straightforward:
+
+```bash
+gobl.ticketbai convert ./test/data/invoice.json
+```
+
+At the moment, it's not possible to add a fingertip or sign TicketBAI files using the CLI.
 
 ## Special Schemes and Line Meta
 
 In order to provide the supplier specific data required by TicketBAI, invoices need to include a bit of extra data. We've managed to simplify these into specific cases.
 
-### Schemes
+### Tax Tags
 
-Schemes can be added to invoice documents in order to reflect a special situation. The following schemes are supported:
+Invoice tax tags can be added to invoice documents in order to reflect a special situation. The following schemes are supported:
 
-- `simplified` - a retailer operating under a simplified tax regime (regimen simplificado) that must indicate that all of their sales are under this scheme. This implies that all operations in the invoice will have the `OperacionEnRecargoDeEquivalenciaORegimenSimplificado` tag set to `Y`.
+- `simplified-scheme` - a retailer operating under a simplified tax regime (regimen simplificado) that must indicate that all of their sales are under this scheme. This implies that all operations in the invoice will have the `OperacionEnRecargoDeEquivalenciaORegimenSimplificado` tag set to `S`.
 - `reverse-charge` - B2B services or goods sold to a tax registered EU member who will pay VAT on the suppliers behalf. Implies that all items will be classified under the `TipoNoExenta` value of `S2`.
-- `customer-rates` - B2C services, specifically for the EU digital goods act (2015) which imply local taxes will be applied.
+- `customer-rates` - B2C services, specifically for the EU digital goods act (2015) which imply local taxes will be applied. All items will specify the `DetalleNoSujeta` cause of `RL`.
 
-### Invoice Line Tags
+### Item Keys
 
-Some lines may require additional "tags" to correctly group them in the final TicketBAI report. The currently supported invoice line tags are:
+Each of the line items in your invoice may require a special key to correctly group them in the final TicketBAI report. The currently supported invoice line item keys are:
 
-- `provider` - indicates that a line item is sold without modification from a provider under the Equalisation Charge scheme. (This implies that the `OperacionEnRecargoDeEquivalenciaORegimenSimplificado` tag will be set to Y).
-- `services` -
-- `goods` -
-- `exempt` - identifies the specific reason as to why taxes should not be applied to the line according to the whole set of exemptions defined in the law. This tag cannot be used alone, and must be presented as one of the following:
-  - `exempt+article-20` - (`E1`) Exenta por el artículo 20 de la Norma Foral del IVA
-  - `exempt+article-21` - (`E2`) Exenta por el artículo 21 de la Norma Foral del IVA
-  - `exempt+article-22` - (`E3`) Exenta por el artículo 22 de la Norma Foral del IVA
-  - `exempt+article-23` - (`E4`) Exenta por el artículo 23 y 24 de la Norma Foral del IVA
-  - `exempt+article-25` - (`E5`) Exenta por el artículo 25 de la Norma Foral del IVA
-  - `exempt+other` - (`E6`) Exenta por otra causa
+- `services` - indicates that the product being sold is a service (as opposed to a physical good). By default, all items are considered services.
+- `goods` - indicates that the product being sold is a physical good.
+- `resale` - indicates that a line item is sold without modification from a provider under the Equalisation Charge scheme. (This implies that the `OperacionEnRecargoDeEquivalenciaORegimenSimplificado` tag will be set to `S`).
 
-\***\* TO DELETE \*\***
+## Tax Extensions
 
-The following keys may be set inside the `meta` property of each line:
+The following extension can be applied to each line tax:
 
-- `source` - when "`provider`" indicates that a line item is sold without modification from a provider under the Equalisation Charge scheme. (This implies that the `OperacionEnRecargoDeEquivalenciaORegimenSimplificado` tag will be set to Y).
-- `product` - when set to "`goods`", indicates that the product being sold is a physical good. By default we assume services are being sold.
-- `exempt` - two-letter-code - identifies the specific reason as to why taxes should not be applied to the line according to the whole set of exemptions defined in the law. The main codes that a user can provide are:
-  - `E1` - Exenta por el artículo 20 de la Norma Foral del IVA
-  - `E2` - Exenta por el artículo 21 de la Norma Foral del IVA
-  - `E3` - Exenta por el artículo 22 de la Norma Foral del IVA
-  - `E4` - Exenta por el artículo 23 y 24 de la Norma Foral del IVA
-  - `E5` - Exenta por el artículo 25 de la Norma Foral del IVA
-  - `E6` - Exenta por otra causa
-
-\***\* END DELETE \*\***
+- `exempt` - identifies the specific TicketBAI exemption reason code as to why taxes should not be applied to the line according to the whole set of exemptions defined in the law. It has to be set along with the tax rate value of `exempt`. These are the valid values:
+  - `E1` – Exenta por el artículo 20 de la Norma Foral del IVA
+  - `E2` – Exenta por el artículo 21 de la Norma Foral del IVA
+  - `E3` – Exenta por el artículo 22 de la Norma Foral del IVA
+  - `E4` – Exenta por el artículo 23 y 24 de la Norma Foral del IVA
+  - `E5` – Exenta por el artículo 25 de la Norma Foral del IVA
+  - `E6` – Exenta por otra causa
 
 ### Use-Cases
 
@@ -108,10 +157,10 @@ Under what situations should the TicketBAI system be expected to function:
 
 - B2B & B2C: regular national invoice with VAT. Operation with minimal data.
 - B2B Provider to Retailer: Include equalisation surcharge VAT rates
-- B2B Retailer: Same as regular invoice, except with invoice lines that include `meta[source] = provider` when the goods being provided are being sold without modification (recargo de equivalencia), very much related to the next point.
-- B2B Retailer Simplified: Include the simplified scheme key. (This implies that the `OperacionEnRecargoDeEquivalenciaORegimenSimplificado` tag will be set to Y).
-- EU B2B: Reverse charge EU export, scheme: reverse-charge taxes calculated, but not applied to totals. By default all line items assumed to be services. Individual rows can use the `meta[product] = goods` value to identify when the line is a physical good. Operations like this are normally assigned the TipoNoExenta value of S2. If however the service or goods are exempt of tax, each line's `meta[exempt]` field can be used to identify a reason.
-- EU B2C Digital Goods: use scheme `customer-rates`, that applies VAT according to customer location. In TicketBAI, these cases are "not subject" to tax, and thus should have the cause RL (por reglas de localización).
+- B2B Retailer: Same as regular invoice, except with invoice lines that include `item.key = resale` when the goods being provided are being sold without modification (recargo de equivalencia), very much related to the next point.
+- B2B Retailer Simplified: Include the simplified scheme key. (This implies that the `OperacionEnRecargoDeEquivalenciaORegimenSimplificado` tag will be set to `S`).
+- EU B2B: Reverse charge EU export, scheme: reverse-charge taxes calculated, but not applied to totals. By default all line items assumed to be services. Individual rows can use the `item.key = goods` value to identify when the line is a physical good. Operations like this are normally assigned the TipoNoExenta value of S2. If however the service or goods are exempt of tax, each line's tax `ext[exempt]` field can be used to identify a reason.
+- EU B2C Digital Goods: use tax tag `customer-rates`, that applies VAT according to customer location. In TicketBAI, these cases are "not subject" to tax, and thus should have the cause RL (por reglas de localización).
 
 ## Test Data
 
@@ -119,16 +168,4 @@ Some sample test data is available in the `./test` directory.
 
 If you make any modifications to the source YAML files, the JSON envelopes will need to be updated.
 
-Make sure you have the GOBL CLI installed ([more details](https://docs.gobl.org/quick-start/cli)):
-
-```
-go install github.com/invopop/gobl.cli/cmd/gobl@latest
-gobl keygen
-```
-
-Then sign the documents:
-
-```
-cd test
-gobl sign --indent sample-invoice.yaml > sample-invoice.json
-```
+Make sure you have the GOBL CLI installed ([more details](https://docs.gobl.org/quick-start/cli)).
