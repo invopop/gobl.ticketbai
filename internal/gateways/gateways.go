@@ -1,7 +1,8 @@
+// Package gateways contains the different interfaces to send the TicketBAI
+// documents to.
 package gateways
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/invopop/gobl/bill"
@@ -33,7 +34,7 @@ func (e Error) Error() string {
 type Connection interface {
 	// Post sends the complete TicketBAI document to the remote end-point. We assume
 	// the document has been fully prepared and signed.
-	Post(ctx context.Context, inv *bill.Invoice, payload []byte) error
+	Post(inv *bill.Invoice, payload []byte) error
 }
 
 // List keeps together the list of connections

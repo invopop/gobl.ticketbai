@@ -1,7 +1,6 @@
 package gateways
 
 import (
-	"context"
 	"crypto/tls"
 	"fmt"
 
@@ -52,7 +51,7 @@ func newEbizkaia(env string, tlsConfig *tls.Config) *EBizkaiaConn {
 
 // Post sends the complete TicketBAI document to the remote end-point. We assume
 // the document has been signed and prepared.
-func (c *EBizkaiaConn) Post(ctx context.Context, inv *bill.Invoice, payload []byte) error {
+func (c *EBizkaiaConn) Post(inv *bill.Invoice, payload []byte) error {
 	sup := &ebizkaia.Supplier{
 		Year: inv.IssueDate.Year,
 		NIF:  inv.Supplier.TaxID.Code.String(),

@@ -1,3 +1,5 @@
+// Package doc contains the TicketBAI document structures and methods to
+// generate it.
 package doc
 
 import (
@@ -23,7 +25,7 @@ func init() {
 }
 
 const (
-	ticketBAINamespace = "urn:ticketbai:emision"
+	ticketBAINamespace = "urn:ticketbai:emision" // nolint:misspell
 )
 
 // TicketBAI contains the data needed to create a TicketBAI invoice
@@ -123,7 +125,7 @@ func (doc *TicketBAI) Bytes() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// Bytes returns the idented XML document bytes
+// BytesIndent returns the idented XML document bytes
 func (doc *TicketBAI) BytesIndent() ([]byte, error) {
 	buf, err := doc.buffer(xml.Header, true)
 	if err != nil {

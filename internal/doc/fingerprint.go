@@ -10,8 +10,7 @@ type HuellaTBAI struct {
 	Software                      *Software
 }
 
-// EncadenamientoFacturaAnterior has the info of the previous
-// invoice generated
+// EncadenamientoFacturaAnterior has the info of the previous invoice generated
 type EncadenamientoFacturaAnterior struct {
 	SerieFacturaAnterior               string
 	NumFacturaAnterior                 string
@@ -19,8 +18,8 @@ type EncadenamientoFacturaAnterior struct {
 	SignatureValueFirmaFacturaAnterior string
 }
 
-// FingerPrintConfig defines what is expected to produce
-// a new fingerprint of a document.
+// FingerprintConfig defines what is expected to produce a new fingerprint of a
+// document.
 type FingerprintConfig struct {
 	License         string
 	NIF             string
@@ -40,8 +39,8 @@ type Software struct {
 	Version               string
 }
 
-// EntidadDesarrolladora is the company that has developed the
-// software that has created the Ticketbai invoice
+// EntidadDesarrolladora is the company that has developed the software that has
+// created the Ticketbai invoice
 type EntidadDesarrolladora struct {
 	NIF string
 }

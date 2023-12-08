@@ -43,7 +43,7 @@ func TestXMLGeneration(t *testing.T) {
 			data, err := convertExample(tbai, example)
 			require.NoError(t, err)
 
-			outPath := test.TestPath("data", "out",
+			outPath := test.Path("test", "data", "out",
 				strings.TrimSuffix(example, ".json")+".xml",
 			)
 
@@ -73,7 +73,7 @@ func TestXMLGeneration(t *testing.T) {
 }
 
 func loadSchema() (*xsd.Schema, error) {
-	schemaPath := test.TestPath("schema", "schema.xsd")
+	schemaPath := test.Path("test", "schema", "schema.xsd")
 	schema, err := xsd.ParseFromFile(schemaPath)
 	if err != nil {
 		return nil, err
@@ -115,7 +115,7 @@ func loadTBAIClient() (*ticketbai.Client, error) {
 }
 
 func lookupExamples() ([]string, error) {
-	examples, err := filepath.Glob(test.TestPath("data", "*.json"))
+	examples, err := filepath.Glob(test.Path("test", "data", "*.json"))
 	if err != nil {
 		return nil, err
 	}

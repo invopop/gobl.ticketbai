@@ -1,3 +1,5 @@
+// Package ebizkaia provides a gatewy for generating and sending documents to the
+// Bizkaia region.
 package ebizkaia
 
 import (
@@ -76,10 +78,10 @@ type LROEPJ240FacturasEmitidasConSGAltaPeticion struct {
 	FacturasEmitidas *FacturasEmitidasConSGCodificadoType
 }
 
-// Cabecera250Type contains the operation headers
+// Cabecera240Type contains the operation headers
 type Cabecera240Type struct {
 	Modelo             string
-	Capitulo           string
+	Capitulo           string // nolint:misspell
 	Subcapitulo        string `xml:",omitempty"`
 	Operacion          string
 	Version            string
@@ -93,12 +95,13 @@ type FacturasEmitidasConSGCodificadoType struct {
 	FacturaEmitida []*DetalleEmitidaConSGCodificadoType // max length 1000
 }
 
-// FacturaEmitida contains the invoice to upload
+// DetalleEmitidaConSGCodificadoType contains the invoice to upload
 type DetalleEmitidaConSGCodificadoType struct {
 	TicketBai string // base64 data
 }
 
-// NIFPersonaType
+// NIFPersonaType contains the identification details of a taxable natural or
+// legal person.
 type NIFPersonaType struct {
 	NIF                        string
 	ApellidosNombreRazonSocial string // max 120
@@ -118,10 +121,8 @@ func NewCreateRequest(sup *Supplier, payload []byte) (*CreateRequest, error) {
 	req := new(CreateRequest)
 
 	head := newCabecera240Type(sup)
-	facs, err := newFacturasEmitidas(payload)
-	if err != nil {
-		return nil, err
-	}
+	facs := newFacturasEmitidas(payload)
+
 	body := &LROEPJ240FacturasEmitidasConSGAltaPeticion{
 		LROENamespace:    schemaLROE240ConSG,
 		Cabecera:         head,
@@ -150,7 +151,7 @@ func NewCreateRequest(sup *Supplier, payload []byte) (*CreateRequest, error) {
 
 // newFacturasEmitidas will encode the invoice data to base64 and instantiate a
 // new object to include in the XML message body.
-func newFacturasEmitidas(payloads ...[]byte) (*FacturasEmitidasConSGCodificadoType, error) {
+func newFacturasEmitidas(payloads ...[]byte) *FacturasEmitidasConSGCodificadoType {
 	b := &FacturasEmitidasConSGCodificadoType{
 		FacturaEmitida: make([]*DetalleEmitidaConSGCodificadoType, len(payloads)),
 	}
@@ -159,13 +160,13 @@ func newFacturasEmitidas(payloads ...[]byte) (*FacturasEmitidasConSGCodificadoTy
 			TicketBai: base64.StdEncoding.EncodeToString(d),
 		}
 	}
-	return b, nil
+	return b
 }
 
 func newCabecera240Type(sup *Supplier) *Cabecera240Type {
 	head := &Cabecera240Type{
 		Modelo:      modelo240,
-		Capitulo:    apartado1,
+		Capitulo:    apartado1, // nolint:misspell
 		Subcapitulo: apartado1_1,
 		Operacion:   operacionEnumAlta,
 		Version:     "1.0",

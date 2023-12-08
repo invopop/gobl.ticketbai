@@ -1,7 +1,8 @@
+// Package ticketbai provides a client for generating and sending TicketBAI
+// documents to the different regional services in the Basque Country.
 package ticketbai
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"time"
@@ -25,7 +26,7 @@ var (
 	ErrInvalidZone      = errors.New("invalid zone")
 )
 
-// Client
+// Client provides the main interface to the TicketBAI package.
 type Client struct {
 	software *Software
 	list     *gateways.List
@@ -90,7 +91,7 @@ type Software struct {
 	Version     string `json:"version"`
 }
 
-// PreviousInvoices stores the fields from the previously generated invoice
+// PreviousInvoice stores the fields from the previously generated invoice
 // document that are linked to in the new document.
 type PreviousInvoice struct {
 	Series    string   `json:"series,omitempty"`
@@ -166,7 +167,7 @@ func (c *Client) NewDocument(env *gobl.Envelope) (*Document, error) {
 }
 
 // Post will send the document to the TicketBAI gateway.
-func (c *Client) Post(ctx context.Context, d *Document) error {
+func (c *Client) Post(d *Document) error {
 	conn := c.list.For(d.zone)
 	if conn == nil {
 		return fmt.Errorf("no gateway available for %s", d.zone)
@@ -177,7 +178,7 @@ func (c *Client) Post(ctx context.Context, d *Document) error {
 		return fmt.Errorf("generating payload: %w", err)
 	}
 
-	return conn.Post(ctx, d.inv, p)
+	return conn.Post(d.inv, p)
 }
 
 // Fingerprint generates a finger print for the TicketBAI document using the
