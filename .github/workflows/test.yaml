@@ -1,0 +1,39 @@
+name: Test Go
+on: [push]
+jobs:
+  lint-test-build:
+    name: Test, Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: "1.20.4"
+        id: go
+
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      #- name: Configure git for private modules
+      #  run: |
+      #    git config --global url."https://${{ secrets.GO_MOD_USER }}:${{ secrets.GO_MOD_PASS }}@github.com".insteadOf "https://github.com"
+
+      - name: Prepare .netrc
+        uses: extractions/netrc@v1
+        with:
+          machine: github.com
+          username: ${{ secrets.GO_MOD_USER }}
+          password: ${{ secrets.GO_MOD_PASS }}
+
+      - name: Install Dependencies
+        env:
+          GOPROXY: https://proxy.golang.org,direct
+          GOPRIVATE: github.com/invopop
+        run: go mod download
+
+      - name: Test
+        run: go test -tags unit -race ./...
+
+      - name: Build
+        run: go build -v ./...
