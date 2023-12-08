@@ -1,0 +1,186 @@
+{
+  "$schema": "https://gobl.org/draft-0/envelope",
+  "head": {
+    "uuid": "90e8a582-92ae-11ee-8a77-e6a7901137ed",
+    "dig": {
+      "alg": "sha256",
+      "val": "8aa806c8439f75826a67d190804e08c5ce9afb7868687618005cc9055219e8cf"
+    },
+    "draft": true
+  },
+  "doc": {
+    "$schema": "https://gobl.org/draft-0/bill/invoice",
+    "type": "standard",
+    "series": "TEST",
+    "code": "001",
+    "issue_date": "2022-02-01",
+    "currency": "EUR",
+    "supplier": {
+      "name": "HFPn5yhXZ9tdD4pHRbvwymaVPrGZQr",
+      "tax_id": {
+        "country": "ES",
+        "zone": "BI",
+        "code": "A99805194"
+      },
+      "addresses": [
+        {
+          "num": "42",
+          "street": "Calle Pradillo",
+          "locality": "Madrid",
+          "region": "Madrid",
+          "code": "28002",
+          "country": "ES"
+        }
+      ],
+      "emails": [
+        {
+          "addr": "billing@example.com"
+        }
+      ]
+    },
+    "customer": {
+      "name": "ESCUELA KEMPER URGATE",
+      "tax_id": {
+        "country": "MX",
+        "zone": "42501",
+        "code": "EKU9003173C9"
+      },
+      "addresses": [
+        {
+          "locality": "Actopan",
+          "code": "42501",
+          "country": "MX"
+        }
+      ],
+      "emails": [
+        {
+          "addr": "customer@example.com"
+        }
+      ]
+    },
+    "lines": [
+      {
+        "i": 1,
+        "quantity": "6",
+        "item": {
+          "key": "goods",
+          "name": "Item being purchased",
+          "price": "100.00"
+        },
+        "sum": "600.00",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "rate": "exempt",
+            "ext": {
+              "es-tbai-exemption": "E1"
+            }
+          }
+        ],
+        "total": "600.00"
+      },
+      {
+        "i": 2,
+        "quantity": "5",
+        "item": {
+          "key": "goods",
+          "name": "Another item being purchased",
+          "price": "20.00"
+        },
+        "sum": "100.00",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "rate": "exempt",
+            "ext": {
+              "es-tbai-exemption": "E2"
+            }
+          }
+        ],
+        "total": "100.00"
+      },
+      {
+        "i": 3,
+        "quantity": "2",
+        "item": {
+          "key": "service",
+          "name": "Service being paid",
+          "price": "150.00"
+        },
+        "sum": "300.00",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "rate": "standard",
+            "percent": "21.0%"
+          },
+          {
+            "cat": "IRPF",
+            "rate": "pro",
+            "percent": "15.0%"
+          }
+        ],
+        "total": "300.00"
+      }
+    ],
+    "totals": {
+      "sum": "1000.00",
+      "total": "1000.00",
+      "taxes": {
+        "categories": [
+          {
+            "code": "VAT",
+            "rates": [
+              {
+                "key": "exempt",
+                "ext": {
+                  "es-tbai-exemption": "E1"
+                },
+                "base": "600.00",
+                "amount": "0.00"
+              },
+              {
+                "key": "exempt",
+                "ext": {
+                  "es-tbai-exemption": "E2"
+                },
+                "base": "100.00",
+                "amount": "0.00"
+              },
+              {
+                "key": "standard",
+                "base": "300.00",
+                "percent": "21.0%",
+                "amount": "63.00"
+              }
+            ],
+            "amount": "63.00"
+          },
+          {
+            "code": "IRPF",
+            "retained": true,
+            "rates": [
+              {
+                "key": "pro",
+                "base": "300.00",
+                "percent": "15.0%",
+                "amount": "45.00"
+              }
+            ],
+            "amount": "45.00"
+          }
+        ],
+        "sum": "18.00"
+      },
+      "tax": "18.00",
+      "total_with_tax": "1018.00",
+      "payable": "1018.00"
+    },
+    "notes": [
+      {
+        "key": "general",
+        "text": "Some random description"
+      }
+    ]
+  }
+}

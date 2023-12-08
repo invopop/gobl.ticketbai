@@ -1,0 +1,118 @@
+{
+  "$schema": "https://gobl.org/draft-0/envelope",
+  "head": {
+    "uuid": "ecd1d445-8d35-11ee-860f-e6a7901137ed",
+    "dig": {
+      "alg": "sha256",
+      "val": "ca103d599d4ece1775ee4e9e2523fcc76dba2e36a6c3dce35bc257e546c36d39"
+    },
+    "draft": true
+  },
+  "doc": {
+    "$schema": "https://gobl.org/draft-0/bill/invoice",
+    "type": "standard",
+    "code": "SAMPLE-002",
+    "issue_date": "2022-02-02",
+    "currency": "EUR",
+    "supplier": {
+      "name": "Provider One S.L.",
+      "tax_id": {
+        "country": "ES",
+        "zone": "BI",
+        "code": "B98602642"
+      },
+      "addresses": [
+        {
+          "num": "42",
+          "street": "Calle Pradillo",
+          "locality": "Madrid",
+          "region": "Madrid",
+          "code": "28002",
+          "country": "ES"
+        }
+      ],
+      "emails": [
+        {
+          "addr": "billing@example.com"
+        }
+      ]
+    },
+    "customer": {
+      "name": "Pere Sancho Latorre",
+      "tax_id": {
+        "country": "ES",
+        "code": "93542762Z"
+      },
+      "addresses": [
+        {
+          "num": "58",
+          "street": "Praza Real",
+          "locality": "Caudete de las Fuentes",
+          "region": "Valencia",
+          "code": "46701",
+          "country": "ES"
+        }
+      ],
+      "emails": [
+        {
+          "addr": "mzkrme5v@blu.it"
+        }
+      ]
+    },
+    "lines": [
+      {
+        "i": 1,
+        "quantity": "15",
+        "item": {
+          "name": "Item being purchased",
+          "price": "90.00"
+        },
+        "sum": "1350.00",
+        "discounts": [
+          {
+            "percent": "10%",
+            "amount": "135.00"
+          }
+        ],
+        "taxes": [
+          {
+            "cat": "VAT",
+            "rate": "standard",
+            "percent": "21.0%"
+          }
+        ],
+        "total": "1215.00"
+      }
+    ],
+    "totals": {
+      "sum": "1215.00",
+      "total": "1215.00",
+      "taxes": {
+        "categories": [
+          {
+            "code": "VAT",
+            "rates": [
+              {
+                "key": "standard",
+                "base": "1215.00",
+                "percent": "21.0%",
+                "amount": "255.15"
+              }
+            ],
+            "amount": "255.15"
+          }
+        ],
+        "sum": "255.15"
+      },
+      "tax": "255.15",
+      "total_with_tax": "1470.15",
+      "payable": "1470.15"
+    },
+    "notes": [
+      {
+        "key": "general",
+        "text": "Some random description"
+      }
+    ]
+  }
+}
