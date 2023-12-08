@@ -2,8 +2,6 @@ module github.com/invopop/gobl.ticketbai
 
 go 1.21
 
-toolchain go1.21.4
-
 require (
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/invopop/gobl v0.63.1
@@ -13,7 +11,6 @@ require (
 	github.com/sigurn/crc8 v0.0.0-20220107193325-2243fe600f9f
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4
-	gitlab.com/flimzy/testy v0.14.0
 	golang.org/x/net v0.10.0
 )
 
