@@ -9,8 +9,11 @@ require (
 	github.com/invopop/gobl v0.63.1
 	github.com/invopop/xmldsig v0.6.1
 	github.com/lestrrat-go/libxml2 v0.0.0-20231124114421-99c71026c2f5
+	github.com/magefile/mage v1.15.0
 	github.com/sigurn/crc8 v0.0.0-20220107193325-2243fe600f9f
+	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4
+	gitlab.com/flimzy/testy v0.14.0
 	golang.org/x/net v0.10.0
 )
 
@@ -23,11 +26,13 @@ require (
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/invopop/jsonschema v0.12.0 // indirect
 	github.com/invopop/validation v0.3.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/square/go-jose/v3 v3.0.0-20200630053402-0a67ce9b0693 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	golang.org/x/crypto v0.9.0 // indirect

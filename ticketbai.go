@@ -119,7 +119,7 @@ func New(software *Software, opts ...Option) (*Client, error) {
 	}
 
 	// Create a new gateway list if none was created by the options
-	if c.list == nil {
+	if c.list == nil && c.cert != nil {
 		list, err := gateways.New(c.env, c.cert)
 		if err != nil {
 			return nil, fmt.Errorf("creating gateway list: %w", err)
