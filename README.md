@@ -119,7 +119,15 @@ gobl.ticketbai convert ./test/data/invoice.json
 
 At the moment, it's not possible to add a fingertip or sign TicketBAI files using the CLI.
 
-## Special Schemes and Line Meta
+## Limitations
+
+- Tickebai allows more than one customer per invoice, but GOBL only has one possible customer.
+
+- Invoices should have a note of type general that will be used as a general description of the invoice. If an invoice is missing this info, it will be rejected with an error.
+
+- Currently GOBL does not allow to distinguish between different VAT regimes. Ticketbai format requires a list of the different regimes applied to the invoice so currently only equivalence surcharge and general regime are available (for a complete list of the other possibilities you can check the documentation on https://www.batuz.eus/es/documentacion-tecnica)
+
+## Tags, Keys and Extensions
 
 In order to provide the supplier specific data required by TicketBAI, invoices need to include a bit of extra data. We've managed to simplify these into specific cases.
 
