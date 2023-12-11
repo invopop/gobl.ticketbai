@@ -1,6 +1,7 @@
 package doc
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/invopop/gobl/bill"
@@ -257,15 +258,15 @@ func buildDetails(lines []*bill.Line, taxInfo taxInfo) ([]DetalleIVA, []DetalleE
 	exempted, nonExempted, surcharged := sumAmountsPerType(lines)
 
 	exemptedList := []DetalleExenta{}
-	for cause, sum := range exempted {
+	eachSumDetail(exempted, func(cause string, sum sumDetail) {
 		exemptedList = append(exemptedList, DetalleExenta{
 			CausaExencion: cause,
 			BaseImponible: sum.amount.Rescale(2).String(),
 		})
-	}
+	})
 
 	detailList := []DetalleIVA{}
-	for _, sum := range nonExempted {
+	eachSumDetail(nonExempted, func(_ string, sum sumDetail) {
 		detail := DetalleIVA{
 			BaseImponible:  sum.amount.Rescale(2).String(),
 			TipoImpositivo: formatPercent(sum.percent),
@@ -282,16 +283,16 @@ func buildDetails(lines []*bill.Line, taxInfo taxInfo) ([]DetalleIVA, []DetalleE
 		}
 
 		detailList = append(detailList, detail)
-	}
+	})
 
-	for _, sum := range surcharged {
+	eachSumDetail(surcharged, func(_ string, sum sumDetail) {
 		detailList = append(detailList, DetalleIVA{
 			BaseImponible:  sum.amount.Rescale(2).String(),
 			TipoImpositivo: formatPercent(sum.percent),
 			CuotaImpuesto:  sum.percent.Of(sum.amount).Rescale(2).String(),
 			OperacionEnRecargoDeEquivalenciaORegimenSimplificado: "S",
 		})
-	}
+	})
 
 	return detailList, exemptedList
 }
@@ -343,6 +344,20 @@ func sumAmountsPerType(lines []*bill.Line) (map[string]sumDetail, map[string]sum
 	}
 
 	return exempted, nonExempted, surcharged
+}
+
+// eachSumDetail iterates over a map of sumDetail sorting it by the keys first.
+// This is needed to get a deterministic output
+func eachSumDetail(sums map[string]sumDetail, f func(string, sumDetail)) {
+	keys := make([]string, 0, len(sums))
+	for k := range sums {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		f(key, sums[key])
+	}
 }
 
 func formatPercent(percent num.Percentage) string {
