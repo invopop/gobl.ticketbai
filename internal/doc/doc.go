@@ -146,9 +146,6 @@ func (doc *TicketBAI) buffer(base string, indent bool) (*bytes.Buffer, error) {
 	if err := enc.Encode(doc); err != nil {
 		return nil, fmt.Errorf("encoding document: %w", err)
 	}
-	if err := enc.Close(); err != nil {
-		return nil, fmt.Errorf("closing encoder: %w", err)
-	}
 
 	return buf, nil
 }
