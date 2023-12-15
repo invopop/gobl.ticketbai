@@ -1,9 +1,5 @@
 package doc
 
-import (
-	"github.com/invopop/gobl/cal"
-)
-
 // HuellaTBAI contains info about the Tickebai fingerprint
 type HuellaTBAI struct {
 	EncadenamientoFacturaAnterior *EncadenamientoFacturaAnterior `xml:",omitempty"`
@@ -27,7 +23,7 @@ type FingerprintConfig struct {
 	SoftwareVersion string
 	LastSeries      string
 	LastCode        string
-	LastIssueDate   cal.Date
+	LastIssueDate   string
 	LastSignature   string
 }
 
@@ -59,11 +55,10 @@ func (doc *TicketBAI) buildHuellaTBAI(conf *FingerprintConfig) error {
 	}
 
 	if conf.LastCode != "" {
-		dStr := conf.LastIssueDate.In(location).Format("02-01-2006")
 		doc.HuellaTBAI.EncadenamientoFacturaAnterior = &EncadenamientoFacturaAnterior{
 			SerieFacturaAnterior:               conf.LastSeries,
 			NumFacturaAnterior:                 conf.LastCode,
-			FechaExpedicionFacturaAnterior:     dStr,
+			FechaExpedicionFacturaAnterior:     conf.LastIssueDate,
 			SignatureValueFirmaFacturaAnterior: trunc(conf.LastSignature, 100),
 		}
 	}

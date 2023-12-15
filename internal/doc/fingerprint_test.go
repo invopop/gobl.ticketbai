@@ -7,7 +7,6 @@ import (
 
 	"github.com/invopop/gobl.ticketbai/internal/doc"
 	"github.com/invopop/gobl.ticketbai/test"
-	"github.com/invopop/gobl/cal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -63,7 +62,7 @@ func TestFingerprintGeneration(t *testing.T) {
 
 		conf.LastSeries = "A"
 		conf.LastCode = "1"
-		conf.LastIssueDate = cal.MakeDate(2022, 1, 1)
+		conf.LastIssueDate = "01-01-2022"
 		conf.LastSignature = strings.Repeat("1234567890", 11)
 
 		err := testCase.Fingerprint(conf)

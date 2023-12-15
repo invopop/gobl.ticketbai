@@ -11,7 +11,6 @@ import (
 	"github.com/invopop/gobl.ticketbai/internal/doc"
 	"github.com/invopop/gobl.ticketbai/internal/gateways"
 	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/head"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/regimes/es"
@@ -84,20 +83,20 @@ func InTesting() Option {
 // generate TicketBAI documents. These details are included in the final
 // document.
 type Software struct {
-	License     string `json:"license"`
-	NIF         string `json:"nif"` // Tax Code of the company that has developed the software.
-	Name        string `json:"name"`
-	CompanyName string `json:"company_name"`
-	Version     string `json:"version"`
+	License     string
+	NIF         string
+	Name        string
+	CompanyName string
+	Version     string
 }
 
 // PreviousInvoice stores the fields from the previously generated invoice
 // document that are linked to in the new document.
 type PreviousInvoice struct {
-	Series    string   `json:"series,omitempty"`
-	Code      string   `json:"code"`
-	IssueDate cal.Date `json:"issue_date"`
-	Signature string   `json:"signature"`
+	Series    string
+	Code      string
+	IssueDate string
+	Signature string
 }
 
 // Document is a wrapper around the internal TicketBAI document.

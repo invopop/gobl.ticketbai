@@ -11,7 +11,6 @@ import (
 
 	ticketbai "github.com/invopop/gobl.ticketbai"
 	"github.com/invopop/gobl.ticketbai/test"
-	"github.com/invopop/gobl/cal"
 	"github.com/invopop/xmldsig"
 	"github.com/lestrrat-go/libxml2"
 	"github.com/lestrrat-go/libxml2/xsd"
@@ -140,7 +139,7 @@ func convertExample(tbai *ticketbai.Client, example string) ([]byte, error) {
 
 	err = tbai.Fingerprint(doc, &ticketbai.PreviousInvoice{
 		Code:      "1234567890",
-		IssueDate: cal.MakeDate(2021, 1, 1),
+		IssueDate: "01-01-2021",
 		Signature: strings.Repeat("1234567890", 20),
 	})
 	if err != nil {
