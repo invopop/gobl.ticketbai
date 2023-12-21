@@ -28,6 +28,13 @@ const (
 	ticketBAINamespace = "urn:ticketbai:emision" // nolint:misspell
 )
 
+// IssuerRole constants
+const (
+	IssuerRoleSupplier   = "N"
+	IssuerRoleCustomer   = "D"
+	IssuerRoleThirdParty = "T"
+)
+
 // TicketBAI contains the data needed to create a TicketBAI invoice
 type TicketBAI struct {
 	XMLName    xml.Name `xml:"T:TicketBai"`
@@ -49,7 +56,7 @@ type Cabecera struct {
 
 // NewTicketBAI takes the GOBL Invoice and converts into a TicketBAI document
 // ready to send to a regional API.
-func NewTicketBAI(inv *bill.Invoice, ts time.Time) (*TicketBAI, error) {
+func NewTicketBAI(inv *bill.Invoice, ts time.Time, role string) (*TicketBAI, error) {
 	err := validateInvoice(inv)
 	if err != nil {
 		return nil, err
@@ -66,7 +73,8 @@ func NewTicketBAI(inv *bill.Invoice, ts time.Time) (*TicketBAI, error) {
 			IDVersionTBAI: "1.2",
 		},
 		Sujetos: &Sujetos{
-			Emisor: newEmisor(inv.Supplier),
+			Emisor:                          newEmisor(inv.Supplier),
+			EmitidaPorTercerosODestinatario: role,
 		},
 		Factura: &Factura{
 			CabeceraFactura: newCabeceraFactura(inv, ts),

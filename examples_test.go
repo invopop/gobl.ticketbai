@@ -110,6 +110,7 @@ func loadTBAIClient() (*ticketbai.Client, error) {
 	},
 		ticketbai.WithCertificate(cert),
 		ticketbai.WithCurrentTime(ts),
+		ticketbai.WithThirdPartyIssuer(),
 	)
 }
 

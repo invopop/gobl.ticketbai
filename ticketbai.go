@@ -27,11 +27,12 @@ var (
 
 // Client provides the main interface to the TicketBAI package.
 type Client struct {
-	software *Software
-	list     *gateways.List
-	cert     *xmldsig.Certificate
-	env      string
-	curTime  time.Time
+	software   *Software
+	list       *gateways.List
+	cert       *xmldsig.Certificate
+	env        string
+	issuerRole string
+	curTime    time.Time
 }
 
 // Option is used to configure the client.
@@ -62,6 +63,31 @@ func WithGateway(code l10n.Code, conn gateways.Connection) Option {
 			c.list = new(gateways.List)
 		}
 		c.list.Register(code, conn)
+	}
+}
+
+// WithSupplierIssuer set the issuer type to supplier. To be used when the
+// invoice's supplier, using their own certificate, is issuing the document.
+func WithSupplierIssuer() Option {
+	return func(c *Client) {
+		c.issuerRole = doc.IssuerRoleSupplier
+	}
+}
+
+// WithCustomerIssuer set the issuer type to customer. To be used when the
+// invoice's supplier, using their own certificate, is issuing the document.
+func WithCustomerIssuer() Option {
+	return func(c *Client) {
+		c.issuerRole = doc.IssuerRoleCustomer
+	}
+}
+
+// WithThirdPartyIssuer set the issuer type to third party. To be used when the
+// an authorised third party, using their own certificate, is issuing the
+// document on behalf of the invoice's supplier.
+func WithThirdPartyIssuer() Option {
+	return func(c *Client) {
+		c.issuerRole = doc.IssuerRoleThirdParty
 	}
 }
 
@@ -112,7 +138,10 @@ type Document struct {
 func New(software *Software, opts ...Option) (*Client, error) {
 	c := new(Client)
 	c.software = software
+
+	// Set default values that can be overwritten by the options
 	c.env = gateways.EnvTesting
+	c.issuerRole = doc.IssuerRoleSupplier
 
 	for _, opt := range opts {
 		opt(c)
@@ -157,7 +186,7 @@ func (c *Client) NewDocument(env *gobl.Envelope) (*Document, error) {
 	}
 
 	var err error
-	d.tbai, err = doc.NewTicketBAI(d.inv, c.CurrentTime())
+	d.tbai, err = doc.NewTicketBAI(d.inv, c.CurrentTime(), c.issuerRole)
 	if err != nil {
 		return nil, err
 	}

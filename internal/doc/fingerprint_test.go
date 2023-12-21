@@ -28,7 +28,8 @@ func TestFingerprintGeneration(t *testing.T) {
 
 		ts, err := time.Parse(time.RFC3339, "2022-02-01T04:00:00Z")
 		require.NoError(t, err)
-		invoice, err := doc.NewTicketBAI(goblInvoice, ts)
+		role := doc.IssuerRoleThirdParty
+		invoice, err := doc.NewTicketBAI(goblInvoice, ts, role)
 		require.NoError(t, err)
 		invoice.Sujetos.Emisor.NIF = test.NIF
 

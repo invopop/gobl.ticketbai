@@ -10,8 +10,9 @@ import (
 
 // Sujetos contains invoice parties info
 type Sujetos struct {
-	Emisor        *Emisor
-	Destinatarios *Destinatarios
+	Emisor                          *Emisor
+	Destinatarios                   *Destinatarios
+	EmitidaPorTercerosODestinatario string
 }
 
 // Emisor contains info about the invoice supplier

@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/go-resty/resty/v2 v2.10.0
 	github.com/invopop/gobl v0.64.0
-	github.com/invopop/xmldsig v0.7.0
+	github.com/invopop/xmldsig v0.8.0
 	github.com/lestrrat-go/libxml2 v0.0.0-20231124114421-99c71026c2f5
 	github.com/magefile/mage v1.15.0
 	github.com/sigurn/crc8 v0.0.0-20220107193325-2243fe600f9f
