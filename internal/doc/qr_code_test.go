@@ -19,6 +19,7 @@ func TestQRCodes(t *testing.T) {
 
 	ts, err := time.Parse(time.RFC3339, "2022-02-01T04:00:00Z")
 	require.NoError(t, err)
+	role := doc.IssuerRoleThirdParty
 
 	conf := &doc.FingerprintConfig{
 		NIF:             "12345678A",
@@ -32,7 +33,7 @@ func TestQRCodes(t *testing.T) {
 	beforeEach := func(t *testing.T) *TestCase {
 		t.Helper()
 		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
-		invoice, err := doc.NewTicketBAI(goblInvoice, ts)
+		invoice, err := doc.NewTicketBAI(goblInvoice, ts, role)
 		require.NoError(t, err)
 
 		err = invoice.Fingerprint(conf)
@@ -60,8 +61,8 @@ func TestQRCodes(t *testing.T) {
 		assert.Equal(t, true, strings.HasPrefix(codes.TBAICode, "TBAI-"))
 		assert.Contains(t, codes.TBAICode, "-A99805194-")
 		assert.Contains(t, codes.TBAICode, "-010222-")
-		assert.Contains(t, codes.TBAICode, "-ablQoHHivlU7n-")
-		assert.Contains(t, codes.TBAICode, "-211")
+		assert.Contains(t, codes.TBAICode, "-PqECG7l50kEjM-")
+		assert.Contains(t, codes.TBAICode, "-015")
 	})
 
 	t.Run("should build QR code for an invoice", func(t *testing.T) {
@@ -74,6 +75,6 @@ func TestQRCodes(t *testing.T) {
 		assert.Contains(t, codes.QRCode, "?id=TBAI-A99805194-010222")
 		assert.Contains(t, codes.QRCode, "&nf=001")
 		assert.Contains(t, codes.QRCode, "&i="+testCase.invoice.Factura.DatosFactura.ImporteTotalFactura)
-		assert.Contains(t, codes.QRCode, "&cr=151") // changes according to test data
+		assert.Contains(t, codes.QRCode, "&cr=045") // changes according to test data
 	})
 }

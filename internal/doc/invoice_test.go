@@ -20,12 +20,13 @@ import (
 func TestFacturaConversion(t *testing.T) {
 	ts, err := time.Parse(time.RFC3339, "2022-08-15T22:15:05+02:00")
 	require.NoError(t, err)
+	role := doc.IssuerRoleThirdParty
 
 	t.Run("should add info about id of an invoice", func(t *testing.T) {
 		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Code = "something-001"
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
 
 		factura := invoice.Factura
 		assert.Equal(t, "something-001", factura.CabeceraFactura.NumFactura)
@@ -34,7 +35,7 @@ func TestFacturaConversion(t *testing.T) {
 	t.Run("should add issue time / date info", func(t *testing.T) {
 		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
 
 		factura := invoice.Factura
 		assert.Equal(t, "15-08-2022", factura.CabeceraFactura.FechaExpedicionFactura)
@@ -47,7 +48,7 @@ func TestFacturaConversion(t *testing.T) {
 			Tags: []cbc.Key{tax.TagSimplified},
 		}
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
 
 		factura := invoice.Factura
 		assert.Equal(t, "S", factura.CabeceraFactura.FacturaSimplificada)
@@ -57,7 +58,7 @@ func TestFacturaConversion(t *testing.T) {
 		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.OperationDate = cal.NewDate(2022, 3, 15)
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
 
 		factura := invoice.Factura
 		assert.Equal(t, "15-03-2022", factura.DatosFactura.FechaOperacion)
@@ -69,7 +70,7 @@ func TestFacturaConversion(t *testing.T) {
 			{Key: cbc.NoteKeyGeneral, Text: "Description of invoice"},
 		}
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
 
 		factura := invoice.Factura
 		assert.Equal(t, "Description of invoice", factura.DatosFactura.DescripcionFactura)
@@ -79,7 +80,7 @@ func TestFacturaConversion(t *testing.T) {
 		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Notes = []*cbc.Note{}
 
-		_, err := doc.NewTicketBAI(goblInvoice, ts)
+		_, err := doc.NewTicketBAI(goblInvoice, ts, role)
 
 		assert.ErrorContains(t, err, "missing general description of invoice")
 	})
@@ -95,7 +96,7 @@ func TestFacturaConversion(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
 
 		factura := invoice.Factura
 		assert.Equal(t, "1210.00", factura.DatosFactura.ImporteTotalFactura)
@@ -114,7 +115,7 @@ func TestFacturaConversion(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
 
 		factura := invoice.Factura
 		assert.Equal(t, "1210.00", factura.DatosFactura.ImporteTotalFactura)
@@ -133,7 +134,7 @@ func TestFacturaConversion(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
 
 		factura := invoice.Factura
 		assert.Equal(t, "150.00", factura.DatosFactura.RetencionSoportada)
@@ -151,7 +152,7 @@ func TestFacturaConversion(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
 
 		claves := invoice.Factura.DatosFactura.Claves
 		assert.Equal(t, "01", claves.IDClave[0].ClaveRegimenIvaOpTrascendencia)
@@ -161,7 +162,7 @@ func TestFacturaConversion(t *testing.T) {
 		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Customer.TaxID.Country = "GB"
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
 
 		claves := invoice.Factura.DatosFactura.Claves
 		assert.Equal(t, "02", claves.IDClave[0].ClaveRegimenIvaOpTrascendencia)
@@ -186,7 +187,7 @@ func TestFacturaConversion(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
 
 		claves := invoice.Factura.DatosFactura.Claves
 		assert.Equal(t, "51", claves.IDClave[0].ClaveRegimenIvaOpTrascendencia)
@@ -197,7 +198,7 @@ func TestFacturaConversion(t *testing.T) {
 			goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
 			goblInvoice.Tax = &bill.Tax{Tags: []cbc.Key{es.TagSimplifiedScheme}}
 
-			invoice, _ := doc.NewTicketBAI(goblInvoice, ts)
+			invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
 
 			claves := invoice.Factura.DatosFactura.Claves
 			assert.Equal(t, "52", claves.IDClave[0].ClaveRegimenIvaOpTrascendencia)

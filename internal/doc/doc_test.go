@@ -15,12 +15,13 @@ import (
 func TestInvoiceConversion(t *testing.T) {
 	ts, err := time.Parse(time.RFC3339, "2022-02-01T04:00:00Z")
 	require.NoError(t, err)
+	role := doc.IssuerRoleThirdParty
 
 	t.Run("fail when missing supplier locality", func(t *testing.T) {
 		inv, _ := test.LoadInvoice("sample-invoice.json")
 		inv.Supplier.TaxID.Zone = ""
 
-		_, err := doc.NewTicketBAI(inv, ts)
+		_, err := doc.NewTicketBAI(inv, ts, role)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "supplier tax identity locality is required")
 	})
@@ -28,7 +29,7 @@ func TestInvoiceConversion(t *testing.T) {
 	t.Run("should have the right version", func(t *testing.T) {
 		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
 
-		invoice, err := doc.NewTicketBAI(goblInvoice, ts)
+		invoice, err := doc.NewTicketBAI(goblInvoice, ts, role)
 
 		require.NoError(t, err)
 		assert.Equal(t, "1.2", invoice.Cabecera.IDVersionTBAI)
@@ -39,10 +40,18 @@ func TestInvoiceConversion(t *testing.T) {
 		goblInvoice.Supplier.TaxID.Code = "X34789654"
 		goblInvoice.Supplier.Name = "Fake Company SL"
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
 
 		assert.Equal(t, "Fake Company SL", invoice.Sujetos.Emisor.ApellidosNombreRazonSocial)
 		assert.Equal(t, "X34789654", invoice.Sujetos.Emisor.NIF)
+	})
+
+	t.Run("should contain the issuer role code", func(t *testing.T) {
+		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
+
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, doc.IssuerRoleCustomer)
+
+		assert.Equal(t, "D", invoice.Sujetos.EmitidaPorTercerosODestinatario)
 	})
 
 	t.Run("should contain info about national customer", func(t *testing.T) {
@@ -52,7 +61,7 @@ func TestInvoiceConversion(t *testing.T) {
 		goblInvoice.Customer.Addresses[0].Code = "50250"
 		goblInvoice.Customer.Addresses[0].PostOfficeBox = "PO-745"
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
 
 		assert.Equal(t, "17654245G", invoice.Sujetos.Destinatarios.IDDestinatario[0].NIF)
 		assert.Equal(t, "Spanish Co SL", invoice.Sujetos.Destinatarios.IDDestinatario[0].ApellidosNombreRazonSocial)
@@ -65,7 +74,7 @@ func TestInvoiceConversion(t *testing.T) {
 		goblInvoice.Customer.TaxID = &tax.Identity{Country: "GB", Code: "PP-123456-S"}
 		goblInvoice.Customer.Name = "Abroad Co LLC"
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
 
 		assert.Equal(t, "GB", invoice.Sujetos.Destinatarios.IDDestinatario[0].IDOtro.CodigoPais)
 		assert.Equal(t, "PP-123456-S", invoice.Sujetos.Destinatarios.IDDestinatario[0].IDOtro.ID)
@@ -79,7 +88,7 @@ func TestInvoiceConversion(t *testing.T) {
 			Country: "GB", Code: "PP-123456-S", Type: es.TaxIdentityTypeResident,
 		}
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
 
 		assert.Equal(t, "05", invoice.Sujetos.Destinatarios.IDDestinatario[0].IDOtro.IDType)
 	})
@@ -88,7 +97,7 @@ func TestInvoiceConversion(t *testing.T) {
 		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Customer = nil
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
 
 		assert.Nil(t, invoice.Sujetos.Destinatarios)
 	})
