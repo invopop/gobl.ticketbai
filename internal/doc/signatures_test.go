@@ -28,7 +28,7 @@ func TestSignatureGeneration(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t,
-			string(xmldsig.XAdESCustomer),
+			string(doc.XAdESCustomer),
 			invoice.Signature.Object.QualifyingProperties.SignedProperties.
 				SignatureProperties.SignerRole.ClaimedRoles.ClaimedRole[0],
 		)

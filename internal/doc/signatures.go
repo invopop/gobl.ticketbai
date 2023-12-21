@@ -6,6 +6,13 @@ import (
 	"github.com/invopop/xmldsig"
 )
 
+// SignerRoles defined in the TicketBAI spec
+const (
+	XAdESSupplier   xmldsig.XAdESSignerRole = "Supplier"
+	XAdESCustomer   xmldsig.XAdESSignerRole = "Customer"
+	XAdESThirdParty xmldsig.XAdESSignerRole = "Thirdparty"
+)
+
 func (doc *TicketBAI) sign(docID string, cert *xmldsig.Certificate, sigopts ...xmldsig.Option) error {
 	data, err := doc.canonical()
 	if err != nil {
@@ -47,11 +54,11 @@ func (doc *TicketBAI) canonical() ([]byte, error) {
 func (doc *TicketBAI) signerRole() xmldsig.XAdESSignerRole {
 	switch doc.Sujetos.EmitidaPorTercerosODestinatario {
 	case IssuerRoleSupplier:
-		return xmldsig.XAdESSupplier
+		return XAdESSupplier
 	case IssuerRoleCustomer:
-		return xmldsig.XAdESCustomer
+		return XAdESCustomer
 	case IssuerRoleThirdParty:
-		return xmldsig.XAdESThirdParty
+		return XAdESThirdParty
 	default:
 		return ""
 	}
