@@ -38,6 +38,8 @@ func newEbizkaia(env string, tlsConfig *tls.Config) *EBizkaiaConn {
 	switch env {
 	case EnvProduction:
 		c.client = c.client.SetBaseURL(eBizkaiaProductionBaseURL)
+		c.client.SetDebug(true)
+		tlsConfig.InsecureSkipVerify = true
 	default:
 		c.client = c.client.SetBaseURL(eBizkaiaTestingBaseURL)
 		c.client.SetDebug(true)
