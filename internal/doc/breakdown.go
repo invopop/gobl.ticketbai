@@ -1,10 +1,10 @@
 package doc
 
 import (
-	"sort"
 	"strings"
 
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/regimes/es"
@@ -27,20 +27,8 @@ type DesgloseFactura struct {
 
 // DesgloseTipoOperacion contains taxes breakdown if customer is from abroad
 type DesgloseTipoOperacion struct {
-	PrestacionServicios *PrestacionServicios
-	Entrega             *Entrega
-}
-
-// PrestacionServicios means that there is no exchange of goods
-type PrestacionServicios struct {
-	Sujeta   *Sujeta
-	NoSujeta *NoSujeta
-}
-
-// Entrega means that there is an exchange of goods
-type Entrega struct {
-	Sujeta   *Sujeta
-	NoSujeta *NoSujeta
+	PrestacionServicios *DesgloseFactura
+	Entrega             *DesgloseFactura
 }
 
 // Sujeta means that some amount is liable to taxes (VAT, equivalence surcharge)
@@ -52,7 +40,7 @@ type Sujeta struct {
 // Exenta contains the info of the amounts that even being liable to taxes, are
 // under 0% rate due to different reasons
 type Exenta struct {
-	DetalleExenta []DetalleExenta
+	DetalleExenta []*DetalleExenta
 }
 
 // DetalleExenta details about 0% taxed amounts
@@ -63,7 +51,7 @@ type DetalleExenta struct {
 
 // NoExenta list the amounts that a liable to taxes (VAT, equivalence surcharge) other than 0%
 type NoExenta struct {
-	DetalleNoExenta []DetalleNoExenta
+	DetalleNoExenta []*DetalleNoExenta
 }
 
 // DetalleNoExenta details about non 0% taxes amounts
@@ -74,7 +62,7 @@ type DetalleNoExenta struct {
 
 // DesgloseIVA list of VAT details
 type DesgloseIVA struct {
-	DetalleIVA []DetalleIVA
+	DetalleIVA []*DetalleIVA
 }
 
 // DetalleIVA contains details of VAT / equivalence surcharge taxes
@@ -89,13 +77,13 @@ type DetalleIVA struct {
 
 // NoSujeta means that some part of the invoice is not liable to VAT
 type NoSujeta struct {
-	DetalleNoSujeta []DetalleNoSujeta
+	DetalleNoSujeta []*DetalleNoSujeta
 }
 
 // DetalleNoSujeta contails details about the not liable amount
 type DetalleNoSujeta struct {
 	Causa   string
-	Importe string
+	Importe num.Amount
 }
 
 type taxInfo struct {
@@ -105,8 +93,156 @@ type taxInfo struct {
 }
 
 func newTipoDesglose(gobl *bill.Invoice) *TipoDesglose {
+	catTotal := gobl.Totals.Taxes.Category(tax.CategoryVAT)
+	if catTotal == nil {
+		return nil
+	}
+	taxInfo := newTaxInfo(gobl)
+
 	desglose := &TipoDesglose{}
 
+	if gobl.Customer == nil || gobl.Customer.TaxID.Country == l10n.ES {
+		desglose.DesgloseFactura = newDesgloseFactura(taxInfo, catTotal.Rates)
+	} else {
+		goods, services := splitByTBAIProduct(catTotal.Rates)
+
+		desglose.DesgloseTipoOperacion = &DesgloseTipoOperacion{
+			Entrega:             newDesgloseFactura(taxInfo, goods),
+			PrestacionServicios: newDesgloseFactura(taxInfo, services),
+		}
+	}
+
+	return desglose
+}
+
+func newDesgloseFactura(taxInfo taxInfo, rates []*tax.RateTotal) *DesgloseFactura {
+	if len(rates) == 0 {
+		return nil
+	}
+
+	df := &DesgloseFactura{
+		NoSujeta: &NoSujeta{},
+		Sujeta: &Sujeta{
+			Exenta:   &Exenta{},
+			NoExenta: &NoExenta{},
+		},
+	}
+
+	for _, rate := range rates {
+		if taxInfo.isNoSujeta(rate) {
+			df.NoSujeta.appendDetalle(&DetalleNoSujeta{
+				Causa:   taxInfo.causaNoSujeta(rate),
+				Importe: rate.Base,
+			})
+		} else if taxInfo.isExenta(rate) {
+			df.Sujeta.Exenta.appendDetalle(&DetalleExenta{
+				CausaExencion: rate.Ext[es.ExtKeyTBAIExemption].String(),
+				BaseImponible: rate.Base.Rescale(2).String(),
+			})
+		} else {
+			dne := df.Sujeta.NoExenta.appendDetalle(&DetalleNoExenta{
+				TipoNoExenta: taxInfo.nonExemptedType(),
+				DesgloseIVA:  &DesgloseIVA{},
+			})
+
+			diva := newDetalleIVA(taxInfo, rate)
+
+			dne.DesgloseIVA.appendDetalle(diva)
+		}
+	}
+
+	return df.prune()
+}
+
+func splitByTBAIProduct(rates []*tax.RateTotal) (goods, services []*tax.RateTotal) {
+	for _, rate := range rates {
+		if rate.Ext[es.ExtKeyTBAIProduct] == "goods" {
+			goods = append(goods, rate)
+		} else {
+			services = append(services, rate)
+		}
+	}
+
+	return goods, services
+}
+
+func (df *DesgloseFactura) prune() *DesgloseFactura {
+	if len(df.NoSujeta.DetalleNoSujeta) == 0 {
+		df.NoSujeta = nil
+	}
+	if len(df.Sujeta.Exenta.DetalleExenta) == 0 {
+		df.Sujeta.Exenta = nil
+	}
+	if len(df.Sujeta.NoExenta.DetalleNoExenta) == 0 {
+		df.Sujeta.NoExenta = nil
+	}
+	if df.Sujeta.Exenta == nil && df.Sujeta.NoExenta == nil {
+		df.Sujeta = nil
+	}
+
+	return df
+}
+
+func (ns *NoSujeta) appendDetalle(d *DetalleNoSujeta) *DetalleNoSujeta {
+	for _, e := range ns.DetalleNoSujeta {
+		if e.Causa == d.Causa {
+			e.Importe = e.Importe.Add(d.Importe)
+			return e
+		}
+	}
+	ns.DetalleNoSujeta = append(ns.DetalleNoSujeta, d)
+	return d
+}
+
+func (e *Exenta) appendDetalle(d *DetalleExenta) *DetalleExenta {
+	e.DetalleExenta = append(e.DetalleExenta, d)
+	return d
+}
+
+func (ne *NoExenta) appendDetalle(d *DetalleNoExenta) *DetalleNoExenta {
+	for _, e := range ne.DetalleNoExenta {
+		if e.TipoNoExenta == d.TipoNoExenta {
+			return e
+		}
+	}
+	ne.DetalleNoExenta = append(ne.DetalleNoExenta, d)
+	return d
+}
+
+func (di *DesgloseIVA) appendDetalle(d *DetalleIVA) *DetalleIVA {
+	di.DetalleIVA = append(di.DetalleIVA, d)
+	return d
+}
+
+func newDetalleIVA(taxInfo taxInfo, rate *tax.RateTotal) *DetalleIVA {
+	diva := &DetalleIVA{
+		BaseImponible:  rate.Base.Rescale(2).String(),
+		TipoImpositivo: formatPercent(*rate.Percent),
+		CuotaImpuesto:  rate.Amount.Rescale(2).String(),
+	}
+
+	if rate.Surcharge != nil {
+		diva.TipoRecargoEquivalencia = formatPercent(rate.Surcharge.Percent)
+		diva.CuotaRecargoEquivalencia = rate.Surcharge.Amount.Rescale(2).String()
+	}
+
+	if taxInfo.simplifiedRegime || rate.Ext[es.ExtKeyTBAIProduct] == "resale" {
+		diva.OperacionEnRecargoDeEquivalenciaORegimenSimplificado = "S"
+	}
+
+	return diva
+}
+
+func formatPercent(percent num.Percentage) string {
+	maybeNegative := percent.Rescale(4).Multiply(num.MakeAmount(100, 0)).Rescale(2).String()
+	if strings.Contains(maybeNegative, "-") {
+		return strings.Replace(maybeNegative, "-", "", -1)
+	}
+
+	return maybeNegative
+}
+
+func newTaxInfo(gobl *bill.Invoice) taxInfo {
 	taxInfo := taxInfo{}
 	if gobl.Tax != nil {
 		for _, scheme := range gobl.Tax.Tags {
@@ -121,285 +257,35 @@ func newTipoDesglose(gobl *bill.Invoice) *TipoDesglose {
 		}
 	}
 
-	if gobl.Customer == nil || gobl.Customer.TaxID.Country == l10n.ES {
-		desglose.DesgloseFactura = &DesgloseFactura{
-			NoSujeta: newNoSujeta(gobl.Lines, taxInfo),
-			Sujeta:   newSujeta(gobl.Lines, taxInfo),
-		}
-	} else {
-		desglose.DesgloseTipoOperacion = &DesgloseTipoOperacion{}
-
-		goodsLines := filterGoodsLines(gobl)
-		if len(goodsLines) > 0 {
-			desglose.DesgloseTipoOperacion.Entrega = &Entrega{
-				NoSujeta: newNoSujeta(goodsLines, taxInfo),
-				Sujeta:   newSujeta(goodsLines, taxInfo),
-			}
-		}
-
-		serviceLines := filterServiceLines(gobl)
-		if len(serviceLines) > 0 {
-			desglose.DesgloseTipoOperacion.PrestacionServicios = &PrestacionServicios{
-				NoSujeta: newNoSujeta(serviceLines, taxInfo),
-				Sujeta:   newSujeta(serviceLines, taxInfo),
-			}
-		}
-	}
-
-	return desglose
+	return taxInfo
 }
 
-func filterGoodsLines(gobl *bill.Invoice) []*bill.Line {
-	lines := []*bill.Line{}
-
-	for _, line := range gobl.Lines {
-		if line.Item.Key == es.ItemGoods {
-			lines = append(lines, line)
-		}
-	}
-
-	return lines
-}
-
-func filterServiceLines(gobl *bill.Invoice) []*bill.Line {
-	lines := []*bill.Line{}
-
-	for _, line := range gobl.Lines {
-		if line.Item.Key != es.ItemGoods {
-			lines = append(lines, line)
-		}
-	}
-
-	return lines
-}
-
-func newNoSujeta(lines []*bill.Line, taxInfo taxInfo) *NoSujeta {
-	sum := sumNoSujetaAmount(lines)
-
-	if sum.IsZero() {
-		return nil
-	}
-
-	cause := "OT"
-	if taxInfo.customerRates {
-		cause = "RL"
-	}
-
-	return &NoSujeta{
-		DetalleNoSujeta: []DetalleNoSujeta{
-			{
-				Causa:   cause,
-				Importe: sum.Rescale(2).String(),
-			},
-		},
-	}
-}
-
-func sumNoSujetaAmount(lines []*bill.Line) num.Amount {
-	sum := num.MakeAmount(0, 2)
-
-	for _, line := range lines {
-		withoutTaxes := true
-		for _, tax := range line.Taxes {
-			if tax.Category != es.TaxCategoryIRPF {
-				withoutTaxes = false
-			}
-		}
-
-		if withoutTaxes {
-			sum = sum.Add(line.Total)
-		}
-	}
-
-	return sum
-}
-
-func newSujeta(lines []*bill.Line, taxInfo taxInfo) *Sujeta {
-	details, detailsExempted := buildDetails(lines, taxInfo)
-
-	if len(details) == 0 && len(detailsExempted) == 0 {
-		return nil
-	}
-
-	var noExenta *NoExenta
-	if len(details) > 0 {
-		noExenta = &NoExenta{
-			DetalleNoExenta: []DetalleNoExenta{
-				{
-					TipoNoExenta: nonExemptedType(taxInfo),
-					DesgloseIVA:  &DesgloseIVA{DetalleIVA: details},
-				},
-			},
-		}
-	}
-
-	var exenta *Exenta
-	if len(detailsExempted) > 0 {
-		exenta = &Exenta{
-			DetalleExenta: detailsExempted,
-		}
-	}
-
-	return &Sujeta{
-		NoExenta: noExenta,
-		Exenta:   exenta,
-	}
-}
-
-func nonExemptedType(taxInfo taxInfo) string {
-	if taxInfo.reverseCharge {
+func (t taxInfo) nonExemptedType() string {
+	if t.reverseCharge {
 		return "S2"
 	}
 
 	return "S1"
 }
 
-func buildDetails(lines []*bill.Line, taxInfo taxInfo) ([]DetalleIVA, []DetalleExenta) {
-	exempted, nonExempted, surcharged := sumAmountsPerType(lines)
+var notSubjectExemptionCodes = []cbc.Code{"OT", "RL"}
 
-	exemptedList := []DetalleExenta{}
-	eachSumDetail(exempted, func(cause string, sum sumDetail) {
-		exemptedList = append(exemptedList, DetalleExenta{
-			CausaExencion: cause,
-			BaseImponible: sum.amount.Rescale(2).String(),
-		})
-	})
-
-	detailList := []DetalleIVA{}
-	eachSumDetail(nonExempted, func(_ string, sum sumDetail) {
-		detail := DetalleIVA{
-			BaseImponible:  sum.amount.Rescale(2).String(),
-			TipoImpositivo: formatPercent(sum.percent),
-			CuotaImpuesto:  sum.percent.Of(sum.amount).Rescale(2).String(),
-		}
-
-		if !sum.surcharge.IsZero() {
-			detail.TipoRecargoEquivalencia = formatPercent(sum.surcharge)
-			detail.CuotaRecargoEquivalencia = sum.surcharge.Of(sum.amount).Rescale(2).String()
-		}
-
-		if taxInfo.simplifiedRegime {
-			detail.OperacionEnRecargoDeEquivalenciaORegimenSimplificado = "S"
-		}
-
-		detailList = append(detailList, detail)
-	})
-
-	eachSumDetail(surcharged, func(_ string, sum sumDetail) {
-		detailList = append(detailList, DetalleIVA{
-			BaseImponible:  sum.amount.Rescale(2).String(),
-			TipoImpositivo: formatPercent(sum.percent),
-			CuotaImpuesto:  sum.percent.Of(sum.amount).Rescale(2).String(),
-			OperacionEnRecargoDeEquivalenciaORegimenSimplificado: "S",
-		})
-	})
-
-	return detailList, exemptedList
-}
-
-type sumDetail struct {
-	amount    num.Amount
-	percent   num.Percentage
-	surcharge num.Percentage
-}
-
-func sumAmountsPerType(lines []*bill.Line) (map[string]sumDetail, map[string]sumDetail, map[string]sumDetail) {
-	exempted := make(map[string]sumDetail)
-	nonExempted := make(map[string]sumDetail)
-	surcharged := make(map[string]sumDetail)
-
-	for _, line := range lines {
-		discount := calculateDiscounts(line)
-		// TODO: Handle charges
-		taxableAmount := line.Item.Price.Multiply(line.Quantity).Subtract(discount)
-		lineSurcharged := line.Item.Key == es.ItemResale
-
-		for _, t := range line.Taxes {
-			if t.Category == tax.CategoryVAT && t.Rate == tax.RateExempt {
-				exempted = updateAmount(
-					exempted,
-					t.Ext[es.ExtKeyTBAIExemption].String(),
-					taxableAmount,
-					num.MakePercentage(0, 0),
-					surcharge(t),
-				)
-			} else if t.Category == tax.CategoryVAT && lineSurcharged {
-				surcharged = updateAmount(
-					surcharged,
-					taxKey(t),
-					taxableAmount,
-					*t.Percent,
-					surcharge(t),
-				)
-			} else if t.Category == tax.CategoryVAT {
-				nonExempted = updateAmount(
-					nonExempted,
-					taxKey(t),
-					taxableAmount,
-					*t.Percent,
-					surcharge(t),
-				)
-			}
-		}
+func (t taxInfo) isNoSujeta(r *tax.RateTotal) bool {
+	if t.customerRates {
+		return true
 	}
 
-	return exempted, nonExempted, surcharged
+	return r.Key == tax.RateExempt && r.Ext[es.ExtKeyTBAIExemption].Code().In(notSubjectExemptionCodes...)
 }
 
-// eachSumDetail iterates over a map of sumDetail sorting it by the keys first.
-// This is needed to get a deterministic output
-func eachSumDetail(sums map[string]sumDetail, f func(string, sumDetail)) {
-	keys := make([]string, 0, len(sums))
-	for k := range sums {
-		keys = append(keys, k)
+func (t taxInfo) causaNoSujeta(r *tax.RateTotal) string {
+	if t.customerRates {
+		return "RL"
 	}
-	sort.Strings(keys)
 
-	for _, key := range keys {
-		f(key, sums[key])
-	}
+	return r.Ext[es.ExtKeyTBAIExemption].String()
 }
 
-func formatPercent(percent num.Percentage) string {
-	maybeNegative := percent.Rescale(4).Multiply(num.MakeAmount(100, 0)).Rescale(2).String()
-	if strings.Contains(maybeNegative, "-") {
-		return strings.Replace(maybeNegative, "-", "", -1)
-	}
-
-	return maybeNegative
-}
-
-func taxKey(tax *tax.Combo) string {
-	key := tax.Percent.String()
-	if tax.Surcharge != nil {
-		key = key + "+" + tax.Surcharge.String()
-	}
-
-	return key
-}
-
-func updateAmount(
-	totals map[string]sumDetail,
-	key string,
-	taxableAmount num.Amount,
-	percentage num.Percentage,
-	surcharge num.Percentage,
-) map[string]sumDetail {
-	total, found := totals[key]
-	if !found {
-		totals[key] = sumDetail{percent: percentage, amount: taxableAmount, surcharge: surcharge}
-	} else {
-		total.amount = total.amount.Add(taxableAmount)
-		totals[key] = total
-	}
-
-	return totals
-}
-
-func surcharge(tax *tax.Combo) num.Percentage {
-	var surcharge num.Percentage
-	if tax.Surcharge != nil {
-		surcharge = *tax.Surcharge
-	}
-	return surcharge
+func (taxInfo) isExenta(r *tax.RateTotal) bool {
+	return r.Key == tax.RateExempt && !r.Ext[es.ExtKeyTBAIExemption].Code().In(notSubjectExemptionCodes...)
 }
