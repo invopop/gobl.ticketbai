@@ -74,7 +74,7 @@ func main() {
 	tbai, err := ticketbai.New(soft,
 		ticketbai.WithCertificate(cert), // Use the certificate previously loaded
 		ticketbai.WithSupplierIssuer(),  // The issuer is the invoice's supplier
-		ticketbai.InTesting()            // Use the tax agency testing environment
+		ticketbai.InTesting(),           // Use the tax agency testing environment
 	)
 	if err != nil {
 		panic(err)
