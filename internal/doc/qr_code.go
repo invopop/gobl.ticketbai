@@ -2,6 +2,7 @@ package doc
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/invopop/gobl/l10n"
@@ -57,7 +58,7 @@ func (doc *TicketBAI) generateQRCode(zone l10n.Code, tbaiCode string) string {
 
 	invCode := doc.Factura.CabeceraFactura.NumFactura
 	invTotal := doc.Factura.DatosFactura.ImporteTotalFactura
-	qrCodeInfo := fmt.Sprintf(pat, tbaiCode, invCode, invTotal)
+	qrCodeInfo := fmt.Sprintf(pat, url.QueryEscape(tbaiCode), invCode, invTotal)
 	qrCodeCRC := crc8.Checksum([]byte(qrCodeInfo), crcTable)
 
 	return fmt.Sprintf("%s&cr=%03d", qrCodeInfo, qrCodeCRC)
