@@ -32,50 +32,37 @@ customer:
     - code: "42501"
       locality: "Actopan"
       country: "MX"
-# customer:
-#   tax_id:
-#     country: "ES"
-#     code: "93542762Z"
-#   name: "Pere Sancho Latorre"
-#   emails:
-#     - addr: "mzkrme5v@blu.it"
-#   addresses:
-#     - num: "58"
-#       street: "Praza Real"
-#       locality: "Caudete de las Fuentes"
-#       region: "Valencia"
-#       code: "46701"
-#       country: "ES"
 
 lines:
   - quantity: 6
     item:
       name: "Item being purchased"
       price: "100.00"
-      key: "goods"
     taxes:
       - cat: "VAT"
         rate: "exempt"
         ext:
           es-tbai-exemption: "E1"
+          es-tbai-product: "goods"
   - quantity: 5
     item:
       name: "Another item being purchased"
       price: "20.00"
-      key: "goods"
     taxes:
       - cat: "VAT"
         rate: "exempt"
         ext:
           es-tbai-exemption: "E2"
+          es-tbai-product: "goods"
   - quantity: 2
     item:
       name: "Service being paid"
       price: "150.00"
-      key: "service"
     taxes:
       - cat: "VAT"
         rate: "standard"
+        ext:
+          es-tbai-product: "services"
       - cat: "IRPF"
         rate: "pro"
 

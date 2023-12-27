@@ -4,7 +4,7 @@
     "uuid": "90e8a582-92ae-11ee-8a77-e6a7901137ed",
     "dig": {
       "alg": "sha256",
-      "val": "8aa806c8439f75826a67d190804e08c5ce9afb7868687618005cc9055219e8cf"
+      "val": "40e741970fefffb416ecd8983308ff10cf49e84a730aa1a31d43ced71815fc78"
     },
     "draft": true
   },
@@ -63,7 +63,6 @@
         "i": 1,
         "quantity": "6",
         "item": {
-          "key": "goods",
           "name": "Item being purchased",
           "price": "100.00"
         },
@@ -73,7 +72,8 @@
             "cat": "VAT",
             "rate": "exempt",
             "ext": {
-              "es-tbai-exemption": "E1"
+              "es-tbai-exemption": "E1",
+              "es-tbai-product": "goods"
             }
           }
         ],
@@ -83,7 +83,6 @@
         "i": 2,
         "quantity": "5",
         "item": {
-          "key": "goods",
           "name": "Another item being purchased",
           "price": "20.00"
         },
@@ -93,7 +92,8 @@
             "cat": "VAT",
             "rate": "exempt",
             "ext": {
-              "es-tbai-exemption": "E2"
+              "es-tbai-exemption": "E2",
+              "es-tbai-product": "goods"
             }
           }
         ],
@@ -103,7 +103,6 @@
         "i": 3,
         "quantity": "2",
         "item": {
-          "key": "service",
           "name": "Service being paid",
           "price": "150.00"
         },
@@ -112,7 +111,10 @@
           {
             "cat": "VAT",
             "rate": "standard",
-            "percent": "21.0%"
+            "percent": "21.0%",
+            "ext": {
+              "es-tbai-product": "services"
+            }
           },
           {
             "cat": "IRPF",
@@ -134,7 +136,8 @@
               {
                 "key": "exempt",
                 "ext": {
-                  "es-tbai-exemption": "E1"
+                  "es-tbai-exemption": "E1",
+                  "es-tbai-product": "goods"
                 },
                 "base": "600.00",
                 "amount": "0.00"
@@ -142,13 +145,17 @@
               {
                 "key": "exempt",
                 "ext": {
-                  "es-tbai-exemption": "E2"
+                  "es-tbai-exemption": "E2",
+                  "es-tbai-product": "goods"
                 },
                 "base": "100.00",
                 "amount": "0.00"
               },
               {
                 "key": "standard",
+                "ext": {
+                  "es-tbai-product": "services"
+                },
                 "base": "300.00",
                 "percent": "21.0%",
                 "amount": "63.00"

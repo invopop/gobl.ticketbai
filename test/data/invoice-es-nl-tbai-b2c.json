@@ -1,0 +1,174 @@
+{
+  "$schema": "https://gobl.org/draft-0/envelope",
+  "head": {
+    "uuid": "7fe11346-a0ce-11ee-b8f0-e6a7901137ed",
+    "dig": {
+      "alg": "sha256",
+      "val": "afc7524dc6207f037c138c6d3c5a953eeb84c78a0afb61c87b33c97ce4dc55af"
+    },
+    "draft": true
+  },
+  "doc": {
+    "$schema": "https://gobl.org/draft-0/bill/invoice",
+    "type": "standard",
+    "series": "EXPORT-X",
+    "code": "0002",
+    "issue_date": "2023-12-18",
+    "currency": "EUR",
+    "tax": {
+      "tags": [
+        "customer-rates"
+      ]
+    },
+    "supplier": {
+      "name": "Provide One S.L.",
+      "tax_id": {
+        "country": "ES",
+        "zone": "BI",
+        "code": "B98602642"
+      },
+      "addresses": [
+        {
+          "num": "42",
+          "street": "San Frantzisko",
+          "locality": "Bilbo",
+          "region": "Bizkaia",
+          "code": "48003",
+          "country": "ES"
+        }
+      ],
+      "emails": [
+        {
+          "addr": "billing@example.com"
+        }
+      ]
+    },
+    "customer": {
+      "name": "Sample End-Consumer",
+      "tax_id": {
+        "country": "NL"
+      }
+    },
+    "lines": [
+      {
+        "i": 1,
+        "quantity": "20",
+        "item": {
+          "name": "Development services",
+          "price": "90.00",
+          "unit": "h"
+        },
+        "sum": "1800.00",
+        "discounts": [
+          {
+            "percent": "10%",
+            "amount": "180.00",
+            "reason": "Special discount"
+          }
+        ],
+        "taxes": [
+          {
+            "cat": "VAT",
+            "rate": "standard",
+            "percent": "21.0%",
+            "ext": {
+              "es-tbai-product": "services"
+            }
+          }
+        ],
+        "total": "1620.00"
+      },
+      {
+        "i": 2,
+        "quantity": "1",
+        "item": {
+          "name": "Some merch",
+          "price": "90.00"
+        },
+        "sum": "90.00",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "rate": "standard",
+            "percent": "21.0%",
+            "ext": {
+              "es-tbai-product": "goods"
+            }
+          }
+        ],
+        "total": "90.00"
+      },
+      {
+        "i": 3,
+        "quantity": "1",
+        "item": {
+          "name": "Some essential needs merch",
+          "price": "30.00"
+        },
+        "sum": "30.00",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "rate": "reduced",
+            "percent": "9.0%",
+            "ext": {
+              "es-tbai-product": "goods"
+            }
+          }
+        ],
+        "total": "30.00"
+      }
+    ],
+    "totals": {
+      "sum": "1740.00",
+      "total": "1740.00",
+      "taxes": {
+        "categories": [
+          {
+            "code": "VAT",
+            "rates": [
+              {
+                "key": "standard",
+                "ext": {
+                  "es-tbai-product": "services"
+                },
+                "base": "1620.00",
+                "percent": "21.0%",
+                "amount": "340.20"
+              },
+              {
+                "key": "standard",
+                "ext": {
+                  "es-tbai-product": "goods"
+                },
+                "base": "90.00",
+                "percent": "21.0%",
+                "amount": "18.90"
+              },
+              {
+                "key": "reduced",
+                "ext": {
+                  "es-tbai-product": "goods"
+                },
+                "base": "30.00",
+                "percent": "9.0%",
+                "amount": "2.70"
+              }
+            ],
+            "amount": "361.80"
+          }
+        ],
+        "sum": "361.80"
+      },
+      "tax": "361.80",
+      "total_with_tax": "2101.80",
+      "payable": "2101.80"
+    },
+    "notes": [
+      {
+        "key": "general",
+        "text": "Some random description"
+      }
+    ]
+  }
+}

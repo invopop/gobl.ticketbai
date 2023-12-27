@@ -176,12 +176,12 @@ func TestFacturaConversion(t *testing.T) {
 			Item: &org.Item{
 				Name:  "A",
 				Price: num.MakeAmount(10, 0),
-				Key:   es.ItemResale,
 			},
 			Taxes: tax.Set{
 				&tax.Combo{
 					Category: "VAT",
 					Rate:     "standard",
+					Ext:      tax.ExtMap{es.ExtKeyTBAIProduct: "resale"},
 				},
 			},
 		}}

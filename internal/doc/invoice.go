@@ -162,11 +162,17 @@ func newClaves(inv *bill.Invoice) []IDClave {
 }
 
 func hasSurchargedLines(inv *bill.Invoice) bool {
-	for _, line := range inv.Lines {
-		if line.Item.Key == es.ItemResale {
+	vat := inv.Totals.Taxes.Category(tax.CategoryVAT)
+	if vat == nil {
+		return false
+	}
+
+	for _, rate := range vat.Rates {
+		if rate.Ext[es.ExtKeyTBAIProduct] == "resale" {
 			return true
 		}
 	}
+
 	return false
 }
 
