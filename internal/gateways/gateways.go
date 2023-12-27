@@ -35,6 +35,7 @@ type Connection interface {
 	// Post sends the complete TicketBAI document to the remote end-point. We assume
 	// the document has been fully prepared and signed.
 	Post(inv *bill.Invoice, payload []byte) error
+	Fetch(nif string, name string, year int) error
 }
 
 // List keeps together the list of connections

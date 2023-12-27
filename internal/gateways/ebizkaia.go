@@ -15,6 +15,7 @@ const (
 	eBizkaiaProductionBaseURL   = "https://sarrerak.bizkaia.eus"
 	eBizkaiaTestingBaseURL      = "https://pruesarrerak.bizkaia.eus"
 	eBizkaiaExecutePath         = "/N3B4000M/aurkezpena"
+	eBizkaiaQueryPath           = "/N3B4001M/kontsulta"
 	eBizkaiaN3VersionHeader     = "eus-bizkaia-n3-version"
 	eBizkaiaN3ContentTypeHeader = "eus-bizkaia-n3-content-type"
 	eBizkaiaN3DataHeader        = "eus-bizkaia-n3-data"
@@ -75,6 +76,46 @@ func (c *EBizkaiaConn) Post(inv *bill.Invoice, payload []byte) error {
 		SetBody(doc.Payload)
 
 	res, err := r.Post(eBizkaiaExecutePath)
+	if err != nil {
+		return fmt.Errorf("%w: ebizkaia: %s", ErrConnection, err.Error())
+	}
+	if res.StatusCode() != 200 {
+		return fmt.Errorf("ebizkaia: status %d", res.StatusCode())
+	}
+
+	code := res.Header().Get(eBizkaiaN3ResponseHeader)
+	if code == eBizkaiaN3ResponseInvalid {
+		msg := res.Header().Get(eBizkaiaN3MessageHeader)
+		return fmt.Errorf("ebizkaia: %v", convertToUTF8(msg))
+	}
+
+	return nil
+}
+
+// Fetch retrieves the TicketBAI from the remote end-point for the given
+// taxpayer and year.
+func (c *EBizkaiaConn) Fetch(nif string, name string, year int) error {
+	sup := &ebizkaia.Supplier{
+		Year: year,
+		NIF:  nif,
+		Name: name,
+	}
+	doc, err := ebizkaia.NewFetchRequest(sup)
+	if err != nil {
+		return fmt.Errorf("fetch request: %w", err)
+	}
+
+	r := c.client.R().
+		SetHeader("Content-Encoding", "gzip").
+		SetHeader("Content-Type", "application/octet-stream").
+		SetHeader("Accept-Encoding", "gzip").
+		SetContentLength(true).
+		SetHeaderVerbatim(eBizkaiaN3ContentTypeHeader, "application/xml").
+		SetHeaderVerbatim(eBizkaiaN3DataHeader, string(doc.Header)).
+		SetHeaderVerbatim(eBizkaiaN3VersionHeader, "1.0").
+		SetBody(doc.Payload)
+
+	res, err := r.Post(eBizkaiaQueryPath)
 	if err != nil {
 		return fmt.Errorf("%w: ebizkaia: %s", ErrConnection, err.Error())
 	}

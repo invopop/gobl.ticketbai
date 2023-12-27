@@ -209,6 +209,16 @@ func (c *Client) Post(d *Document) error {
 	return conn.Post(d.inv, p)
 }
 
+// Fetch will retrieve the issued documents from the TicketBAI gateway.
+func (c *Client) Fetch(zone l10n.Code, nif string, name string, year int) error {
+	conn := c.list.For(zone)
+	if conn == nil {
+		return fmt.Errorf("no gateway available for %s", zone)
+	}
+
+	return conn.Fetch(nif, name, year)
+}
+
 // Fingerprint generates a finger print for the TicketBAI document using the
 // data provided from the previous invoice data. If there was no previous
 // invoice, the parameter should be nil.
