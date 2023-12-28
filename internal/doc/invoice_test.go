@@ -25,11 +25,13 @@ func TestFacturaConversion(t *testing.T) {
 	t.Run("should add info about id of an invoice", func(t *testing.T) {
 		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Code = "something-001"
+		goblInvoice.Series = "SERIES"
 
 		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
 
 		factura := invoice.Factura
 		assert.Equal(t, "something-001", factura.CabeceraFactura.NumFactura)
+		assert.Equal(t, "SERIES", factura.CabeceraFactura.SerieFactura)
 	})
 
 	t.Run("should add issue time / date info", func(t *testing.T) {
