@@ -73,9 +73,9 @@ func TestQRCodes(t *testing.T) {
 
 		assert.Equal(t, true, strings.HasPrefix(codes.QRCode, "https://batuz.eus/QRTBAI/"))
 		assert.Contains(t, codes.QRCode, "?id=TBAI-A99805194-020222-")
-		assert.Contains(t, codes.QRCode, "&s=")
+		assert.Contains(t, codes.QRCode, "&s=TEST")
 		assert.Contains(t, codes.QRCode, "&nf=001")
-		assert.Contains(t, codes.QRCode, "&i="+testCase.invoice.Factura.DatosFactura.ImporteTotalFactura)
-		assert.Contains(t, codes.QRCode, "&cr=111") // changes according to test data
+		assert.Contains(t, codes.QRCode, "&i=1089.00")
+		assert.Contains(t, codes.QRCode, "&cr=143") // changes according to test data
 	})
 }

@@ -50,15 +50,18 @@ func (doc *TicketBAI) generateTbaiCode() string {
 func (doc *TicketBAI) generateQRCode(zone l10n.Code, tbaiCode string) string {
 	var pat string
 	if zone == es.ZoneBI {
-		pat = "https://batuz.eus/QRTBAI/?id=%s&s=&nf=%s&i=%s"
+		pat = "https://batuz.eus/QRTBAI/?id=%s&s=%s&nf=%s&i=%s"
 	}
 	if pat == "" {
 		return ""
 	}
 
-	invCode := doc.Factura.CabeceraFactura.NumFactura
+	tbaiCode = url.QueryEscape(tbaiCode)
+	invCode := url.QueryEscape(doc.Factura.CabeceraFactura.NumFactura)
+	invSeries := url.QueryEscape(doc.Factura.CabeceraFactura.SerieFactura)
 	invTotal := doc.Factura.DatosFactura.ImporteTotalFactura
-	qrCodeInfo := fmt.Sprintf(pat, url.QueryEscape(tbaiCode), invCode, invTotal)
+
+	qrCodeInfo := fmt.Sprintf(pat, tbaiCode, invSeries, invCode, invTotal)
 	qrCodeCRC := crc8.Checksum([]byte(qrCodeInfo), crcTable)
 
 	return fmt.Sprintf("%s&cr=%03d", qrCodeInfo, qrCodeCRC)
