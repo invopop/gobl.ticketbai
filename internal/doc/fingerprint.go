@@ -8,7 +8,7 @@ type HuellaTBAI struct {
 
 // EncadenamientoFacturaAnterior has the info of the previous invoice generated
 type EncadenamientoFacturaAnterior struct {
-	SerieFacturaAnterior               string
+	SerieFacturaAnterior               string `xml:",omitempty"`
 	NumFacturaAnterior                 string
 	FechaExpedicionFacturaAnterior     string
 	SignatureValueFirmaFacturaAnterior string
