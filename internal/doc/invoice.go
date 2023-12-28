@@ -20,6 +20,7 @@ type Factura struct {
 
 // CabeceraFactura contains info about the invoice header
 type CabeceraFactura struct {
+	SerieFactura           string `xml:",omitempty"`
 	NumFactura             string
 	FechaExpedicionFactura string
 	HoraExpedicionFactura  string
@@ -60,6 +61,7 @@ func newCabeceraFactura(inv *bill.Invoice, ts time.Time) *CabeceraFactura {
 	issueTime := ts.Format("15:04:05")
 
 	return &CabeceraFactura{
+		SerieFactura:           inv.Series,
 		NumFactura:             inv.Code,
 		FechaExpedicionFactura: issueDate,
 		HoraExpedicionFactura:  issueTime,
