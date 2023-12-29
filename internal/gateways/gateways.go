@@ -11,10 +11,13 @@ import (
 	"github.com/invopop/xmldsig"
 )
 
+// Environment defines the environment to use for connections
+type Environment string
+
 // Environment to use for connections
 const (
-	EnvProduction = "production"
-	EnvTesting    = "testing"
+	EnvironmentProduction Environment = "production"
+	EnvironmentTesting    Environment = "testing"
 )
 
 // Error is used to provide more contextual errors
@@ -35,6 +38,8 @@ type Connection interface {
 	// Post sends the complete TicketBAI document to the remote end-point. We assume
 	// the document has been fully prepared and signed.
 	Post(inv *bill.Invoice, payload []byte) error
+	Fetch(nif string, name string, year int) error
+	Cancel(inv *bill.Invoice, payload []byte) error
 }
 
 // List keeps together the list of connections
@@ -43,7 +48,7 @@ type List struct {
 }
 
 // New instantiates a new set of connections using the provided config.
-func New(env string, cert *xmldsig.Certificate) (*List, error) {
+func New(env Environment, cert *xmldsig.Certificate) (*List, error) {
 	l := new(List)
 
 	tlsConf, err := cert.TLSAuthConfig()

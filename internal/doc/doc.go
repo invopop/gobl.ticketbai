@@ -25,14 +25,20 @@ func init() {
 }
 
 const (
-	ticketBAINamespace = "urn:ticketbai:emision" // nolint:misspell
+	ticketBAIVersion = "1.2"
+
+	ticketBAIEmisionNamespace   = "urn:ticketbai:emision"   // nolint:misspell
+	ticketBAIAnulacionNamespace = "urn:ticketbai:anulacion" // nolint:misspell
 )
+
+// IssuerRole defines the role of the issuer in the invoice.
+type IssuerRole string
 
 // IssuerRole constants
 const (
-	IssuerRoleSupplier   = "N"
-	IssuerRoleCustomer   = "D"
-	IssuerRoleThirdParty = "T"
+	IssuerRoleSupplier   IssuerRole = "N"
+	IssuerRoleCustomer   IssuerRole = "D"
+	IssuerRoleThirdParty IssuerRole = "T"
 )
 
 // TicketBAI contains the data needed to create a TicketBAI invoice
@@ -56,7 +62,7 @@ type Cabecera struct {
 
 // NewTicketBAI takes the GOBL Invoice and converts into a TicketBAI document
 // ready to send to a regional API.
-func NewTicketBAI(inv *bill.Invoice, ts time.Time, role string) (*TicketBAI, error) {
+func NewTicketBAI(inv *bill.Invoice, ts time.Time, role IssuerRole) (*TicketBAI, error) {
 	err := validateInvoice(inv)
 	if err != nil {
 		return nil, err
@@ -68,13 +74,13 @@ func NewTicketBAI(inv *bill.Invoice, ts time.Time, role string) (*TicketBAI, err
 	}
 
 	doc := &TicketBAI{
-		TNamespace: ticketBAINamespace,
+		TNamespace: ticketBAIEmisionNamespace,
 		Cabecera: &Cabecera{
-			IDVersionTBAI: "1.2",
+			IDVersionTBAI: ticketBAIVersion,
 		},
 		Sujetos: &Sujetos{
 			Emisor:                          newEmisor(inv.Supplier),
-			EmitidaPorTercerosODestinatario: role,
+			EmitidaPorTercerosODestinatario: string(role),
 		},
 		Factura: &Factura{
 			CabeceraFactura: newCabeceraFactura(inv, ts),
@@ -105,13 +111,20 @@ func NewTicketBAI(inv *bill.Invoice, ts time.Time, role string) (*TicketBAI, err
 // Fingerprint tries to generate the "HuellaTBAI" using the
 // previous invoice details (if available) as a reference.
 func (doc *TicketBAI) Fingerprint(conf *FingerprintConfig) error {
-	return doc.buildHuellaTBAI(conf)
+	doc.HuellaTBAI = newHuellaTBAI(conf)
+	return nil
 }
 
-// Sign generates and assigns the XML signature to the document. It needs an
-// ID to use to identify the document and a certificate to sign with.
-func (doc *TicketBAI) Sign(docID string, cert *xmldsig.Certificate, opts ...xmldsig.Option) error {
-	return doc.sign(docID, cert, opts...)
+// Sign signs the document with the given certificate and role
+func (doc *TicketBAI) Sign(docID string, cert *xmldsig.Certificate, role IssuerRole, opts ...xmldsig.Option) error {
+	s, err := newSignature(doc, docID, doc.zone, role, cert, opts...)
+	if err != nil {
+		return err
+	}
+
+	doc.Signature = s
+
+	return nil
 }
 
 // QRCodes generates the QR codes for this invoice, but requires the Fingerprint to have been
@@ -125,17 +138,16 @@ func (doc *TicketBAI) QRCodes() *Codes {
 
 // Bytes returns the XML document bytes
 func (doc *TicketBAI) Bytes() ([]byte, error) {
-	buf, err := doc.buffer(xml.Header, false)
-	if err != nil {
-		return nil, err
-	}
-
-	return buf.Bytes(), nil
+	return toBytes(doc)
 }
 
-// BytesIndent returns the idented XML document bytes
+// BytesIndent returns the indented XML document bytes
 func (doc *TicketBAI) BytesIndent() ([]byte, error) {
-	buf, err := doc.buffer(xml.Header, true)
+	return toBytesIndent(doc)
+}
+
+func toBytes(doc any) ([]byte, error) {
+	buf, err := buffer(doc, xml.Header, false)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +155,25 @@ func (doc *TicketBAI) BytesIndent() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (doc *TicketBAI) buffer(base string, indent bool) (*bytes.Buffer, error) {
+func toBytesIndent(doc any) ([]byte, error) {
+	buf, err := buffer(doc, xml.Header, true)
+	if err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+func toBytesCanonical(doc any) ([]byte, error) {
+	buf, err := buffer(doc, "", false)
+	if err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+func buffer(doc any, base string, indent bool) (*bytes.Buffer, error) {
 	buf := bytes.NewBufferString(base)
 
 	enc := xml.NewEncoder(buf)

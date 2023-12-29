@@ -15,6 +15,7 @@ const (
 	eBizkaiaProductionBaseURL   = "https://sarrerak.bizkaia.eus"
 	eBizkaiaTestingBaseURL      = "https://pruesarrerak.bizkaia.eus"
 	eBizkaiaExecutePath         = "/N3B4000M/aurkezpena"
+	eBizkaiaQueryPath           = "/N3B4001M/kontsulta"
 	eBizkaiaN3VersionHeader     = "eus-bizkaia-n3-version"
 	eBizkaiaN3ContentTypeHeader = "eus-bizkaia-n3-content-type"
 	eBizkaiaN3DataHeader        = "eus-bizkaia-n3-data"
@@ -32,11 +33,11 @@ type EBizkaiaConn struct {
 	client *resty.Client
 }
 
-func newEbizkaia(env string, tlsConfig *tls.Config) *EBizkaiaConn {
+func newEbizkaia(env Environment, tlsConfig *tls.Config) *EBizkaiaConn {
 	c := new(EBizkaiaConn)
 	c.client = resty.New()
 	switch env {
-	case EnvProduction:
+	case EnvironmentProduction:
 		c.client = c.client.SetBaseURL(eBizkaiaProductionBaseURL)
 		c.client.SetDebug(true)
 		tlsConfig.InsecureSkipVerify = true
@@ -59,11 +60,50 @@ func (c *EBizkaiaConn) Post(inv *bill.Invoice, payload []byte) error {
 		NIF:  inv.Supplier.TaxID.Code.String(),
 		Name: inv.Supplier.Name,
 	}
+
 	doc, err := ebizkaia.NewCreateRequest(sup, payload)
 	if err != nil {
 		return fmt.Errorf("create request: %w", err)
 	}
 
+	return c.sendRequest(doc, eBizkaiaExecutePath)
+}
+
+// Fetch retrieves the TicketBAI from the remote end-point for the given
+// taxpayer and year.
+func (c *EBizkaiaConn) Fetch(nif string, name string, year int) error {
+	sup := &ebizkaia.Supplier{
+		Year: year,
+		NIF:  nif,
+		Name: name,
+	}
+
+	doc, err := ebizkaia.NewFetchRequest(sup)
+	if err != nil {
+		return fmt.Errorf("fetch request: %w", err)
+	}
+
+	return c.sendRequest(doc, eBizkaiaQueryPath)
+}
+
+// Cancel sends the cancellation request for the TickeBAI invoice to the remote
+// end-point.
+func (c *EBizkaiaConn) Cancel(inv *bill.Invoice, payload []byte) error {
+	sup := &ebizkaia.Supplier{
+		Year: inv.IssueDate.Year,
+		NIF:  inv.Supplier.TaxID.Code.String(),
+		Name: inv.Supplier.Name,
+	}
+
+	doc, err := ebizkaia.NewCancelRequest(sup, payload)
+	if err != nil {
+		return fmt.Errorf("create request: %w", err)
+	}
+
+	return c.sendRequest(doc, eBizkaiaExecutePath)
+}
+
+func (c *EBizkaiaConn) sendRequest(doc *ebizkaia.Request, path string) error {
 	r := c.client.R().
 		SetHeader("Content-Encoding", "gzip").
 		SetHeader("Content-Type", "application/octet-stream").
@@ -74,7 +114,7 @@ func (c *EBizkaiaConn) Post(inv *bill.Invoice, payload []byte) error {
 		SetHeaderVerbatim(eBizkaiaN3VersionHeader, "1.0").
 		SetBody(doc.Payload)
 
-	res, err := r.Post(eBizkaiaExecutePath)
+	res, err := r.Post(path)
 	if err != nil {
 		return fmt.Errorf("%w: ebizkaia: %s", ErrConnection, err.Error())
 	}

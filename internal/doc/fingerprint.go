@@ -41,8 +41,8 @@ type EntidadDesarrolladora struct {
 	NIF string
 }
 
-func (doc *TicketBAI) buildHuellaTBAI(conf *FingerprintConfig) error {
-	doc.HuellaTBAI = &HuellaTBAI{
+func newHuellaTBAI(conf *FingerprintConfig) *HuellaTBAI {
+	huella := &HuellaTBAI{
 		EncadenamientoFacturaAnterior: nil,
 		Software: &Software{
 			LicenciaTBAI: conf.License,
@@ -55,7 +55,7 @@ func (doc *TicketBAI) buildHuellaTBAI(conf *FingerprintConfig) error {
 	}
 
 	if conf.LastCode != "" {
-		doc.HuellaTBAI.EncadenamientoFacturaAnterior = &EncadenamientoFacturaAnterior{
+		huella.EncadenamientoFacturaAnterior = &EncadenamientoFacturaAnterior{
 			SerieFacturaAnterior:               conf.LastSeries,
 			NumFacturaAnterior:                 conf.LastCode,
 			FechaExpedicionFacturaAnterior:     conf.LastIssueDate,
@@ -63,7 +63,7 @@ func (doc *TicketBAI) buildHuellaTBAI(conf *FingerprintConfig) error {
 		}
 	}
 
-	return nil
+	return huella
 }
 
 func trunc(s string, n int) string {

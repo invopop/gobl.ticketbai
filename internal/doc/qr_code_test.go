@@ -39,7 +39,7 @@ func TestQRCodes(t *testing.T) {
 		err = invoice.Fingerprint(conf)
 		require.NoError(t, err)
 
-		err = invoice.Sign("TEST", cert, xmldsig.WithCurrentTime(func() time.Time {
+		err = invoice.Sign("TEST", cert, role, xmldsig.WithCurrentTime(func() time.Time {
 			// Make sure same time is always returned so signature values are
 			// always the same
 			return ts

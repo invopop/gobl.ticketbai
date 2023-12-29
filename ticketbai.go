@@ -10,10 +10,7 @@ import (
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.ticketbai/internal/doc"
 	"github.com/invopop/gobl.ticketbai/internal/gateways"
-	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/head"
 	"github.com/invopop/gobl/l10n"
-	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/xmldsig"
 )
 
@@ -30,8 +27,8 @@ type Client struct {
 	software   *Software
 	list       *gateways.List
 	cert       *xmldsig.Certificate
-	env        string
-	issuerRole string
+	env        gateways.Environment
+	issuerRole doc.IssuerRole
 	curTime    time.Time
 }
 
@@ -94,14 +91,14 @@ func WithThirdPartyIssuer() Option {
 // InProduction defines the connection to use the production environment.
 func InProduction() Option {
 	return func(c *Client) {
-		c.env = gateways.EnvProduction
+		c.env = gateways.EnvironmentProduction
 	}
 }
 
 // InTesting defines the connection to use the testing environment.
 func InTesting() Option {
 	return func(c *Client) {
-		c.env = gateways.EnvTesting
+		c.env = gateways.EnvironmentTesting
 	}
 }
 
@@ -125,14 +122,6 @@ type PreviousInvoice struct {
 	Signature string
 }
 
-// Document is a wrapper around the internal TicketBAI document.
-type Document struct {
-	env  *gobl.Envelope
-	inv  *bill.Invoice
-	zone l10n.Code
-	tbai *doc.TicketBAI // output
-}
-
 // New creates a new TicketBAI client with shared software and configuration
 // options for creating and sending new documents.
 func New(software *Software, opts ...Option) (*Client, error) {
@@ -140,7 +129,7 @@ func New(software *Software, opts ...Option) (*Client, error) {
 	c.software = software
 
 	// Set default values that can be overwritten by the options
-	c.env = gateways.EnvTesting
+	c.env = gateways.EnvironmentTesting
 	c.issuerRole = doc.IssuerRoleSupplier
 
 	for _, opt := range opts {
@@ -163,35 +152,13 @@ func New(software *Software, opts ...Option) (*Client, error) {
 // NewDocument creates a new TicketBAI document from the provided GOBL Envelope.
 // The envelope must contain a valid Invoice.
 func (c *Client) NewDocument(env *gobl.Envelope) (*Document, error) {
-	d := new(Document)
+	return newDocument(c, env)
+}
 
-	// Extract the Invoice
-	var ok bool
-	d.env = env
-	d.inv, ok = d.env.Extract().(*bill.Invoice)
-	if !ok {
-		return nil, ErrOnlyInvoices
-	}
-
-	// Check the existing stamps, we might not need to do anything
-	if d.hasExistingStamps() {
-		return nil, ErrAlreadyProcessed
-	}
-	if d.inv.Supplier.TaxID.Country != l10n.ES {
-		return nil, ErrNotSpanish
-	}
-	d.zone = d.inv.Supplier.TaxID.Zone
-	if d.zone == "" {
-		return nil, ErrInvalidZone
-	}
-
-	var err error
-	d.tbai, err = doc.NewTicketBAI(d.inv, c.CurrentTime(), c.issuerRole)
-	if err != nil {
-		return nil, err
-	}
-
-	return d, nil
+// NewCancelDocument creates a new AnulaTicketBAI document from the provided
+// GOBL Envelope.
+func (c *Client) NewCancelDocument(env *gobl.Envelope) (*CancelDocument, error) {
+	return newCancelDocument(c, env)
 }
 
 // Post will send the document to the TicketBAI gateway.
@@ -209,50 +176,29 @@ func (c *Client) Post(d *Document) error {
 	return conn.Post(d.inv, p)
 }
 
-// Fingerprint generates a finger print for the TicketBAI document using the
-// data provided from the previous invoice data. If there was no previous
-// invoice, the parameter should be nil.
-func (c *Client) Fingerprint(d *Document, prev *PreviousInvoice) error {
-	conf := &doc.FingerprintConfig{
-		License:         c.software.License,
-		NIF:             c.software.NIF,
-		SoftwareName:    c.software.Name,
-		SoftwareVersion: c.software.Version,
+// Fetch will retrieve the issued documents from the TicketBAI gateway.
+func (c *Client) Fetch(zone l10n.Code, nif string, name string, year int) error {
+	conn := c.list.For(zone)
+	if conn == nil {
+		return fmt.Errorf("no gateway available for %s", zone)
 	}
-	if prev != nil {
-		conf.LastSeries = prev.Series
-		conf.LastCode = prev.Code
-		conf.LastIssueDate = prev.IssueDate
-		conf.LastSignature = prev.Signature
-	}
-	return d.tbai.Fingerprint(conf)
+
+	return conn.Fetch(nif, name, year)
 }
 
-// Sign is used to generate the XML DSig components of the final XML document.
-// This method will also update the GOBL Envelope with the QR codes that are
-// generated.
-func (c *Client) Sign(d *Document) error {
-	dID := d.env.Head.UUID.String()
-	if err := d.tbai.Sign(dID, c.cert, xmldsig.WithCurrentTime(c.CurrentTime)); err != nil {
-		return fmt.Errorf("signing: %w", err)
+// Cancel will send the cancel document in the TicketBAI gateway.
+func (c *Client) Cancel(d *CancelDocument) error {
+	conn := c.list.For(d.zone)
+	if conn == nil {
+		return fmt.Errorf("no gateway available for %s", d.zone)
 	}
 
-	// now generate the QR codes and add them to the envelope
-	codes := d.tbai.QRCodes()
-	d.env.Head.AddStamp(
-		&head.Stamp{
-			Provider: es.StampProviderTBAICode,
-			Value:    codes.TBAICode,
-		},
-	)
-	d.env.Head.AddStamp(
-		&head.Stamp{
-			Provider: es.StampProviderTBAIQR,
-			Value:    codes.QRCode,
-		},
-	)
+	p, err := d.tbai.Bytes()
+	if err != nil {
+		return fmt.Errorf("generating payload: %w", err)
+	}
 
-	return nil
+	return conn.Cancel(d.inv, p)
 }
 
 // CurrentTime returns the current time to use when generating
@@ -262,33 +208,4 @@ func (c *Client) CurrentTime() time.Time {
 		return c.curTime
 	}
 	return time.Now()
-}
-
-// Bytes generates the byte output of the TicketBAI Document.
-func (d *Document) Bytes() ([]byte, error) {
-	return d.tbai.Bytes()
-}
-
-// BytesIndent generates the indented byte output of the TicketBAI Document.
-func (d *Document) BytesIndent() ([]byte, error) {
-	return d.tbai.BytesIndent()
-}
-
-// Head returns the CabeceraFactura from the TicketBAI document.
-func (d *Document) Head() *doc.CabeceraFactura {
-	return d.tbai.Factura.CabeceraFactura
-}
-
-// SignatureValue provides quick access to the XML signatures final value.
-func (d *Document) SignatureValue() string {
-	return d.tbai.SignatureValue()
-}
-
-func (d *Document) hasExistingStamps() bool {
-	for _, stamp := range d.env.Head.Stamps {
-		if stamp.Provider.In(es.StampProviderTBAICode, es.StampProviderTBAIQR) {
-			return true
-		}
-	}
-	return false
 }

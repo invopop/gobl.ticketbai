@@ -16,11 +16,13 @@ import (
 
 // Constants used in headers
 const (
-	concepto           = "LROE"
-	apartado1          = "1"
-	apartado1_1        = "1.1"
-	modelo240          = "240"
-	schemaLROE240ConSG = "https://www.batuz.eus/fitxategiak/batuz/LROE/esquemas/LROE_PJ_240_1_1_FacturasEmitidas_ConSG_AltaPeticion_V1_0_2.xsd"
+	concepto                    = "LROE"
+	apartado1                   = "1"
+	apartado1_1                 = "1.1"
+	modelo240                   = "240"
+	schemaLROE240ConSGAlta      = "https://www.batuz.eus/fitxategiak/batuz/LROE/esquemas/LROE_PJ_240_1_1_FacturasEmitidas_ConSG_AltaPeticion_V1_0_2.xsd"
+	schemaLROE240ConSGConsulta  = "https://www.batuz.eus/fitxategiak/batuz/LROE/esquemas/LROE_PJ_240_1_1_FacturasEmitidas_ConSG_ConsultaPeticion_V1_0_0.xsd"
+	schemaLROE240ConSGAnulacion = "https://www.batuz.eus/fitxategiak/batuz/LROE/esquemas/LROE_PJ_240_1_1_FacturasEmitidas_ConSG_AnulacionPeticion_V1_0_0.xsd"
 )
 
 const (
@@ -32,10 +34,10 @@ const (
 	operacionEnumConsulta                       = "C00"
 )
 
-// CreateRequest tries to keep all the request information in one place ready to send to the
+// Request tries to keep all the request information in one place ready to send to the
 // Bizkaia servers. They really out did themselves while defining these connections making it
 // increadibly complex.
-type CreateRequest struct {
+type Request struct {
 	Header  []byte // JSON special data header
 	Payload []byte // already gzipped
 }
@@ -78,6 +80,24 @@ type LROEPJ240FacturasEmitidasConSGAltaPeticion struct {
 	FacturasEmitidas *FacturasEmitidasConSGCodificadoType
 }
 
+// LROEPJ240FacturasEmitidasConSGConsultaPeticion is used for querying invoices.
+type LROEPJ240FacturasEmitidasConSGConsultaPeticion struct {
+	XMLName       xml.Name `xml:"lrpjfecsgcp:LROEPJ240FacturasEmitidasConSGConsultaPeticion"`
+	LROENamespace string   `xml:"xmlns:lrpjfecsgcp,attr"`
+
+	Cabecera                            *Cabecera240Type
+	FiltroConsultaFacturasEmitidasConSG *FiltroConsultaFacturasEmitidasType
+}
+
+// LROEPJ240FacturasEmitidasConSGAnulacionPeticion is used for cancelling invoices.
+type LROEPJ240FacturasEmitidasConSGAnulacionPeticion struct {
+	XMLName       xml.Name `xml:"lrpjfecsgap:LROEPJ240FacturasEmitidasConSGAnulacionPeticion"`
+	LROENamespace string   `xml:"xmlns:lrpjfecsgap,attr"`
+
+	Cabecera         *Cabecera240Type
+	FacturasEmitidas *AnulacionesFacturasEmitidasConSGType
+}
+
 // Cabecera240Type contains the operation headers
 type Cabecera240Type struct {
 	Modelo             string
@@ -95,9 +115,24 @@ type FacturasEmitidasConSGCodificadoType struct {
 	FacturaEmitida []*DetalleEmitidaConSGCodificadoType // max length 1000
 }
 
+// FiltroConsultaFacturasEmitidasType contains the details of a invoice query.
+type FiltroConsultaFacturasEmitidasType struct {
+	NumPaginaConsulta int
+}
+
+// AnulacionesFacturasEmitidasConSGType holds an array of invoices to cancel.
+type AnulacionesFacturasEmitidasConSGType struct {
+	FacturaEmitida []*AnulacionFacturaConSGType
+}
+
 // DetalleEmitidaConSGCodificadoType contains the invoice to upload
 type DetalleEmitidaConSGCodificadoType struct {
 	TicketBai string // base64 data
+}
+
+// AnulacionFacturaConSGType contains the invoice to cancel
+type AnulacionFacturaConSGType struct {
+	AnulacionTicketBai string // base64 data
 }
 
 // NIFPersonaType contains the identification details of a taxable natural or
@@ -115,19 +150,71 @@ type Supplier struct {
 	Name string // Name of the company
 }
 
-// NewCreateRequest simplifies the process of creating a new request for a regular
-// company using Invopop.
-func NewCreateRequest(sup *Supplier, payload []byte) (*CreateRequest, error) {
-	req := new(CreateRequest)
-
-	head := newCabecera240Type(sup)
-	facs := newFacturasEmitidas(payload)
-
+// NewCreateRequest assembles a new Create request
+func NewCreateRequest(sup *Supplier, payload []byte) (*Request, error) {
 	body := &LROEPJ240FacturasEmitidasConSGAltaPeticion{
-		LROENamespace:    schemaLROE240ConSG,
-		Cabecera:         head,
-		FacturasEmitidas: facs,
+		LROENamespace: schemaLROE240ConSGAlta,
+		Cabecera:      newCabecera240Type(sup, operacionEnumAlta),
+		FacturasEmitidas: &FacturasEmitidasConSGCodificadoType{
+			FacturaEmitida: []*DetalleEmitidaConSGCodificadoType{
+				{
+					TicketBai: base64.StdEncoding.EncodeToString(payload),
+				},
+			},
+		},
 	}
+
+	return newRequest(sup, body)
+}
+
+// NewFetchRequest assembles a new Fetch request
+func NewFetchRequest(sup *Supplier) (*Request, error) {
+	body := &LROEPJ240FacturasEmitidasConSGConsultaPeticion{
+		LROENamespace: schemaLROE240ConSGConsulta,
+		Cabecera:      newCabecera240Type(sup, operacionEnumConsulta),
+		FiltroConsultaFacturasEmitidasConSG: &FiltroConsultaFacturasEmitidasType{
+			NumPaginaConsulta: 1,
+		},
+	}
+
+	return newRequest(sup, body)
+}
+
+// NewCancelRequest assembles a new Cancel request
+func NewCancelRequest(sup *Supplier, payload []byte) (*Request, error) {
+	body := &LROEPJ240FacturasEmitidasConSGAnulacionPeticion{
+		LROENamespace: schemaLROE240ConSGAnulacion,
+		Cabecera:      newCabecera240Type(sup, operacionEnumAnulacion),
+		FacturasEmitidas: &AnulacionesFacturasEmitidasConSGType{
+			FacturaEmitida: []*AnulacionFacturaConSGType{
+				{
+					AnulacionTicketBai: base64.StdEncoding.EncodeToString(payload),
+				},
+			},
+		},
+	}
+
+	return newRequest(sup, body)
+}
+
+func newCabecera240Type(sup *Supplier, op string) *Cabecera240Type {
+	head := &Cabecera240Type{
+		Modelo:      modelo240,
+		Capitulo:    apartado1, // nolint:misspell
+		Subcapitulo: apartado1_1,
+		Operacion:   op,
+		Version:     "1.0",
+		Ejercicio:   fmt.Sprintf("%d", sup.Year),
+		ObligadoTributario: &NIFPersonaType{
+			NIF:                        sup.NIF,
+			ApellidosNombreRazonSocial: sup.Name,
+		},
+	}
+	return head
+}
+
+func newRequest(sup *Supplier, body any) (*Request, error) {
+	req := new(Request)
 
 	bdata, err := xml.Marshal(body)
 	if err != nil {
@@ -145,38 +232,7 @@ func NewCreateRequest(sup *Supplier, payload []byte) (*CreateRequest, error) {
 		return nil, fmt.Errorf("json header: %w", err)
 	}
 
-	// Holy fuck that was complicated.
 	return req, nil
-}
-
-// newFacturasEmitidas will encode the invoice data to base64 and instantiate a
-// new object to include in the XML message body.
-func newFacturasEmitidas(payloads ...[]byte) *FacturasEmitidasConSGCodificadoType {
-	b := &FacturasEmitidasConSGCodificadoType{
-		FacturaEmitida: make([]*DetalleEmitidaConSGCodificadoType, len(payloads)),
-	}
-	for i, d := range payloads {
-		b.FacturaEmitida[i] = &DetalleEmitidaConSGCodificadoType{
-			TicketBai: base64.StdEncoding.EncodeToString(d),
-		}
-	}
-	return b
-}
-
-func newCabecera240Type(sup *Supplier) *Cabecera240Type {
-	head := &Cabecera240Type{
-		Modelo:      modelo240,
-		Capitulo:    apartado1, // nolint:misspell
-		Subcapitulo: apartado1_1,
-		Operacion:   operacionEnumAlta,
-		Version:     "1.0",
-		Ejercicio:   fmt.Sprintf("%d", sup.Year),
-		ObligadoTributario: &NIFPersonaType{
-			NIF:                        sup.NIF,
-			ApellidosNombreRazonSocial: sup.Name,
-		},
-	}
-	return head
 }
 
 func newN3Header(sup *Supplier) *N3Header {
