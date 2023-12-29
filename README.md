@@ -87,12 +87,12 @@ func main() {
 	}
 
 	// Create the document fingerprint:
-	if err = tbai.Fingerprint(doc, prev); err != nil {
+	if err = doc.Fingerprint(prev); err != nil {
 		panic(err)
 	}
 
 	// Sign the document:
-	if err := tbai.Sign(doc); err != nil {
+	if err := doc.Sign(); err != nil {
 		panic(err)
 	}
 

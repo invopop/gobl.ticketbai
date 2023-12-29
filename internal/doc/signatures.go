@@ -13,24 +13,20 @@ const (
 	XAdESThirdParty xmldsig.XAdESSignerRole = "Thirdparty"
 )
 
-func (doc *TicketBAI) sign(docID string, cert *xmldsig.Certificate, sigopts ...xmldsig.Option) error {
-	data, err := doc.canonical()
+func newSignature(doc any, docID string, zone l10n.Code, role IssuerRole, cert *xmldsig.Certificate, opts ...xmldsig.Option) (*xmldsig.Signature, error) {
+	data, err := toBytesCanonical(doc)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	sigopts = append(sigopts,
+	opts = append(opts,
 		xmldsig.WithDocID(docID),
-		xmldsig.WithXAdES(XAdESConfig(doc.zone, doc.signerRole())),
+		xmldsig.WithXAdES(XAdESConfig(zone, signerRole(role))),
 		xmldsig.WithCertificate(cert),
-		xmldsig.WithNamespace("T", ticketBAINamespace),
+		xmldsig.WithNamespace("T", ticketBAIEmisionNamespace),
 	)
-	doc.Signature, err = xmldsig.Sign(data, sigopts...)
-	if err != nil {
-		return err
-	}
 
-	return nil
+	return xmldsig.Sign(data, opts...)
 }
 
 // SignatureValue provides quick access to the XML signatures final value,
@@ -42,17 +38,8 @@ func (doc *TicketBAI) SignatureValue() string {
 	return doc.Signature.Value.Value
 }
 
-func (doc *TicketBAI) canonical() ([]byte, error) {
-	buf, err := doc.buffer("", false)
-	if err != nil {
-		return nil, err
-	}
-
-	return buf.Bytes(), nil
-}
-
-func (doc *TicketBAI) signerRole() xmldsig.XAdESSignerRole {
-	switch doc.Sujetos.EmitidaPorTercerosODestinatario {
+func signerRole(role IssuerRole) xmldsig.XAdESSignerRole {
+	switch role {
 	case IssuerRoleSupplier:
 		return XAdESSupplier
 	case IssuerRoleCustomer:

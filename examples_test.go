@@ -138,7 +138,7 @@ func convertExample(tbai *ticketbai.Client, example string) ([]byte, error) {
 		return nil, err
 	}
 
-	err = tbai.Fingerprint(doc, &ticketbai.PreviousInvoice{
+	err = doc.Fingerprint(&ticketbai.PreviousInvoice{
 		Series:    "AF",
 		Code:      "1234567890",
 		IssueDate: "01-01-2021",
@@ -148,7 +148,7 @@ func convertExample(tbai *ticketbai.Client, example string) ([]byte, error) {
 		return nil, err
 	}
 
-	err = tbai.Sign(doc)
+	err = doc.Sign()
 	if err != nil {
 		return nil, err
 	}

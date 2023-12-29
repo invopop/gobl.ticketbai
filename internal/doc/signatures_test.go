@@ -24,7 +24,7 @@ func TestSignatureGeneration(t *testing.T) {
 		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
 		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
 
-		err := invoice.Sign("TEST", cert)
+		err := invoice.Sign("TEST", cert, role)
 		require.NoError(t, err)
 
 		assert.Equal(t,

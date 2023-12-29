@@ -33,11 +33,11 @@ type EBizkaiaConn struct {
 	client *resty.Client
 }
 
-func newEbizkaia(env string, tlsConfig *tls.Config) *EBizkaiaConn {
+func newEbizkaia(env Environment, tlsConfig *tls.Config) *EBizkaiaConn {
 	c := new(EBizkaiaConn)
 	c.client = resty.New()
 	switch env {
-	case EnvProduction:
+	case EnvironmentProduction:
 		c.client = c.client.SetBaseURL(eBizkaiaProductionBaseURL)
 		c.client.SetDebug(true)
 		tlsConfig.InsecureSkipVerify = true
@@ -60,36 +60,13 @@ func (c *EBizkaiaConn) Post(inv *bill.Invoice, payload []byte) error {
 		NIF:  inv.Supplier.TaxID.Code.String(),
 		Name: inv.Supplier.Name,
 	}
+
 	doc, err := ebizkaia.NewCreateRequest(sup, payload)
 	if err != nil {
 		return fmt.Errorf("create request: %w", err)
 	}
 
-	r := c.client.R().
-		SetHeader("Content-Encoding", "gzip").
-		SetHeader("Content-Type", "application/octet-stream").
-		SetHeader("Accept-Encoding", "gzip").
-		SetContentLength(true).
-		SetHeaderVerbatim(eBizkaiaN3ContentTypeHeader, "application/xml").
-		SetHeaderVerbatim(eBizkaiaN3DataHeader, string(doc.Header)).
-		SetHeaderVerbatim(eBizkaiaN3VersionHeader, "1.0").
-		SetBody(doc.Payload)
-
-	res, err := r.Post(eBizkaiaExecutePath)
-	if err != nil {
-		return fmt.Errorf("%w: ebizkaia: %s", ErrConnection, err.Error())
-	}
-	if res.StatusCode() != 200 {
-		return fmt.Errorf("ebizkaia: status %d", res.StatusCode())
-	}
-
-	code := res.Header().Get(eBizkaiaN3ResponseHeader)
-	if code == eBizkaiaN3ResponseInvalid {
-		msg := res.Header().Get(eBizkaiaN3MessageHeader)
-		return fmt.Errorf("ebizkaia: %v", convertToUTF8(msg))
-	}
-
-	return nil
+	return c.sendRequest(doc, eBizkaiaExecutePath)
 }
 
 // Fetch retrieves the TicketBAI from the remote end-point for the given
@@ -100,11 +77,33 @@ func (c *EBizkaiaConn) Fetch(nif string, name string, year int) error {
 		NIF:  nif,
 		Name: name,
 	}
+
 	doc, err := ebizkaia.NewFetchRequest(sup)
 	if err != nil {
 		return fmt.Errorf("fetch request: %w", err)
 	}
 
+	return c.sendRequest(doc, eBizkaiaQueryPath)
+}
+
+// Cancel sends the cancellation request for the TickeBAI invoice to the remote
+// end-point.
+func (c *EBizkaiaConn) Cancel(inv *bill.Invoice, payload []byte) error {
+	sup := &ebizkaia.Supplier{
+		Year: inv.IssueDate.Year,
+		NIF:  inv.Supplier.TaxID.Code.String(),
+		Name: inv.Supplier.Name,
+	}
+
+	doc, err := ebizkaia.NewCancelRequest(sup, payload)
+	if err != nil {
+		return fmt.Errorf("create request: %w", err)
+	}
+
+	return c.sendRequest(doc, eBizkaiaExecutePath)
+}
+
+func (c *EBizkaiaConn) sendRequest(doc *ebizkaia.Request, path string) error {
 	r := c.client.R().
 		SetHeader("Content-Encoding", "gzip").
 		SetHeader("Content-Type", "application/octet-stream").
@@ -115,7 +114,7 @@ func (c *EBizkaiaConn) Fetch(nif string, name string, year int) error {
 		SetHeaderVerbatim(eBizkaiaN3VersionHeader, "1.0").
 		SetBody(doc.Payload)
 
-	res, err := r.Post(eBizkaiaQueryPath)
+	res, err := r.Post(path)
 	if err != nil {
 		return fmt.Errorf("%w: ebizkaia: %s", ErrConnection, err.Error())
 	}
