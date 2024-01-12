@@ -23,9 +23,11 @@ const (
 	// Responses
 	eBizkaiaN3MessageHeader   = "Eus-Bizkaia-N3-Mensaje-Respuesta"
 	eBizkaiaN3ResponseHeader  = "Eus-Bizkaia-N3-Tipo-Respuesta"
+	eBizkaiaN3RespCodeHeader  = "Eus-Bizkaia-N3-Codigo-Respuesta"
 	eBizkaiaN3RegNumberHeader = "Eus-Bizkaia-N3-Numero-Registro"
 
-	eBizkaiaN3ResponseInvalid = "Incorrecto"
+	eBizkaiaN3ResponseInvalid   = "Incorrecto"
+	eBizkaiaN3RespCodeTechnical = "B4_1000004"
 )
 
 // EBizkaiaConn keeps all the connection details together for the Vizcaya region.
@@ -125,7 +127,16 @@ func (c *EBizkaiaConn) sendRequest(doc *ebizkaia.Request, path string) error {
 	code := res.Header().Get(eBizkaiaN3ResponseHeader)
 	if code == eBizkaiaN3ResponseInvalid {
 		msg := res.Header().Get(eBizkaiaN3MessageHeader)
-		return fmt.Errorf("ebizkaia: %v", convertToUTF8(msg))
+		msg = convertToUTF8(msg)
+
+		code := res.Header().Get(eBizkaiaN3RespCodeHeader)
+		if code != eBizkaiaN3RespCodeTechnical {
+			// Not a technical error, so the cause of it is in the request. We identify
+			// it as an ErrInvalidRequest to handle it properly later.
+			return fmt.Errorf("ebizcaia: %w: %v: %v", ErrInvalidRequest, code, msg)
+		}
+
+		return fmt.Errorf("ebizkaia: %v: %v", code, msg)
 	}
 
 	return nil

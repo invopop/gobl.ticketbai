@@ -3,6 +3,7 @@
 package gateways
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/invopop/gobl/bill"
@@ -20,18 +21,11 @@ const (
 	EnvironmentTesting    Environment = "testing"
 )
 
-// Error is used to provide more contextual errors
-type Error string
-
 // Standard gateway error responses
 var (
-	ErrConnection Error = "connection"
+	ErrConnection     = errors.New("connection")
+	ErrInvalidRequest = errors.New("invalid request")
 )
-
-// Error provides string form of an error
-func (e Error) Error() string {
-	return string(e)
-}
 
 // Connection defines what is expected from a connection to a gateway.
 type Connection interface {

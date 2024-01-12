@@ -22,6 +22,17 @@ var (
 	ErrInvalidZone      = errors.New("invalid zone")
 )
 
+// ClientError is a simple wrapper around client-side errors (that should not be retried) as opposed
+// to server-side errors (that should be retried).
+type ClientError struct {
+	err error
+}
+
+// Error implements the error interface for ClientError.
+func (e *ClientError) Error() string {
+	return e.err.Error()
+}
+
 // Client provides the main interface to the TicketBAI package.
 type Client struct {
 	software   *Software
@@ -173,7 +184,12 @@ func (c *Client) Post(d *Document) error {
 		return fmt.Errorf("generating payload: %w", err)
 	}
 
-	return conn.Post(d.inv, p)
+	err = conn.Post(d.inv, p)
+	if errors.Is(err, gateways.ErrInvalidRequest) {
+		return &ClientError{err}
+	}
+
+	return err
 }
 
 // Fetch will retrieve the issued documents from the TicketBAI gateway.
