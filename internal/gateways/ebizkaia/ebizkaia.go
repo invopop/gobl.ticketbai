@@ -9,6 +9,8 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+
+	"github.com/invopop/gobl.ticketbai/internal/doc"
 )
 
 // Bizkaia has extra complications when sending documents, so we define all the additional
@@ -68,36 +70,6 @@ type N3DatosRelevantes struct {
 	Ejercicio string `json:"ejer"` // invoice issue year
 }
 
-// LROEPJ240FacturasEmitidasConSGAltaPeticion is used for uploading invoices. "240" refers to
-// the type of entity which in this case is a "business", and "ConSG" means the request is
-// from a "software garante", i.e. Invopop.
-type LROEPJ240FacturasEmitidasConSGAltaPeticion struct {
-	// XMLName xml.Name `xml:"LROEPJ240FacturasEmitidasConSGAltaPeticion"`
-	XMLName       xml.Name `xml:"lrpjfecsgap:LROEPJ240FacturasEmitidasConSGAltaPeticion"`
-	LROENamespace string   `xml:"xmlns:lrpjfecsgap,attr"`
-
-	Cabecera         *Cabecera240Type
-	FacturasEmitidas *FacturasEmitidasConSGCodificadoType
-}
-
-// LROEPJ240FacturasEmitidasConSGConsultaPeticion is used for querying invoices.
-type LROEPJ240FacturasEmitidasConSGConsultaPeticion struct {
-	XMLName       xml.Name `xml:"lrpjfecsgcp:LROEPJ240FacturasEmitidasConSGConsultaPeticion"`
-	LROENamespace string   `xml:"xmlns:lrpjfecsgcp,attr"`
-
-	Cabecera                            *Cabecera240Type
-	FiltroConsultaFacturasEmitidasConSG *FiltroConsultaFacturasEmitidasType
-}
-
-// LROEPJ240FacturasEmitidasConSGAnulacionPeticion is used for cancelling invoices.
-type LROEPJ240FacturasEmitidasConSGAnulacionPeticion struct {
-	XMLName       xml.Name `xml:"lrpjfecsgap:LROEPJ240FacturasEmitidasConSGAnulacionPeticion"`
-	LROENamespace string   `xml:"xmlns:lrpjfecsgap,attr"`
-
-	Cabecera         *Cabecera240Type
-	FacturasEmitidas *AnulacionesFacturasEmitidasConSGType
-}
-
 // Cabecera240Type contains the operation headers
 type Cabecera240Type struct {
 	Modelo             string
@@ -109,15 +81,105 @@ type Cabecera240Type struct {
 	ObligadoTributario *NIFPersonaType
 }
 
+// LROEPJ240FacturasEmitidasConSGAltaPeticion is used for uploading invoices. "240" refers to
+// the type of entity which in this case is a "business", and "ConSG" means the request is
+// from a "software garante", i.e. Invopop.
+type LROEPJ240FacturasEmitidasConSGAltaPeticion struct {
+	XMLName       xml.Name `xml:"lrpjfecsgap:LROEPJ240FacturasEmitidasConSGAltaPeticion"`
+	LROENamespace string   `xml:"xmlns:lrpjfecsgap,attr"`
+
+	Cabecera         *Cabecera240Type
+	FacturasEmitidas *FacturasEmitidasConSGCodificadoType
+}
+
+// LROEPJ240FacturasEmitidasConSGAltaRespuesta represents the response from the server
+// when uploading invoices.
+type LROEPJ240FacturasEmitidasConSGAltaRespuesta struct {
+	Registros *RegistrosFacturaConSGType
+}
+
+// RegistrosFacturaConSGType contains the response for all invoices proccessed in a upload request.
+type RegistrosFacturaConSGType struct {
+	Registro []*RegistroFacturaConSGType
+}
+
+// RegistroFacturaConSGType contains the response for a single invoice proccessed in a upload
+// request.
+type RegistroFacturaConSGType struct {
+	SituacionRegistro *SituacionRegistroType
+}
+
+// SituacionRegistroType details about the outcome of uploading a single invoice.
+type SituacionRegistroType struct {
+	CodigoErrorRegistro string
+}
+
+// LROEPJ240FacturasEmitidasConSGConsultaPeticion represents a request to fetch invoices.
+type LROEPJ240FacturasEmitidasConSGConsultaPeticion struct {
+	XMLName       xml.Name `xml:"lrpjfecsgcp:LROEPJ240FacturasEmitidasConSGConsultaPeticion"`
+	LROENamespace string   `xml:"xmlns:lrpjfecsgcp,attr"`
+
+	Cabecera                            *Cabecera240Type
+	FiltroConsultaFacturasEmitidasConSG *FiltroConsultaFacturasEmitidasType
+}
+
+// FiltroConsultaFacturasEmitidasType contains the details of an invoice query.
+type FiltroConsultaFacturasEmitidasType struct {
+	CabeceraFactura   *CabeceraFacturaConsultaType
+	NumPaginaConsulta int
+}
+
+// CabeceraFacturaConsultaType contains the header of an invoice query.
+type CabeceraFacturaConsultaType struct {
+	SerieFactura           string `xml:",omitempty"`
+	NumFactura             string `xml:",omitempty"`
+	FechaExpedicionFactura *FechaDesdeHastaType
+}
+
+// FechaDesdeHastaType represants a date range
+type FechaDesdeHastaType struct {
+	Desde string `xml:",omitempty"`
+	Hasta string `xml:",omitempty"`
+}
+
+// LROEPJ240FacturasEmitidasConSGConsultaRespuesta represents the response from the server
+// when fetching invoices.
+type LROEPJ240FacturasEmitidasConSGConsultaRespuesta struct {
+	FacturasEmitidas *FacturasEmitidasConSGConsultaRespuestaType
+}
+
+// FacturasEmitidasConSGConsultaRespuestaType contains the response for all invoices fetched.
+type FacturasEmitidasConSGConsultaRespuestaType struct {
+	FacturaEmitida []*FacturaEmitidaConSGConsultaRespuestaType
+}
+
+// FacturaEmitidaConSGConsultaRespuestaType contains the response for a single invoice fetched.
+type FacturaEmitidaConSGConsultaRespuestaType struct {
+	TicketBai *TicketBaiType
+}
+
+// TicketBaiType contains the details of a fetched invoice.
+type TicketBaiType struct {
+	Cabecera   *doc.Cabecera
+	Sujetos    *doc.Sujetos
+	Factura    *doc.Factura
+	HuellaTBAI *doc.HuellaTBAI
+	Signature  string
+}
+
+// LROEPJ240FacturasEmitidasConSGAnulacionPeticion is used for cancelling invoices.
+type LROEPJ240FacturasEmitidasConSGAnulacionPeticion struct {
+	XMLName       xml.Name `xml:"lrpjfecsgap:LROEPJ240FacturasEmitidasConSGAnulacionPeticion"`
+	LROENamespace string   `xml:"xmlns:lrpjfecsgap,attr"`
+
+	Cabecera         *Cabecera240Type
+	FacturasEmitidas *AnulacionesFacturasEmitidasConSGType
+}
+
 // FacturasEmitidasConSGCodificadoType holds an array of invoices
 // to send.
 type FacturasEmitidasConSGCodificadoType struct {
 	FacturaEmitida []*DetalleEmitidaConSGCodificadoType // max length 1000
-}
-
-// FiltroConsultaFacturasEmitidasType contains the details of a invoice query.
-type FiltroConsultaFacturasEmitidasType struct {
-	NumPaginaConsulta int
 }
 
 // AnulacionesFacturasEmitidasConSGType holds an array of invoices to cancel.
@@ -168,13 +230,24 @@ func NewCreateRequest(sup *Supplier, payload []byte) (*Request, error) {
 }
 
 // NewFetchRequest assembles a new Fetch request
-func NewFetchRequest(sup *Supplier) (*Request, error) {
+func NewFetchRequest(sup *Supplier, head *doc.CabeceraFactura) (*Request, error) {
 	body := &LROEPJ240FacturasEmitidasConSGConsultaPeticion{
 		LROENamespace: schemaLROE240ConSGConsulta,
 		Cabecera:      newCabecera240Type(sup, operacionEnumConsulta),
 		FiltroConsultaFacturasEmitidasConSG: &FiltroConsultaFacturasEmitidasType{
 			NumPaginaConsulta: 1,
 		},
+	}
+
+	if head != nil {
+		body.FiltroConsultaFacturasEmitidasConSG.CabeceraFactura = &CabeceraFacturaConsultaType{
+			NumFactura:   head.NumFactura,
+			SerieFactura: head.SerieFactura,
+			FechaExpedicionFactura: &FechaDesdeHastaType{
+				Desde: head.FechaExpedicionFactura,
+				Hasta: head.FechaExpedicionFactura,
+			},
+		}
 	}
 
 	return newRequest(sup, body)
@@ -265,4 +338,13 @@ func compressBody(data []byte) ([]byte, error) {
 	}
 
 	return buf.Bytes(), nil
+}
+
+// FirstErrorCode returns the first error code in the response.
+func (r *LROEPJ240FacturasEmitidasConSGAltaRespuesta) FirstErrorCode() string {
+	if r.Registros == nil || len(r.Registros.Registro) == 0 {
+		return ""
+	}
+
+	return r.Registros.Registro[0].SituacionRegistro.CodigoErrorRegistro
 }

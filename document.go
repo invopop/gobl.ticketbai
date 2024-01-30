@@ -2,6 +2,7 @@ package ticketbai
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.ticketbai/internal/doc"
@@ -87,7 +88,7 @@ func (d *Document) Sign() error {
 	c := d.client // shortcut
 
 	dID := d.env.Head.UUID.String()
-	if err := d.tbai.Sign(dID, c.cert, c.issuerRole, xmldsig.WithCurrentTime(c.CurrentTime)); err != nil {
+	if err := d.tbai.Sign(dID, c.cert, c.issuerRole, xmldsig.WithCurrentTime(d.tbai.IssueTimestamp)); err != nil {
 		return fmt.Errorf("signing: %w", err)
 	}
 
@@ -107,6 +108,11 @@ func (d *Document) Sign() error {
 	)
 
 	return nil
+}
+
+// SetIssueTimestamp updates the issue date and time of the TicketBAI document.
+func (d *Document) SetIssueTimestamp(ts time.Time) {
+	d.tbai.SetIssueTimestamp(ts)
 }
 
 // Bytes generates the byte output of the TicketBAI Document.

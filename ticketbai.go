@@ -16,10 +16,10 @@ import (
 
 // Standard error responses.
 var (
-	ErrNotSpanish       = errors.New("only spanish invoices are supported")
-	ErrAlreadyProcessed = errors.New("already processed")
-	ErrOnlyInvoices     = errors.New("only invoices are supported")
-	ErrInvalidZone      = errors.New("invalid zone")
+	ErrNotSpanish       = newClientError("only spanish invoices are supported")
+	ErrAlreadyProcessed = newClientError("already processed")
+	ErrOnlyInvoices     = newClientError("only invoices are supported")
+	ErrInvalidZone      = newClientError("invalid zone")
 )
 
 // ClientError is a simple wrapper around client-side errors (that should not be retried) as opposed
@@ -31,6 +31,10 @@ type ClientError struct {
 // Error implements the error interface for ClientError.
 func (e *ClientError) Error() string {
 	return e.err.Error()
+}
+
+func newClientError(text string) error {
+	return &ClientError{errors.New(text)}
 }
 
 // Client provides the main interface to the TicketBAI package.
@@ -172,34 +176,65 @@ func (c *Client) NewCancelDocument(env *gobl.Envelope) (*CancelDocument, error) 
 	return newCancelDocument(c, env)
 }
 
-// Post will send the document to the TicketBAI gateway.
+// Post will send the document to the TicketBAI gateway. It manages idempotently the possible
+// scenario of the same document having been previously posted.
 func (c *Client) Post(d *Document) error {
 	conn := c.list.For(d.zone)
 	if conn == nil {
 		return fmt.Errorf("no gateway available for %s", d.zone)
 	}
 
-	p, err := d.tbai.Bytes()
-	if err != nil {
-		return fmt.Errorf("generating payload: %w", err)
-	}
-
-	err = conn.Post(d.inv, p)
+	err := conn.Post(d.inv, d.tbai)
 	if errors.Is(err, gateways.ErrInvalidRequest) {
 		return &ClientError{err}
+	}
+	if errors.Is(err, gateways.ErrDuplicatedRecord) {
+		dup, err := c.fetchDuplicate(d)
+		if err != nil {
+			return fmt.Errorf("fetching duplicate: %w", err)
+		}
+
+		if dup.SignatureValue()[:100] == d.SignatureValue()[:100] {
+			// it's the same document, we can ignore the error
+			return nil
+		}
+
+		return ErrAlreadyProcessed
 	}
 
 	return err
 }
 
 // Fetch will retrieve the issued documents from the TicketBAI gateway.
-func (c *Client) Fetch(zone l10n.Code, nif string, name string, year int) error {
+func (c *Client) Fetch(zone l10n.Code, nif string, name string, year int) ([]*doc.TicketBAI, error) {
 	conn := c.list.For(zone)
 	if conn == nil {
-		return fmt.Errorf("no gateway available for %s", zone)
+		return nil, fmt.Errorf("no gateway available for %s", zone)
 	}
 
-	return conn.Fetch(nif, name, year)
+	return conn.Fetch(nif, name, year, nil)
+}
+
+func (c *Client) fetchDuplicate(d *Document) (*doc.TicketBAI, error) {
+	conn := c.list.For(d.zone)
+	if conn == nil {
+		return nil, fmt.Errorf("no gateway available for %s", d.zone)
+	}
+
+	docs, err := conn.Fetch(
+		d.inv.Supplier.TaxID.Code.String(),
+		d.inv.Supplier.Name,
+		d.inv.IssueDate.Year,
+		d.Head(),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("fetching duplicate: %w", err)
+	}
+	if len(docs) != 1 {
+		return nil, fmt.Errorf("fetching duplicate: expected 1, got %d", len(docs))
+	}
+
+	return docs[0], nil
 }
 
 // Cancel will send the cancel document in the TicketBAI gateway.
@@ -209,12 +244,7 @@ func (c *Client) Cancel(d *CancelDocument) error {
 		return fmt.Errorf("no gateway available for %s", d.zone)
 	}
 
-	p, err := d.tbai.Bytes()
-	if err != nil {
-		return fmt.Errorf("generating payload: %w", err)
-	}
-
-	return conn.Cancel(d.inv, p)
+	return conn.Cancel(d.inv, d.tbai)
 }
 
 // CurrentTime returns the current time to use when generating

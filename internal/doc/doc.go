@@ -53,6 +53,7 @@ type TicketBAI struct {
 	Signature  *xmldsig.Signature `xml:"ds:Signature,omitempty"` // XML Signature
 
 	zone l10n.Code // copied from invoice
+	ts   time.Time
 }
 
 // Cabecera defines the document head with TBAI version ID.
@@ -83,10 +84,12 @@ func NewTicketBAI(inv *bill.Invoice, ts time.Time, role IssuerRole) (*TicketBAI,
 			EmitidaPorTercerosODestinatario: string(role),
 		},
 		Factura: &Factura{
-			CabeceraFactura: newCabeceraFactura(inv, ts),
+			CabeceraFactura: newCabeceraFactura(inv),
 			TipoDesglose:    newTipoDesglose(goblWithoutIncludedTaxes),
 		},
 	}
+
+	doc.SetIssueTimestamp(ts)
 
 	// Add customers
 	if inv.Customer != nil {
@@ -106,6 +109,24 @@ func NewTicketBAI(inv *bill.Invoice, ts time.Time, role IssuerRole) (*TicketBAI,
 	doc.zone = inv.Supplier.TaxID.Zone
 
 	return doc, nil
+}
+
+// SetIssueTimestamp sets the issue date and time for the document
+func (doc *TicketBAI) SetIssueTimestamp(ts time.Time) {
+	doc.ts = ts
+
+	// make sure TZ is correct
+	ts = ts.In(location)
+	issueDate := ts.Format("02-01-2006")
+	issueTime := ts.Format("15:04:05")
+
+	doc.Factura.CabeceraFactura.FechaExpedicionFactura = issueDate
+	doc.Factura.CabeceraFactura.HoraExpedicionFactura = issueTime
+}
+
+// IssueTimestamp returns the issue date and time for the document
+func (doc *TicketBAI) IssueTimestamp() time.Time {
+	return doc.ts
 }
 
 // Fingerprint tries to generate the "HuellaTBAI" using the

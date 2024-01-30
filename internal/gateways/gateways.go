@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/invopop/gobl.ticketbai/internal/doc"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/regimes/es"
@@ -23,17 +24,18 @@ const (
 
 // Standard gateway error responses
 var (
-	ErrConnection     = errors.New("connection")
-	ErrInvalidRequest = errors.New("invalid request")
+	ErrConnection       = errors.New("connection")
+	ErrInvalidRequest   = errors.New("invalid request")
+	ErrDuplicatedRecord = errors.New("duplicated record")
 )
 
 // Connection defines what is expected from a connection to a gateway.
 type Connection interface {
 	// Post sends the complete TicketBAI document to the remote end-point. We assume
 	// the document has been fully prepared and signed.
-	Post(inv *bill.Invoice, payload []byte) error
-	Fetch(nif string, name string, year int) error
-	Cancel(inv *bill.Invoice, payload []byte) error
+	Post(inv *bill.Invoice, doc *doc.TicketBAI) error
+	Fetch(nif string, name string, year int, head *doc.CabeceraFactura) ([]*doc.TicketBAI, error)
+	Cancel(inv *bill.Invoice, doc *doc.AnulaTicketBAI) error
 }
 
 // List keeps together the list of connections
