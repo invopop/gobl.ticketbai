@@ -2,7 +2,6 @@ package doc
 
 import (
 	"errors"
-	"time"
 
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
@@ -49,23 +48,16 @@ type IDClave struct {
 	ClaveRegimenIvaOpTrascendencia string
 }
 
-func newCabeceraFactura(inv *bill.Invoice, ts time.Time) *CabeceraFactura {
+func newCabeceraFactura(inv *bill.Invoice) *CabeceraFactura {
 	simplifiedInvoice := "N"
 	if inv.Tax.ContainsTag(tax.TagSimplified) {
 		simplifiedInvoice = "S"
 	}
 
-	// make sure TZ is correct
-	ts = ts.In(location)
-	issueDate := ts.Format("02-01-2006")
-	issueTime := ts.Format("15:04:05")
-
 	return &CabeceraFactura{
-		SerieFactura:           inv.Series,
-		NumFactura:             inv.Code,
-		FechaExpedicionFactura: issueDate,
-		HoraExpedicionFactura:  issueTime,
-		FacturaSimplificada:    simplifiedInvoice,
+		SerieFactura:        inv.Series,
+		NumFactura:          inv.Code,
+		FacturaSimplificada: simplifiedInvoice,
 	}
 }
 

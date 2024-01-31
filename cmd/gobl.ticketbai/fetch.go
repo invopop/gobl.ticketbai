@@ -90,7 +90,7 @@ func (c *fetchOpts) runE(*cobra.Command, []string) error {
 		panic(err)
 	}
 
-	err = tbai.Fetch(l10n.Code(c.zone), c.nif, c.name, c.year)
+	_, err = tbai.Fetch(l10n.Code(c.zone), c.nif, c.name, c.year)
 	if err != nil {
 		panic(err)
 	}
