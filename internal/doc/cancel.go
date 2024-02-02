@@ -47,7 +47,7 @@ func NewAnulaTicketBAI(inv *bill.Invoice, ts time.Time) (*AnulaTicketBAI, error)
 			CabeceraFactura: &CabeceraAnulacionFactura{
 				SerieFactura:           inv.Series,
 				NumFactura:             inv.Code,
-				FechaExpedicionFactura: ts.In(location).Format("02-01-2006"),
+				FechaExpedicionFactura: formatDate(ts),
 			},
 		},
 	}
