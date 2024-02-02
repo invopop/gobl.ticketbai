@@ -25,7 +25,7 @@ func (tc *TestConnection) Cancel(_ *bill.Invoice, _ *doc.AnulaTicketBAI) error {
 }
 
 // Fetch mocks the Fetch method of the Connection interface
-func (tc *TestConnection) Fetch(_ string, _ string, _ int, _ *doc.CabeceraFactura) ([]*doc.TicketBAI, error) {
+func (tc *TestConnection) Fetch(_ string, _ string, _ int, _ int, _ *doc.CabeceraFactura) ([]*doc.TicketBAI, error) {
 	tc.fetchCalled = true
 	return nil, nil
 }

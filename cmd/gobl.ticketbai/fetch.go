@@ -21,6 +21,7 @@ type fetchOpts struct {
 	swVersion  string
 	swLicense  string
 	production bool
+	page       int
 }
 
 func fetch(o *rootOpts) *fetchOpts {
@@ -46,6 +47,7 @@ func (c *fetchOpts) cmd() *cobra.Command {
 	f.StringVar(&c.swVersion, "sw-version", "", "Version of the software")
 	f.StringVar(&c.swLicense, "sw-license", "", "License of the software")
 	f.BoolVarP(&c.production, "production", "p", false, "Production environment")
+	f.IntVarP(&c.page, "page", "P", 1, "Page of the results")
 
 	cmd.MarkFlagRequired("cert")             // nolint:errcheck
 	cmd.MarkFlagRequired("password")         // nolint:errcheck
@@ -90,7 +92,7 @@ func (c *fetchOpts) runE(*cobra.Command, []string) error {
 		panic(err)
 	}
 
-	_, err = tbai.Fetch(l10n.Code(c.zone), c.nif, c.name, c.year)
+	_, err = tbai.Fetch(l10n.Code(c.zone), c.nif, c.name, c.year, c.page)
 	if err != nil {
 		panic(err)
 	}

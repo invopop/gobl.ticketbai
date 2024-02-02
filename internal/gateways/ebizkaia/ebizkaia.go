@@ -230,12 +230,12 @@ func NewCreateRequest(sup *Supplier, payload []byte) (*Request, error) {
 }
 
 // NewFetchRequest assembles a new Fetch request
-func NewFetchRequest(sup *Supplier, head *doc.CabeceraFactura) (*Request, error) {
+func NewFetchRequest(sup *Supplier, page int, head *doc.CabeceraFactura) (*Request, error) {
 	body := &LROEPJ240FacturasEmitidasConSGConsultaPeticion{
 		LROENamespace: schemaLROE240ConSGConsulta,
 		Cabecera:      newCabecera240Type(sup, operacionEnumConsulta),
 		FiltroConsultaFacturasEmitidasConSG: &FiltroConsultaFacturasEmitidasType{
-			NumPaginaConsulta: 1,
+			NumPaginaConsulta: page,
 		},
 	}
 

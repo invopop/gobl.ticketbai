@@ -89,14 +89,14 @@ func (c *EBizkaiaConn) Post(inv *bill.Invoice, doc *doc.TicketBAI) error {
 
 // Fetch retrieves the TicketBAI from the remote end-point for the given
 // taxpayer and year.
-func (c *EBizkaiaConn) Fetch(nif string, name string, year int, head *doc.CabeceraFactura) ([]*doc.TicketBAI, error) {
+func (c *EBizkaiaConn) Fetch(nif string, name string, year int, page int, head *doc.CabeceraFactura) ([]*doc.TicketBAI, error) {
 	sup := &ebizkaia.Supplier{
 		Year: year,
 		NIF:  nif,
 		Name: name,
 	}
 
-	d, err := ebizkaia.NewFetchRequest(sup, head)
+	d, err := ebizkaia.NewFetchRequest(sup, page, head)
 	if err != nil {
 		return nil, fmt.Errorf("fetch request: %w", err)
 	}

@@ -206,13 +206,13 @@ func (c *Client) Post(d *Document) error {
 }
 
 // Fetch will retrieve the issued documents from the TicketBAI gateway.
-func (c *Client) Fetch(zone l10n.Code, nif string, name string, year int) ([]*doc.TicketBAI, error) {
+func (c *Client) Fetch(zone l10n.Code, nif string, name string, year int, page int) ([]*doc.TicketBAI, error) {
 	conn := c.list.For(zone)
 	if conn == nil {
 		return nil, fmt.Errorf("no gateway available for %s", zone)
 	}
 
-	return conn.Fetch(nif, name, year, nil)
+	return conn.Fetch(nif, name, year, page, nil)
 }
 
 func (c *Client) fetchDuplicate(d *Document) (*doc.TicketBAI, error) {
@@ -225,6 +225,7 @@ func (c *Client) fetchDuplicate(d *Document) (*doc.TicketBAI, error) {
 		d.inv.Supplier.TaxID.Code.String(),
 		d.inv.Supplier.Name,
 		d.inv.IssueDate.Year,
+		1,
 		d.Head(),
 	)
 	if err != nil {
