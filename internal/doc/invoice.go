@@ -19,12 +19,13 @@ type Factura struct {
 
 // CabeceraFactura contains info about the invoice header
 type CabeceraFactura struct {
-	SerieFactura           string `xml:",omitempty"`
-	NumFactura             string
-	FechaExpedicionFactura string
-	HoraExpedicionFactura  string
-	FacturaSimplificada    string
-	// FIXME: FacturasRectificativa
+	SerieFactura                    string `xml:",omitempty"`
+	NumFactura                      string
+	FechaExpedicionFactura          string
+	HoraExpedicionFactura           string
+	FacturaSimplificada             string
+	FacturaRectificativa            *FacturaRectificativa            `xml:",omitempty"`
+	FacturasRectificadasSustituidas *FacturasRectificadasSustituidas `xml:",omitempty"`
 }
 
 // DatosFactura contains info about the invoice description
@@ -48,6 +49,26 @@ type IDClave struct {
 	ClaveRegimenIvaOpTrascendencia string
 }
 
+// FacturaRectificativa contains the info a corrective invoice
+type FacturaRectificativa struct {
+	Codigo string
+	Tipo   string
+}
+
+// FacturasRectificadasSustituidas contains the info of all the invoices corrected or substituted in
+// a corrective invoice
+type FacturasRectificadasSustituidas struct {
+	IDFacturaRectificadaSustituida []*IDFacturaRectificadaSustituida
+}
+
+// IDFacturaRectificadaSustituida contains the info of a single invoice corrected or substituted in
+// a corrective invoice
+type IDFacturaRectificadaSustituida struct {
+	SerieFactura           string
+	NumFactura             string
+	FechaExpedicionFactura string
+}
+
 func newCabeceraFactura(inv *bill.Invoice) *CabeceraFactura {
 	simplifiedInvoice := "N"
 	if inv.Tax.ContainsTag(tax.TagSimplified) {
@@ -55,9 +76,11 @@ func newCabeceraFactura(inv *bill.Invoice) *CabeceraFactura {
 	}
 
 	return &CabeceraFactura{
-		SerieFactura:        inv.Series,
-		NumFactura:          inv.Code,
-		FacturaSimplificada: simplifiedInvoice,
+		SerieFactura:                    inv.Series,
+		NumFactura:                      inv.Code,
+		FacturaSimplificada:             simplifiedInvoice,
+		FacturaRectificativa:            newFacturaRectificativa(inv),
+		FacturasRectificadasSustituidas: newFacturasRectificadasSustituidas(inv),
 	}
 }
 
@@ -75,7 +98,7 @@ func newDatosFactura(inv *bill.Invoice) (*DatosFactura, error) {
 	if opDate == nil {
 		opDate = &inv.IssueDate
 	}
-	opDateStr := opDate.In(location).Format("02-01-2006")
+	opDateStr := formatDate(opDate)
 
 	return &DatosFactura{
 		FechaOperacion:      opDateStr,
@@ -153,6 +176,37 @@ func newClaves(inv *bill.Invoice) []IDClave {
 	}
 
 	return claves
+}
+
+func newFacturaRectificativa(inv *bill.Invoice) *FacturaRectificativa {
+	if len(inv.Preceding) == 0 {
+		return nil
+	}
+
+	p := inv.Preceding[0]
+
+	return &FacturaRectificativa{
+		Codigo: p.Ext[es.ExtKeyTBAICorrection].String(),
+		Tipo:   CorrectiveTypeDifferences, // Only differences are supported for now
+	}
+}
+
+func newFacturasRectificadasSustituidas(inv *bill.Invoice) *FacturasRectificadasSustituidas {
+	if inv.Preceding == nil {
+		return nil
+	}
+
+	p := inv.Preceding[0]
+
+	return &FacturasRectificadasSustituidas{
+		IDFacturaRectificadaSustituida: []*IDFacturaRectificadaSustituida{
+			{
+				SerieFactura:           p.Series,
+				NumFactura:             p.Code,
+				FechaExpedicionFactura: formatDate(p.IssueDate),
+			},
+		},
+	}
 }
 
 func hasSurchargedLines(inv *bill.Invoice) bool {

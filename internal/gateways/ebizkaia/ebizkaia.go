@@ -111,7 +111,8 @@ type RegistroFacturaConSGType struct {
 
 // SituacionRegistroType details about the outcome of uploading a single invoice.
 type SituacionRegistroType struct {
-	CodigoErrorRegistro string
+	CodigoErrorRegistro        string
+	DescripcionErrorRegistroES string
 }
 
 // LROEPJ240FacturasEmitidasConSGConsultaPeticion represents a request to fetch invoices.
@@ -347,4 +348,13 @@ func (r *LROEPJ240FacturasEmitidasConSGAltaRespuesta) FirstErrorCode() string {
 	}
 
 	return r.Registros.Registro[0].SituacionRegistro.CodigoErrorRegistro
+}
+
+// FirstErrorDescription returns the first error description in the response.
+func (r *LROEPJ240FacturasEmitidasConSGAltaRespuesta) FirstErrorDescription() string {
+	if r.Registros == nil || len(r.Registros.Registro) == 0 {
+		return ""
+	}
+
+	return r.Registros.Registro[0].SituacionRegistro.DescripcionErrorRegistroES
 }

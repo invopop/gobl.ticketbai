@@ -41,6 +41,12 @@ const (
 	IssuerRoleThirdParty IssuerRole = "T"
 )
 
+// CorrectiveType constants
+const (
+	CorrectiveTypeSubstitution = "S"
+	CorrectiveTypeDifferences  = "I"
+)
+
 // TicketBAI contains the data needed to create a TicketBAI invoice
 type TicketBAI struct {
 	XMLName    xml.Name `xml:"T:TicketBai"`
@@ -67,6 +73,18 @@ func NewTicketBAI(inv *bill.Invoice, ts time.Time, role IssuerRole) (*TicketBAI,
 	err := validateInvoice(inv)
 	if err != nil {
 		return nil, err
+	}
+
+	if inv.Type == bill.InvoiceTypeCreditNote {
+		// GOBL credit note's amounts represent the amounts to be credited to the customer,
+		// and they are provided as positive numbers. In TicketBAI, however, credit notes
+		// become "facturas rectificativas por diferencias" and, when a correction is for a
+		// credit operation, the amounts must be negative to cancel out the ones in the
+		// original invoice. For that reason, we invert the credit note quantities here.
+		inv.Invert()
+		if err := inv.Calculate(); err != nil {
+			return nil, err
+		}
 	}
 
 	goblWithoutIncludedTaxes, err := inv.RemoveIncludedTaxes()
@@ -115,13 +133,8 @@ func NewTicketBAI(inv *bill.Invoice, ts time.Time, role IssuerRole) (*TicketBAI,
 func (doc *TicketBAI) SetIssueTimestamp(ts time.Time) {
 	doc.ts = ts
 
-	// make sure TZ is correct
-	ts = ts.In(location)
-	issueDate := ts.Format("02-01-2006")
-	issueTime := ts.Format("15:04:05")
-
-	doc.Factura.CabeceraFactura.FechaExpedicionFactura = issueDate
-	doc.Factura.CabeceraFactura.HoraExpedicionFactura = issueTime
+	doc.Factura.CabeceraFactura.FechaExpedicionFactura = formatDate(ts)
+	doc.Factura.CabeceraFactura.HoraExpedicionFactura = formatTime(ts)
 }
 
 // IssueTimestamp returns the issue date and time for the document
@@ -207,4 +220,16 @@ func buffer(doc any, base string, indent bool) (*bytes.Buffer, error) {
 	}
 
 	return buf, nil
+}
+
+type timeLocationable interface {
+	In(*time.Location) time.Time
+}
+
+func formatDate(ts timeLocationable) string {
+	return ts.In(location).Format("02-01-2006")
+}
+
+func formatTime(ts timeLocationable) string {
+	return ts.In(location).Format("15:04:05")
 }

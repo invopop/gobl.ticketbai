@@ -15,6 +15,10 @@ var validSupplierLocalities = []l10n.Code{
 }
 
 func validateInvoice(inv *bill.Invoice) error {
+	if inv.Type == bill.InvoiceTypeCorrective {
+		return errors.New("corrective invoices not supported, use credit or debit notes")
+	}
+
 	if inv.Supplier == nil || inv.Supplier.TaxID == nil {
 		return nil // ignore
 	}

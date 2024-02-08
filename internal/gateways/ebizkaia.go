@@ -80,8 +80,14 @@ func (c *EBizkaiaConn) Post(inv *bill.Invoice, doc *doc.TicketBAI) error {
 	resp := ebizkaia.LROEPJ240FacturasEmitidasConSGAltaRespuesta{}
 
 	err = c.sendRequest(req, eBizkaiaExecutePath, &resp)
-	if errors.Is(err, ErrInvalidRequest) && resp.FirstErrorCode() == eBizkaiaN3RespCodeDuplicated {
-		return ErrDuplicatedRecord
+	if errors.Is(err, ErrInvalidRequest) {
+		if resp.FirstErrorCode() == eBizkaiaN3RespCodeDuplicated {
+			return ErrDuplicatedRecord
+		}
+
+		if resp.FirstErrorDescription() != "" {
+			return fmt.Errorf("ebizcaia: %w: %v", ErrInvalidRequest, resp.FirstErrorDescription())
+		}
 	}
 
 	return err
