@@ -131,6 +131,8 @@ At the moment, it's not possible to add a fingertip or sign TicketBAI files usin
 
 - Currently GOBL does not allow to distinguish between different VAT regimes. Ticketbai format requires a list of the different regimes applied to the invoice so currently only equivalence surcharge and general regime are available (for a complete list of the other possibilities you can check the documentation on https://www.batuz.eus/es/documentacion-tecnica)
 
+- GOBL's corrective invoices aren't supported at the moment. Only credit and debit notes are, and they are converted into "Facturas Rectificativas por Diferencias" with either positive or inverted quantities depending on whether it is a debit or a credit note.
+
 ## Tags, Keys and Extensions
 
 In order to provide the supplier specific data required by TicketBAI, invoices need to include a bit of extra data. We've managed to simplify these into specific cases.
