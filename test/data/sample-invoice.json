@@ -1,143 +1,143 @@
 {
-  "$schema": "https://gobl.org/draft-0/envelope",
-  "head": {
-    "uuid": "ef544466-8df3-11ee-844a-e6a7901137ed",
-    "dig": {
-      "alg": "sha256",
-      "val": "eb3d08ae1590ef0651564583f3a2f73a199d707a9265bbfe33456c002a6c4d86"
-    },
-    "draft": true
-  },
-  "doc": {
-    "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "type": "standard",
-    "series": "TEST",
-    "code": "001",
-    "issue_date": "2022-02-01",
-    "currency": "EUR",
-    "supplier": {
-      "name": "HFPn5yhXZ9tdD4pHRbvwymaVPrGZQr",
-      "tax_id": {
-        "country": "ES",
-        "zone": "BI",
-        "code": "A99805194"
-      },
-      "addresses": [
-        {
-          "num": "42",
-          "street": "Calle Pradillo",
-          "locality": "Madrid",
-          "region": "Madrid",
-          "code": "28002",
-          "country": "ES"
-        }
-      ],
-      "emails": [
-        {
-          "addr": "billing@example.com"
-        }
-      ]
-    },
-    "customer": {
-      "name": "Sample Customer",
-      "tax_id": {
-        "country": "ES",
-        "code": "54387763P"
-      },
-      "addresses": [
-        {
-          "num": "13",
-          "street": "Calle del Barro",
-          "locality": "Alcañiz",
-          "region": "Teruel",
-          "code": "44600",
-          "country": "ES"
-        }
-      ],
-      "emails": [
-        {
-          "addr": "customer@example.com"
-        }
-      ]
-    },
-    "lines": [
-      {
-        "i": 1,
-        "quantity": "10",
-        "item": {
-          "name": "Item being purchased",
-          "price": "100.00"
-        },
-        "sum": "1000.00",
-        "discounts": [
-          {
-            "percent": "10%",
-            "amount": "100.00"
-          }
-        ],
-        "taxes": [
-          {
-            "cat": "VAT",
-            "rate": "standard+eqs",
-            "percent": "21.0%",
-            "surcharge": "5.2%"
-          },
-          {
-            "cat": "IRPF",
-            "rate": "pro",
-            "percent": "15.0%"
-          }
-        ],
-        "total": "900.00"
-      }
-    ],
-    "totals": {
-      "sum": "900.00",
-      "total": "900.00",
-      "taxes": {
-        "categories": [
-          {
-            "code": "VAT",
-            "rates": [
-              {
-                "key": "standard+eqs",
-                "base": "900.00",
-                "percent": "21.0%",
-                "surcharge": {
-                  "percent": "5.2%",
-                  "amount": "46.80"
-                },
-                "amount": "189.00"
-              }
-            ],
-            "amount": "189.00",
-            "surcharge": "46.80"
-          },
-          {
-            "code": "IRPF",
-            "retained": true,
-            "rates": [
-              {
-                "key": "pro",
-                "base": "900.00",
-                "percent": "15.0%",
-                "amount": "135.00"
-              }
-            ],
-            "amount": "135.00"
-          }
-        ],
-        "sum": "100.80"
-      },
-      "tax": "100.80",
-      "total_with_tax": "1000.80",
-      "payable": "1000.80"
-    },
-    "notes": [
-      {
-        "key": "general",
-        "text": "Some random description"
-      }
-    ]
-  }
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "ef544466-8df3-11ee-844a-e6a7901137ed",
+		"dig": {
+			"alg": "sha256",
+			"val": "eb3d08ae1590ef0651564583f3a2f73a199d707a9265bbfe33456c002a6c4d86"
+		},
+		"draft": true
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"type": "standard",
+		"series": "TEST",
+		"code": "001",
+		"issue_date": "2022-02-01",
+		"currency": "EUR",
+		"supplier": {
+			"name": "HFPn5yhXZ9tdD4pHRbvwymaVPrGZQr",
+			"tax_id": {
+				"country": "ES",
+				"zone": "BI",
+				"code": "A99805194"
+			},
+			"addresses": [
+				{
+					"num": "42",
+					"street": "Calle Pradillo",
+					"locality": "Madrid",
+					"region": "Madrid",
+					"code": "28002",
+					"country": "ES"
+				}
+			],
+			"emails": [
+				{
+					"addr": "billing@example.com"
+				}
+			]
+		},
+		"customer": {
+			"name": "Sample Customer",
+			"tax_id": {
+				"country": "ES",
+				"code": "54387763P"
+			},
+			"addresses": [
+				{
+					"num": "13",
+					"street": "Calle del Barro",
+					"locality": "Alcañiz",
+					"region": "Teruel",
+					"code": "44600",
+					"country": "ES"
+				}
+			],
+			"emails": [
+				{
+					"addr": "customer@example.com"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "10",
+				"item": {
+					"name": "Item being purchased",
+					"price": "100.00"
+				},
+				"sum": "1000.00",
+				"discounts": [
+					{
+						"percent": "10%",
+						"amount": "100.00"
+					}
+				],
+				"taxes": [
+					{
+						"cat": "VAT",
+						"rate": "standard+eqs",
+						"percent": "21.0%",
+						"surcharge": "5.2%"
+					},
+					{
+						"cat": "IRPF",
+						"rate": "pro",
+						"percent": "15.0%"
+					}
+				],
+				"total": "900.00"
+			}
+		],
+		"totals": {
+			"sum": "900.00",
+			"total": "900.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard+eqs",
+								"base": "900.00",
+								"percent": "21.0%",
+								"surcharge": {
+									"percent": "5.2%",
+									"amount": "46.80"
+								},
+								"amount": "189.00"
+							}
+						],
+						"amount": "189.00",
+						"surcharge": "46.80"
+					},
+					{
+						"code": "IRPF",
+						"retained": true,
+						"rates": [
+							{
+								"key": "pro",
+								"base": "900.00",
+								"percent": "15.0%",
+								"amount": "135.00"
+							}
+						],
+						"amount": "135.00"
+					}
+				],
+				"sum": "100.80"
+			},
+			"tax": "100.80",
+			"total_with_tax": "1000.80",
+			"payable": "1000.80"
+		},
+		"notes": [
+			{
+				"key": "general",
+				"text": "Some random description"
+			}
+		]
+	}
 }
