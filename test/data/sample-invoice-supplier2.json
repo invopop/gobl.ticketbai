@@ -4,7 +4,7 @@
 		"uuid": "f19d4d33-8d35-11ee-be40-e6a7901137ed",
 		"dig": {
 			"alg": "sha256",
-			"val": "1fd1e34ad280d12663452ba3aec00aee8fc6e4bdbda3458209e7d16d4a14fdd0"
+			"val": "c890e8f7f2a1d52c424cf8a7ab4de505669ab22b6433effedcb1fcb25d45f099"
 		},
 		"draft": true
 	},
@@ -19,7 +19,6 @@
 			"name": "Provider Two S.L.",
 			"tax_id": {
 				"country": "ES",
-				"zone": "BI",
 				"code": "B64847106"
 			},
 			"addresses": [

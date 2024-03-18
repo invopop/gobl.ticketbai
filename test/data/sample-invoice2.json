@@ -4,7 +4,7 @@
 		"uuid": "ecd1d445-8d35-11ee-860f-e6a7901137ed",
 		"dig": {
 			"alg": "sha256",
-			"val": "ca103d599d4ece1775ee4e9e2523fcc76dba2e36a6c3dce35bc257e546c36d39"
+			"val": "cb069fd6e597749c1f514a4b1bb67abffd80eda3917e4c6aaeaa72e29dfd0b31"
 		},
 		"draft": true
 	},
@@ -18,7 +18,6 @@
 			"name": "Provider One S.L.",
 			"tax_id": {
 				"country": "ES",
-				"zone": "BI",
 				"code": "B98602642"
 			},
 			"addresses": [

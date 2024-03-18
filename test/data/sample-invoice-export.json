@@ -4,7 +4,7 @@
 		"uuid": "90e8a582-92ae-11ee-8a77-e6a7901137ed",
 		"dig": {
 			"alg": "sha256",
-			"val": "40e741970fefffb416ecd8983308ff10cf49e84a730aa1a31d43ced71815fc78"
+			"val": "565a48648fed438bcfbb0035e9adf31c5d291d1b428bdb26279e0d6c2720f2bb"
 		},
 		"draft": true
 	},
@@ -19,7 +19,6 @@
 			"name": "HFPn5yhXZ9tdD4pHRbvwymaVPrGZQr",
 			"tax_id": {
 				"country": "ES",
-				"zone": "BI",
 				"code": "A99805194"
 			},
 			"addresses": [
@@ -42,7 +41,6 @@
 			"name": "ESCUELA KEMPER URGATE",
 			"tax_id": {
 				"country": "MX",
-				"zone": "42501",
 				"code": "EKU9003173C9"
 			},
 			"addresses": [

@@ -5,16 +5,15 @@ import (
 
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
-	"github.com/invopop/gobl/regimes/es"
 )
 
 var validSupplierLocalities = []l10n.Code{
-	es.ZoneBI, // Vizcaya
-	es.ZoneSS, // Guizpuzcoa
-	es.ZoneVI, // Álava
+	ZoneBI, // Vizcaya
+	ZoneSS, // Guizpuzcoa
+	ZoneVI, // Álava
 }
 
-func validateInvoice(inv *bill.Invoice) error {
+func validate(inv *bill.Invoice, zone l10n.Code) error {
 	if inv.Type == bill.InvoiceTypeCorrective {
 		return errors.New("corrective invoices not supported, use credit or debit notes")
 	}
@@ -23,16 +22,15 @@ func validateInvoice(inv *bill.Invoice) error {
 		return nil // ignore
 	}
 
-	tID := inv.Supplier.TaxID
-	if tID.Zone == l10n.CodeEmpty {
-		return errors.New("supplier tax identity locality is required")
+	if zone == l10n.CodeEmpty {
+		return errors.New("zone is required")
 	}
 
-	if !tID.Zone.In(validSupplierLocalities...) {
-		return errors.New("supplier tax identity locality not supported by TicketBAI")
+	if !zone.In(validSupplierLocalities...) {
+		return errors.New("zone not supported by TicketBAI")
 	}
 
-	if tID.Zone.In(es.ZoneSS, es.ZoneVI) {
+	if zone.In(ZoneSS, ZoneVI) {
 		if len(inv.Lines) > 1000 {
 			return errors.New("line count over limit (1000) for tax locality")
 		}

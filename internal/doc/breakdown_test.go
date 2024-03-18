@@ -25,7 +25,7 @@ func TestDesgloseConversion(t *testing.T) {
 	t.Run("should fill DesgloseFactura when customer is from Spain", func(t *testing.T) {
 		goblInvoice := invoiceFromCountry(l10n.ES)
 
-		invoice, err := doc.NewTicketBAI(goblInvoice, ts, role)
+		invoice, err := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 		require.NoError(t, err)
 
 		factura := invoice.Factura
@@ -37,7 +37,7 @@ func TestDesgloseConversion(t *testing.T) {
 			goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
 			goblInvoice.Customer = nil
 
-			invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+			invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
 			desglose := invoice.Factura.TipoDesglose
 			assert.NotNil(t, desglose.DesgloseFactura)
@@ -47,7 +47,7 @@ func TestDesgloseConversion(t *testing.T) {
 		func(t *testing.T) {
 			goblInvoice := invoiceFromCountry("GB")
 
-			invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+			invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
 			desglose := invoice.Factura.TipoDesglose
 			assert.NotNil(t, desglose.DesgloseTipoOperacion)
@@ -56,10 +56,10 @@ func TestDesgloseConversion(t *testing.T) {
 	t.Run("should distinguish goods from services when customer from other country",
 		func(t *testing.T) {
 			goblInvoice := invoiceFromCountry("GB")
-			goblInvoice.Lines[0].Taxes.Get(tax.CategoryVAT).Ext = tax.ExtMap{es.ExtKeyTBAIProduct: "goods"}
+			goblInvoice.Lines[0].Taxes.Get(tax.CategoryVAT).Ext = tax.Extensions{es.ExtKeyTBAIProduct: "goods"}
 			_ = goblInvoice.Calculate()
 
-			invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+			invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
 			details := invoice.Factura.TipoDesglose.DesgloseTipoOperacion
 			assert.NotNil(t, details.Entrega)
@@ -71,7 +71,7 @@ func TestDesgloseConversion(t *testing.T) {
 			goblInvoice := invoiceFromCountry("GB")
 			goblInvoice.Lines[0].Item.Key = cbc.KeyEmpty
 
-			invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+			invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
 			details := invoice.Factura.TipoDesglose.DesgloseTipoOperacion
 			assert.NotNil(t, details.PrestacionServicios)
@@ -104,7 +104,7 @@ func TestDesgloseConversion(t *testing.T) {
 					&tax.Combo{
 						Category: "VAT",
 						Rate:     "standard",
-						Ext: tax.ExtMap{
+						Ext: tax.Extensions{
 							es.ExtKeyTBAIProduct: "goods",
 						},
 					},
@@ -121,7 +121,7 @@ func TestDesgloseConversion(t *testing.T) {
 					&tax.Combo{
 						Category: "VAT",
 						Rate:     "reduced",
-						Ext: tax.ExtMap{
+						Ext: tax.Extensions{
 							es.ExtKeyTBAIProduct: "goods",
 						},
 					},
@@ -130,7 +130,7 @@ func TestDesgloseConversion(t *testing.T) {
 		}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
 		details := invoice.Factura.TipoDesglose.DesgloseTipoOperacion
 		assert.Equal(t, 1, len(details.Entrega.NoSujeta.DetalleNoSujeta))
@@ -160,14 +160,14 @@ func TestDesgloseConversion(t *testing.T) {
 						&tax.Combo{
 							Category: "VAT",
 							Rate:     "standard",
-							Ext:      tax.ExtMap{es.ExtKeyTBAIProduct: "goods"},
+							Ext:      tax.Extensions{es.ExtKeyTBAIProduct: "goods"},
 						},
 					},
 				},
 			}
 			_ = goblInvoice.Calculate()
 
-			invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+			invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
 			details := invoice.Factura.TipoDesglose.DesgloseTipoOperacion
 			goodsDetails := details.Entrega.Sujeta.NoExenta.DetalleNoExenta[0]
@@ -188,13 +188,13 @@ func TestDesgloseConversion(t *testing.T) {
 				&tax.Combo{
 					Category: "VAT",
 					Rate:     "exempt",
-					Ext:      tax.ExtMap{es.ExtKeyTBAIExemption: "OT"},
+					Ext:      tax.Extensions{es.ExtKeyTBAIExemption: "OT"},
 				},
 			},
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
 		assert.Equal(t, "900.00", desglose.NoSujeta.DetalleNoSujeta[0].Importe.String())
@@ -211,13 +211,13 @@ func TestDesgloseConversion(t *testing.T) {
 				&tax.Combo{
 					Category: "VAT",
 					Rate:     "exempt",
-					Ext:      tax.ExtMap{es.ExtKeyTBAIExemption: "RL"},
+					Ext:      tax.Extensions{es.ExtKeyTBAIExemption: "RL"},
 				},
 			},
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
 		assert.Equal(t, "RL", desglose.NoSujeta.DetalleNoSujeta[0].Causa)
@@ -234,13 +234,13 @@ func TestDesgloseConversion(t *testing.T) {
 				&tax.Combo{
 					Category: "VAT",
 					Rate:     "exempt",
-					Ext:      tax.ExtMap{es.ExtKeyTBAIExemption: "RL"},
+					Ext:      tax.Extensions{es.ExtKeyTBAIExemption: "RL"},
 				},
 			},
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseTipoOperacion
 		assert.Equal(t, "900.00", desglose.PrestacionServicios.NoSujeta.DetalleNoSujeta[0].Importe.String())
@@ -259,7 +259,7 @@ func TestDesgloseConversion(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
 		desgloseIVA := desglose.Sujeta.NoExenta.DetalleNoExenta[0].DesgloseIVA
@@ -283,7 +283,7 @@ func TestDesgloseConversion(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseTipoOperacion
 		desgloseIVA := desglose.PrestacionServicios.Sujeta.NoExenta.DetalleNoExenta[0].DesgloseIVA
@@ -304,7 +304,7 @@ func TestDesgloseConversion(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
 		desgloseIVA := desglose.Sujeta.NoExenta.DetalleNoExenta[0].DesgloseIVA
@@ -332,14 +332,14 @@ func TestDesgloseConversion(t *testing.T) {
 					&tax.Combo{
 						Category: "VAT",
 						Rate:     "standard",
-						Ext:      tax.ExtMap{es.ExtKeyTBAIProduct: "resale"},
+						Ext:      tax.Extensions{es.ExtKeyTBAIProduct: "resale"},
 					},
 				},
 			},
 		}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
 		desgloseIVA := desglose.Sujeta.NoExenta.DetalleNoExenta[0].DesgloseIVA
@@ -359,13 +359,13 @@ func TestDesgloseConversion(t *testing.T) {
 				&tax.Combo{
 					Category: tax.CategoryVAT,
 					Rate:     tax.RateExempt,
-					Ext:      tax.ExtMap{es.ExtKeyTBAIExemption: "E1"},
+					Ext:      tax.Extensions{es.ExtKeyTBAIExemption: "E1"},
 				},
 			},
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
 		assert.Equal(t, "1000.00", desglose.Sujeta.Exenta.DetalleExenta[0].BaseImponible)
@@ -385,7 +385,7 @@ func TestDesgloseConversion(t *testing.T) {
 					&tax.Combo{
 						Category: tax.CategoryVAT,
 						Rate:     tax.RateExempt,
-						Ext: tax.ExtMap{
+						Ext: tax.Extensions{
 							es.ExtKeyTBAIExemption: "E1",
 						},
 					},
@@ -402,7 +402,7 @@ func TestDesgloseConversion(t *testing.T) {
 					&tax.Combo{
 						Category: tax.CategoryVAT,
 						Rate:     tax.RateExempt,
-						Ext: tax.ExtMap{
+						Ext: tax.Extensions{
 							es.ExtKeyTBAIExemption: "E2",
 						},
 					},
@@ -411,7 +411,7 @@ func TestDesgloseConversion(t *testing.T) {
 		}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
 		e1 := findExemption(desglose.Sujeta.Exenta.DetalleExenta, "E1")
@@ -433,7 +433,7 @@ func TestDesgloseConversion(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
 		desgloseIVA := desglose.Sujeta.NoExenta.DetalleNoExenta[0].DesgloseIVA
@@ -451,7 +451,7 @@ func TestDesgloseConversion(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
 		assert.Equal(t, "S2", desglose.Sujeta.NoExenta.DetalleNoExenta[0].TipoNoExenta)

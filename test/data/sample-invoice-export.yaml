@@ -7,7 +7,6 @@ code: "001"
 supplier:
   tax_id:
     country: "ES"
-    zone: "BI"
     code: "A99805194" # provided by Batuz
   name: "HFPn5yhXZ9tdD4pHRbvwymaVPrGZQr" # Provided by Batuz
   emails:
@@ -24,7 +23,6 @@ customer:
   tax_id:
     country: "MX"
     code: "EKU9003173C9"
-    zone: "42501"
   name: "ESCUELA KEMPER URGATE"
   emails:
     - addr: "customer@example.com"

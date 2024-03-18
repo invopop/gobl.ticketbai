@@ -4,7 +4,7 @@
 		"uuid": "328f20c8-a0ac-11ee-bb1d-e6a7901137ed",
 		"dig": {
 			"alg": "sha256",
-			"val": "a87bf8dbc6316cbbad363a13383ff35dd6ae651352ad7d1758484e0c2fed701f"
+			"val": "f3ddfa851e44b35c5d2b7262b752560ec8cb2d408fe994ca531473031b5a9f62"
 		},
 		"draft": true
 	},
@@ -19,7 +19,6 @@
 			"name": "Provide One S.L.",
 			"tax_id": {
 				"country": "ES",
-				"zone": "BI",
 				"code": "B98602642"
 			},
 			"addresses": [

@@ -2,7 +2,6 @@ package doc
 
 import (
 	"github.com/invopop/gobl/l10n"
-	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/xmldsig"
 )
 
@@ -53,7 +52,7 @@ func signerRole(role IssuerRole) xmldsig.XAdESSignerRole {
 
 // XAdESConfig returns the policies configuration for signing a TicketBAI doc
 func XAdESConfig(zone l10n.Code, role xmldsig.XAdESSignerRole) *xmldsig.XAdESConfig {
-	if zone == es.ZoneBI {
+	if zone == ZoneBI {
 		return &xmldsig.XAdESConfig{
 			Role:        role,
 			Description: "",

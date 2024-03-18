@@ -23,7 +23,9 @@ type CancelDocument struct {
 	client *Client
 }
 
-func newCancelDocument(c *Client, env *gobl.Envelope) (*CancelDocument, error) {
+// NewCancelDocument creates a new AnulaTicketBAI document from the provided
+// GOBL Envelope.
+func (c *Client) NewCancelDocument(env *gobl.Envelope) (*CancelDocument, error) {
 	d := new(CancelDocument)
 
 	// Set the client for later use

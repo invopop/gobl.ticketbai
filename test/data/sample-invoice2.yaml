@@ -6,7 +6,6 @@ code: "SAMPLE-002"
 supplier:
   tax_id:
     country: "ES"
-    zone: "BI"
     code: "B98602642" # random
   name: "Provider One S.L."
   emails:

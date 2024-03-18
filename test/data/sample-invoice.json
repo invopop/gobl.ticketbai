@@ -4,7 +4,7 @@
 		"uuid": "ef544466-8df3-11ee-844a-e6a7901137ed",
 		"dig": {
 			"alg": "sha256",
-			"val": "eb3d08ae1590ef0651564583f3a2f73a199d707a9265bbfe33456c002a6c4d86"
+			"val": "18ad6e7b903b509f69b2a33cc42b8fd743cd2fdeb47de4ae1dd5395e84883cd4"
 		},
 		"draft": true
 	},
@@ -19,7 +19,6 @@
 			"name": "HFPn5yhXZ9tdD4pHRbvwymaVPrGZQr",
 			"tax_id": {
 				"country": "ES",
-				"zone": "BI",
 				"code": "A99805194"
 			},
 			"addresses": [

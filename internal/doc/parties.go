@@ -75,7 +75,7 @@ func newDestinatario(party *org.Party) IDDestinatario {
 }
 
 func taxDocumentType(party *org.Party) cbc.Code {
-	r := tax.RegimeFor(l10n.ES, party.TaxID.Zone)
+	r := tax.RegimeFor(l10n.ES)
 
 	t := party.TaxID.Type
 	if t == "" {

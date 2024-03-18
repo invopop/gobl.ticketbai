@@ -17,13 +17,14 @@ import (
 type Document struct {
 	env  *gobl.Envelope
 	inv  *bill.Invoice
-	zone l10n.Code
 	tbai *doc.TicketBAI // output
 
 	client *Client
 }
 
-func newDocument(c *Client, env *gobl.Envelope) (*Document, error) {
+// NewDocument creates a new TicketBAI document from the provided GOBL Envelope.
+// The envelope must contain a valid Invoice.
+func (c *Client) NewDocument(env *gobl.Envelope) (*Document, error) {
 	d := new(Document)
 
 	// Set the client for later use
@@ -44,13 +45,9 @@ func newDocument(c *Client, env *gobl.Envelope) (*Document, error) {
 	if d.inv.Supplier.TaxID.Country != l10n.ES {
 		return nil, ErrNotSpanish
 	}
-	d.zone = d.inv.Supplier.TaxID.Zone
-	if d.zone == "" {
-		return nil, ErrInvalidZone
-	}
 
 	var err error
-	d.tbai, err = doc.NewTicketBAI(d.inv, c.CurrentTime(), c.issuerRole)
+	d.tbai, err = doc.NewTicketBAI(d.inv, c.CurrentTime(), c.issuerRole, c.zone)
 	if err != nil {
 		return nil, err
 	}

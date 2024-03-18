@@ -22,7 +22,7 @@ func TestSignatureGeneration(t *testing.T) {
 		role := doc.IssuerRoleCustomer
 
 		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
 		err := invoice.Sign("TEST", cert, role)
 		require.NoError(t, err)
