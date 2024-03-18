@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.ticketbai/internal/doc"
 	"github.com/invopop/gobl.ticketbai/internal/gateways"
 	"github.com/invopop/gobl/l10n"
@@ -45,6 +44,7 @@ type Client struct {
 	env        gateways.Environment
 	issuerRole doc.IssuerRole
 	curTime    time.Time
+	zone       l10n.Code
 }
 
 // Option is used to configure the client.
@@ -100,6 +100,13 @@ func WithCustomerIssuer() Option {
 func WithThirdPartyIssuer() Option {
 	return func(c *Client) {
 		c.issuerRole = doc.IssuerRoleThirdParty
+	}
+}
+
+// WithZone defines the zone to use when generating the TicketBAI document.
+func WithZone(zone l10n.Code) Option {
+	return func(c *Client) {
+		c.zone = zone
 	}
 }
 
@@ -164,24 +171,12 @@ func New(software *Software, opts ...Option) (*Client, error) {
 	return c, nil
 }
 
-// NewDocument creates a new TicketBAI document from the provided GOBL Envelope.
-// The envelope must contain a valid Invoice.
-func (c *Client) NewDocument(env *gobl.Envelope) (*Document, error) {
-	return newDocument(c, env)
-}
-
-// NewCancelDocument creates a new AnulaTicketBAI document from the provided
-// GOBL Envelope.
-func (c *Client) NewCancelDocument(env *gobl.Envelope) (*CancelDocument, error) {
-	return newCancelDocument(c, env)
-}
-
 // Post will send the document to the TicketBAI gateway. It manages idempotently the possible
 // scenario of the same document having been previously posted.
 func (c *Client) Post(d *Document) error {
-	conn := c.list.For(d.zone)
+	conn := c.list.For(c.zone)
 	if conn == nil {
-		return fmt.Errorf("no gateway available for %s", d.zone)
+		return fmt.Errorf("no gateway available for %s", c.zone)
 	}
 
 	err := conn.Post(d.inv, d.tbai)
@@ -216,9 +211,9 @@ func (c *Client) Fetch(zone l10n.Code, nif string, name string, year int, page i
 }
 
 func (c *Client) fetchDuplicate(d *Document) (*doc.TicketBAI, error) {
-	conn := c.list.For(d.zone)
+	conn := c.list.For(c.zone)
 	if conn == nil {
-		return nil, fmt.Errorf("no gateway available for %s", d.zone)
+		return nil, fmt.Errorf("no gateway available for %s", c.zone)
 	}
 
 	docs, err := conn.Fetch(

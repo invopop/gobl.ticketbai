@@ -16,7 +16,6 @@ preceding:
 supplier:
   tax_id:
     country: "ES"
-    zone: "BI"
     code: "B98602642"
   name: "Provide One S.L."
   emails:

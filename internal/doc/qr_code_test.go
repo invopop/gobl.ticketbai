@@ -7,6 +7,7 @@ import (
 
 	"github.com/invopop/gobl.ticketbai/internal/doc"
 	"github.com/invopop/gobl.ticketbai/test"
+	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/xmldsig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,7 +34,7 @@ func TestQRCodes(t *testing.T) {
 	beforeEach := func(t *testing.T) *TestCase {
 		t.Helper()
 		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
-		invoice, err := doc.NewTicketBAI(goblInvoice, ts, role)
+		invoice, err := doc.NewTicketBAI(goblInvoice, ts, role, es.ZoneBI)
 		require.NoError(t, err)
 
 		err = invoice.Fingerprint(conf)

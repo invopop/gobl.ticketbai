@@ -30,7 +30,7 @@ func TestLines(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, es.ZoneBI)
 
 		lines := invoice.Factura.DatosFactura.DetallesFactura.IDDetalleFactura
 		assert.Equal(t, 1, len(lines))
@@ -51,7 +51,7 @@ func TestLines(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, es.ZoneBI)
 
 		line := invoice.Factura.DatosFactura.DetallesFactura.IDDetalleFactura[0]
 		assert.Equal(t, "100.00", line.Descuento)
@@ -70,7 +70,7 @@ func TestLines(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, es.ZoneBI)
 
 		line := invoice.Factura.DatosFactura.DetallesFactura.IDDetalleFactura[0]
 		assert.Equal(t, "100.00", line.ImporteUnitario)
@@ -79,7 +79,6 @@ func TestLines(t *testing.T) {
 
 	t.Run("should return error if more than 1000 lines included and not Vizcaya", func(t *testing.T) {
 		inv, _ := test.LoadInvoice("sample-invoice.json")
-		inv.Supplier.TaxID.Zone = es.ZoneSS
 		inv.Lines = []*bill.Line{}
 		for i := 1; i <= 1001; i++ {
 			inv.Lines = append(inv.Lines, &bill.Line{
@@ -91,7 +90,7 @@ func TestLines(t *testing.T) {
 		}
 		require.NoError(t, inv.Calculate())
 
-		_, err := doc.NewTicketBAI(inv, ts, role)
+		_, err := doc.NewTicketBAI(inv, ts, role, es.ZoneSS)
 
 		assert.ErrorContains(t, err, "line count over limit (1000) for tax locality")
 	})

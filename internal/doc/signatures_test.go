@@ -6,6 +6,7 @@ import (
 
 	"github.com/invopop/gobl.ticketbai/internal/doc"
 	"github.com/invopop/gobl.ticketbai/test"
+	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/xmldsig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -22,7 +23,7 @@ func TestSignatureGeneration(t *testing.T) {
 		role := doc.IssuerRoleCustomer
 
 		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role)
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, es.ZoneBI)
 
 		err := invoice.Sign("TEST", cert, role)
 		require.NoError(t, err)

@@ -69,8 +69,8 @@ type Cabecera struct {
 
 // NewTicketBAI takes the GOBL Invoice and converts into a TicketBAI document
 // ready to send to a regional API.
-func NewTicketBAI(inv *bill.Invoice, ts time.Time, role IssuerRole) (*TicketBAI, error) {
-	err := validateInvoice(inv)
+func NewTicketBAI(inv *bill.Invoice, ts time.Time, role IssuerRole, zone l10n.Code) (*TicketBAI, error) {
+	err := validate(inv, zone)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func NewTicketBAI(inv *bill.Invoice, ts time.Time, role IssuerRole) (*TicketBAI,
 		return nil, err
 	}
 
-	doc.zone = inv.Supplier.TaxID.Zone
+	doc.zone = zone
 
 	return doc, nil
 }

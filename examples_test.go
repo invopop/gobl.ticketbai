@@ -11,6 +11,7 @@ import (
 
 	ticketbai "github.com/invopop/gobl.ticketbai"
 	"github.com/invopop/gobl.ticketbai/test"
+	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/xmldsig"
 	"github.com/lestrrat-go/libxml2"
 	"github.com/lestrrat-go/libxml2/xsd"
@@ -111,6 +112,7 @@ func loadTBAIClient() (*ticketbai.Client, error) {
 		ticketbai.WithCertificate(cert),
 		ticketbai.WithCurrentTime(ts),
 		ticketbai.WithThirdPartyIssuer(),
+		ticketbai.WithZone(es.ZoneBI),
 	)
 }
 

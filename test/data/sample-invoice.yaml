@@ -7,7 +7,6 @@ code: "001"
 supplier:
   tax_id:
     country: "ES"
-    zone: "BI"
     code: "A99805194" # provided by Batuz
   name: "HFPn5yhXZ9tdD4pHRbvwymaVPrGZQr" # Provided by Batuz
   emails:
