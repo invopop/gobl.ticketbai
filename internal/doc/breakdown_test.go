@@ -56,7 +56,7 @@ func TestDesgloseConversion(t *testing.T) {
 	t.Run("should distinguish goods from services when customer from other country",
 		func(t *testing.T) {
 			goblInvoice := invoiceFromCountry("GB")
-			goblInvoice.Lines[0].Taxes.Get(tax.CategoryVAT).Ext = tax.ExtMap{es.ExtKeyTBAIProduct: "goods"}
+			goblInvoice.Lines[0].Taxes.Get(tax.CategoryVAT).Ext = tax.Extensions{es.ExtKeyTBAIProduct: "goods"}
 			_ = goblInvoice.Calculate()
 
 			invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
@@ -104,7 +104,7 @@ func TestDesgloseConversion(t *testing.T) {
 					&tax.Combo{
 						Category: "VAT",
 						Rate:     "standard",
-						Ext: tax.ExtMap{
+						Ext: tax.Extensions{
 							es.ExtKeyTBAIProduct: "goods",
 						},
 					},
@@ -121,7 +121,7 @@ func TestDesgloseConversion(t *testing.T) {
 					&tax.Combo{
 						Category: "VAT",
 						Rate:     "reduced",
-						Ext: tax.ExtMap{
+						Ext: tax.Extensions{
 							es.ExtKeyTBAIProduct: "goods",
 						},
 					},
@@ -160,7 +160,7 @@ func TestDesgloseConversion(t *testing.T) {
 						&tax.Combo{
 							Category: "VAT",
 							Rate:     "standard",
-							Ext:      tax.ExtMap{es.ExtKeyTBAIProduct: "goods"},
+							Ext:      tax.Extensions{es.ExtKeyTBAIProduct: "goods"},
 						},
 					},
 				},
@@ -188,7 +188,7 @@ func TestDesgloseConversion(t *testing.T) {
 				&tax.Combo{
 					Category: "VAT",
 					Rate:     "exempt",
-					Ext:      tax.ExtMap{es.ExtKeyTBAIExemption: "OT"},
+					Ext:      tax.Extensions{es.ExtKeyTBAIExemption: "OT"},
 				},
 			},
 		}}
@@ -211,7 +211,7 @@ func TestDesgloseConversion(t *testing.T) {
 				&tax.Combo{
 					Category: "VAT",
 					Rate:     "exempt",
-					Ext:      tax.ExtMap{es.ExtKeyTBAIExemption: "RL"},
+					Ext:      tax.Extensions{es.ExtKeyTBAIExemption: "RL"},
 				},
 			},
 		}}
@@ -234,7 +234,7 @@ func TestDesgloseConversion(t *testing.T) {
 				&tax.Combo{
 					Category: "VAT",
 					Rate:     "exempt",
-					Ext:      tax.ExtMap{es.ExtKeyTBAIExemption: "RL"},
+					Ext:      tax.Extensions{es.ExtKeyTBAIExemption: "RL"},
 				},
 			},
 		}}
@@ -332,7 +332,7 @@ func TestDesgloseConversion(t *testing.T) {
 					&tax.Combo{
 						Category: "VAT",
 						Rate:     "standard",
-						Ext:      tax.ExtMap{es.ExtKeyTBAIProduct: "resale"},
+						Ext:      tax.Extensions{es.ExtKeyTBAIProduct: "resale"},
 					},
 				},
 			},
@@ -359,7 +359,7 @@ func TestDesgloseConversion(t *testing.T) {
 				&tax.Combo{
 					Category: tax.CategoryVAT,
 					Rate:     tax.RateExempt,
-					Ext:      tax.ExtMap{es.ExtKeyTBAIExemption: "E1"},
+					Ext:      tax.Extensions{es.ExtKeyTBAIExemption: "E1"},
 				},
 			},
 		}}
@@ -385,7 +385,7 @@ func TestDesgloseConversion(t *testing.T) {
 					&tax.Combo{
 						Category: tax.CategoryVAT,
 						Rate:     tax.RateExempt,
-						Ext: tax.ExtMap{
+						Ext: tax.Extensions{
 							es.ExtKeyTBAIExemption: "E1",
 						},
 					},
@@ -402,7 +402,7 @@ func TestDesgloseConversion(t *testing.T) {
 					&tax.Combo{
 						Category: tax.CategoryVAT,
 						Rate:     tax.RateExempt,
-						Ext: tax.ExtMap{
+						Ext: tax.Extensions{
 							es.ExtKeyTBAIExemption: "E2",
 						},
 					},
