@@ -9,7 +9,6 @@ import (
 	"github.com/invopop/gobl.ticketbai/internal/doc"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
-	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/xmldsig"
 )
 
@@ -52,7 +51,7 @@ func New(env Environment, cert *xmldsig.Certificate) (*List, error) {
 		return nil, fmt.Errorf("preparing TLS config: %w", err)
 	}
 
-	l.Register(es.ZoneBI, newEbizkaia(env, tlsConf))
+	l.Register(doc.ZoneBI, newEbizkaia(env, tlsConf))
 
 	return l, nil
 }

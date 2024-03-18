@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/invopop/gobl/l10n"
-	"github.com/invopop/gobl/regimes/es"
 	"github.com/sigurn/crc8"
 )
 
@@ -49,7 +48,7 @@ func (doc *TicketBAI) generateTbaiCode() string {
 
 func (doc *TicketBAI) generateQRCode(zone l10n.Code, tbaiCode string) string {
 	var pat string
-	if zone == es.ZoneBI {
+	if zone == ZoneBI {
 		pat = "https://batuz.eus/QRTBAI/?id=%s&s=%s&nf=%s&i=%s"
 	}
 	if pat == "" {

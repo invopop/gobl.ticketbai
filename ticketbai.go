@@ -13,6 +13,13 @@ import (
 	"github.com/invopop/xmldsig"
 )
 
+// Expose zone codes for external use.
+const (
+	ZoneBI l10n.Code = doc.ZoneBI
+	ZoneSS l10n.Code = doc.ZoneSS
+	ZoneVI l10n.Code = doc.ZoneVI
+)
+
 // Standard error responses.
 var (
 	ErrNotSpanish       = newClientError("only spanish invoices are supported")

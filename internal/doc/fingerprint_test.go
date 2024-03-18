@@ -7,7 +7,6 @@ import (
 
 	"github.com/invopop/gobl.ticketbai/internal/doc"
 	"github.com/invopop/gobl.ticketbai/test"
-	"github.com/invopop/gobl/regimes/es"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -30,7 +29,7 @@ func TestFingerprintGeneration(t *testing.T) {
 		ts, err := time.Parse(time.RFC3339, "2022-02-01T04:00:00Z")
 		require.NoError(t, err)
 		role := doc.IssuerRoleThirdParty
-		invoice, err := doc.NewTicketBAI(goblInvoice, ts, role, es.ZoneBI)
+		invoice, err := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 		require.NoError(t, err)
 		invoice.Sujetos.Emisor.NIF = test.NIF
 

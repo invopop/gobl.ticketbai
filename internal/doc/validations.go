@@ -5,13 +5,12 @@ import (
 
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
-	"github.com/invopop/gobl/regimes/es"
 )
 
 var validSupplierLocalities = []l10n.Code{
-	es.ZoneBI, // Vizcaya
-	es.ZoneSS, // Guizpuzcoa
-	es.ZoneVI, // Álava
+	ZoneBI, // Vizcaya
+	ZoneSS, // Guizpuzcoa
+	ZoneVI, // Álava
 }
 
 func validate(inv *bill.Invoice, zone l10n.Code) error {
@@ -31,7 +30,7 @@ func validate(inv *bill.Invoice, zone l10n.Code) error {
 		return errors.New("zone not supported by TicketBAI")
 	}
 
-	if zone.In(es.ZoneSS, es.ZoneVI) {
+	if zone.In(ZoneSS, ZoneVI) {
 		if len(inv.Lines) > 1000 {
 			return errors.New("line count over limit (1000) for tax locality")
 		}
