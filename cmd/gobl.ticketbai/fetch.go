@@ -63,7 +63,7 @@ func (c *fetchOpts) cmd() *cobra.Command {
 	return cmd
 }
 
-func (c *fetchOpts) runE(*cobra.Command, []string) error {
+func (c *fetchOpts) runE(cmd *cobra.Command, _ []string) error {
 	soft := &ticketbai.Software{
 		NIF:     c.swNIF,
 		Name:    c.swName,
@@ -92,7 +92,7 @@ func (c *fetchOpts) runE(*cobra.Command, []string) error {
 		panic(err)
 	}
 
-	_, err = tbai.Fetch(l10n.Code(c.zone), c.nif, c.name, c.year, c.page)
+	_, err = tbai.Fetch(cmd.Context(), l10n.Code(c.zone), c.nif, c.name, c.year, c.page)
 	if err != nil {
 		panic(err)
 	}
