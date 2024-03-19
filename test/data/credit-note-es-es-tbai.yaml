@@ -59,6 +59,9 @@ lines:
     item:
       name: "Financial service"
       price: "10.00"
+    discounts:
+      - amount: "5.00"
+        reason: "5-euro coupon"
     taxes:
       - cat: VAT
         rate: zero

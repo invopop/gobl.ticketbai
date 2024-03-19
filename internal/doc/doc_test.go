@@ -6,7 +6,9 @@ import (
 
 	"github.com/invopop/gobl.ticketbai/internal/doc"
 	"github.com/invopop/gobl.ticketbai/test"
+	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
+	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
@@ -100,5 +102,21 @@ func TestInvoiceConversion(t *testing.T) {
 		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
 		assert.Nil(t, invoice.Sujetos.Destinatarios)
+	})
+
+	t.Run("fail when charges are present since they aren't supported", func(t *testing.T) {
+		inv, _ := test.LoadInvoice("sample-invoice.json")
+		inv.Lines[0].Charges = []*bill.LineCharge{{Amount: num.MakeAmount(100, 2)}}
+
+		_, err := doc.NewTicketBAI(inv, ts, role, doc.ZoneBI)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "charges are not supported")
+
+		inv.Lines[0].Charges = nil
+		inv.Charges = []*bill.Charge{{Amount: num.MakeAmount(100, 2)}}
+
+		_, err = doc.NewTicketBAI(inv, ts, role, doc.ZoneBI)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "charges are not supported")
 	})
 }
