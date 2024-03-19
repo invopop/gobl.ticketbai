@@ -1,10 +1,12 @@
 module github.com/invopop/gobl.ticketbai
 
-go 1.18
+go 1.21
+
+toolchain go1.22.1
 
 require (
 	github.com/go-resty/resty/v2 v2.10.0
-	github.com/invopop/gobl v0.69.1-0.20240318213521-98a7c92b648d
+	github.com/invopop/gobl v0.69.1
 	github.com/invopop/xmldsig v0.9.0
 	github.com/lestrrat-go/libxml2 v0.0.0-20231124114421-99c71026c2f5
 	github.com/magefile/mage v1.15.0
