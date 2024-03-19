@@ -3,6 +3,7 @@
 package ticketbai
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
@@ -180,18 +181,18 @@ func New(software *Software, opts ...Option) (*Client, error) {
 
 // Post will send the document to the TicketBAI gateway. It manages idempotently the possible
 // scenario of the same document having been previously posted.
-func (c *Client) Post(d *Document) error {
+func (c *Client) Post(ctx context.Context, d *Document) error {
 	conn := c.list.For(c.zone)
 	if conn == nil {
 		return fmt.Errorf("no gateway available for %s", c.zone)
 	}
 
-	err := conn.Post(d.inv, d.tbai)
+	err := conn.Post(ctx, d.inv, d.tbai)
 	if errors.Is(err, gateways.ErrInvalidRequest) {
 		return &ClientError{err}
 	}
 	if errors.Is(err, gateways.ErrDuplicatedRecord) {
-		dup, err := c.fetchDuplicate(d)
+		dup, err := c.fetchDuplicate(ctx, d)
 		if err != nil {
 			return fmt.Errorf("fetching duplicate: %w", err)
 		}
@@ -208,22 +209,23 @@ func (c *Client) Post(d *Document) error {
 }
 
 // Fetch will retrieve the issued documents from the TicketBAI gateway.
-func (c *Client) Fetch(zone l10n.Code, nif string, name string, year int, page int) ([]*doc.TicketBAI, error) {
+func (c *Client) Fetch(ctx context.Context, zone l10n.Code, nif string, name string, year int, page int) ([]*doc.TicketBAI, error) {
 	conn := c.list.For(zone)
 	if conn == nil {
 		return nil, fmt.Errorf("no gateway available for %s", zone)
 	}
 
-	return conn.Fetch(nif, name, year, page, nil)
+	return conn.Fetch(ctx, nif, name, year, page, nil)
 }
 
-func (c *Client) fetchDuplicate(d *Document) (*doc.TicketBAI, error) {
+func (c *Client) fetchDuplicate(ctx context.Context, d *Document) (*doc.TicketBAI, error) {
 	conn := c.list.For(c.zone)
 	if conn == nil {
 		return nil, fmt.Errorf("no gateway available for %s", c.zone)
 	}
 
 	docs, err := conn.Fetch(
+		ctx,
 		d.inv.Supplier.TaxID.Code.String(),
 		d.inv.Supplier.Name,
 		d.inv.IssueDate.Year,
@@ -241,13 +243,13 @@ func (c *Client) fetchDuplicate(d *Document) (*doc.TicketBAI, error) {
 }
 
 // Cancel will send the cancel document in the TicketBAI gateway.
-func (c *Client) Cancel(d *CancelDocument) error {
+func (c *Client) Cancel(ctx context.Context, d *CancelDocument) error {
 	conn := c.list.For(d.zone)
 	if conn == nil {
 		return fmt.Errorf("no gateway available for %s", d.zone)
 	}
 
-	return conn.Cancel(d.inv, d.tbai)
+	return conn.Cancel(ctx, d.inv, d.tbai)
 }
 
 // CurrentTime returns the current time to use when generating

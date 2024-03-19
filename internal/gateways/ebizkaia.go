@@ -1,6 +1,7 @@
 package gateways
 
 import (
+	"context"
 	"crypto/tls"
 	"errors"
 	"fmt"
@@ -60,7 +61,7 @@ func newEbizkaia(env Environment, tlsConfig *tls.Config) *EBizkaiaConn {
 
 // Post sends the complete TicketBAI document to the remote end-point. We assume
 // the document has been signed and prepared.
-func (c *EBizkaiaConn) Post(inv *bill.Invoice, doc *doc.TicketBAI) error {
+func (c *EBizkaiaConn) Post(ctx context.Context, inv *bill.Invoice, doc *doc.TicketBAI) error {
 	payload, err := doc.Bytes()
 	if err != nil {
 		return fmt.Errorf("generating payload: %w", err)
@@ -79,7 +80,7 @@ func (c *EBizkaiaConn) Post(inv *bill.Invoice, doc *doc.TicketBAI) error {
 
 	resp := ebizkaia.LROEPJ240FacturasEmitidasConSGAltaRespuesta{}
 
-	err = c.sendRequest(req, eBizkaiaExecutePath, &resp)
+	err = c.sendRequest(ctx, req, eBizkaiaExecutePath, &resp)
 	if errors.Is(err, ErrInvalidRequest) {
 		if resp.FirstErrorCode() == eBizkaiaN3RespCodeDuplicated {
 			return ErrDuplicatedRecord
@@ -95,7 +96,7 @@ func (c *EBizkaiaConn) Post(inv *bill.Invoice, doc *doc.TicketBAI) error {
 
 // Fetch retrieves the TicketBAI from the remote end-point for the given
 // taxpayer and year.
-func (c *EBizkaiaConn) Fetch(nif string, name string, year int, page int, head *doc.CabeceraFactura) ([]*doc.TicketBAI, error) {
+func (c *EBizkaiaConn) Fetch(ctx context.Context, nif string, name string, year int, page int, head *doc.CabeceraFactura) ([]*doc.TicketBAI, error) {
 	sup := &ebizkaia.Supplier{
 		Year: year,
 		NIF:  nif,
@@ -108,7 +109,7 @@ func (c *EBizkaiaConn) Fetch(nif string, name string, year int, page int, head *
 	}
 
 	resp := ebizkaia.LROEPJ240FacturasEmitidasConSGConsultaRespuesta{}
-	if err := c.sendRequest(d, eBizkaiaQueryPath, &resp); err != nil {
+	if err := c.sendRequest(ctx, d, eBizkaiaQueryPath, &resp); err != nil {
 		return nil, fmt.Errorf("sending fetch request: %w", err)
 	}
 
@@ -122,7 +123,7 @@ func (c *EBizkaiaConn) Fetch(nif string, name string, year int, page int, head *
 
 // Cancel sends the cancellation request for the TickeBAI invoice to the remote
 // end-point.
-func (c *EBizkaiaConn) Cancel(inv *bill.Invoice, doc *doc.AnulaTicketBAI) error {
+func (c *EBizkaiaConn) Cancel(ctx context.Context, inv *bill.Invoice, doc *doc.AnulaTicketBAI) error {
 	payload, err := doc.Bytes()
 	if err != nil {
 		return fmt.Errorf("generating payload: %w", err)
@@ -139,11 +140,12 @@ func (c *EBizkaiaConn) Cancel(inv *bill.Invoice, doc *doc.AnulaTicketBAI) error 
 		return fmt.Errorf("create request: %w", err)
 	}
 
-	return c.sendRequest(req, eBizkaiaExecutePath, nil)
+	return c.sendRequest(ctx, req, eBizkaiaExecutePath, nil)
 }
 
-func (c *EBizkaiaConn) sendRequest(doc *ebizkaia.Request, path string, resp interface{}) error {
+func (c *EBizkaiaConn) sendRequest(ctx context.Context, doc *ebizkaia.Request, path string, resp interface{}) error {
 	r := c.client.R().
+		SetContext(ctx).
 		SetHeader("Content-Encoding", "gzip").
 		SetHeader("Content-Type", "application/octet-stream").
 		SetHeader("Accept-Encoding", "gzip").
