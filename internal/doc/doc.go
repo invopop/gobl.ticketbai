@@ -88,8 +88,7 @@ func NewTicketBAI(inv *bill.Invoice, ts time.Time, role IssuerRole, zone l10n.Co
 		// become "facturas rectificativas por diferencias" and, when a correction is for a
 		// credit operation, the amounts must be negative to cancel out the ones in the
 		// original invoice. For that reason, we invert the credit note quantities here.
-		inv.Invert()
-		if err := inv.Calculate(); err != nil {
+		if err := inv.Invert(); err != nil {
 			return nil, err
 		}
 	}

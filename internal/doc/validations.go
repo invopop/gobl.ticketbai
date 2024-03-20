@@ -39,5 +39,15 @@ func validate(inv *bill.Invoice, zone l10n.Code) error {
 		}
 	}
 
+	for _, l := range inv.Lines {
+		if len(l.Charges) > 0 {
+			return errors.New("charges are not supported")
+		}
+	}
+
+	if len(inv.Charges) > 0 {
+		return errors.New("charges are not supported")
+	}
+
 	return nil
 }

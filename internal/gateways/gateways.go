@@ -3,6 +3,7 @@
 package gateways
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -32,9 +33,9 @@ var (
 type Connection interface {
 	// Post sends the complete TicketBAI document to the remote end-point. We assume
 	// the document has been fully prepared and signed.
-	Post(inv *bill.Invoice, doc *doc.TicketBAI) error
-	Fetch(nif string, name string, year int, page int, head *doc.CabeceraFactura) ([]*doc.TicketBAI, error)
-	Cancel(inv *bill.Invoice, doc *doc.AnulaTicketBAI) error
+	Post(ctx context.Context, inv *bill.Invoice, doc *doc.TicketBAI) error
+	Fetch(ctx context.Context, nif string, name string, year int, page int, head *doc.CabeceraFactura) ([]*doc.TicketBAI, error)
+	Cancel(ctx context.Context, inv *bill.Invoice, doc *doc.AnulaTicketBAI) error
 }
 
 // List keeps together the list of connections

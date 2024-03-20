@@ -1,10 +1,10 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "8a51fd30-2a27-11ee-be56-0242ac120002",
+		"uuid": "78f1695c-e5ce-11ee-9527-e6a7901137ed",
 		"dig": {
 			"alg": "sha256",
-			"val": "2349886e98f484bd81d81d4d07b16d686259e5e4e56ad218d81796b4ac8ae1ec"
+			"val": "0c28b4a60a0330ad4c2f419c9c3b8a3d43eb8cd51f24eef926710bea9cdb1134"
 		},
 		"draft": true
 	},
@@ -104,6 +104,12 @@
 					"price": "10.00"
 				},
 				"sum": "10.00",
+				"discounts": [
+					{
+						"amount": "5.00",
+						"reason": "5-euro coupon"
+					}
+				],
 				"taxes": [
 					{
 						"cat": "VAT",
@@ -111,12 +117,12 @@
 						"percent": "0.0%"
 					}
 				],
-				"total": "10.00"
+				"total": "5.00"
 			}
 		],
 		"totals": {
-			"sum": "1630.00",
-			"total": "1630.00",
+			"sum": "1625.00",
+			"total": "1625.00",
 			"taxes": {
 				"categories": [
 					{
@@ -130,7 +136,7 @@
 							},
 							{
 								"key": "zero",
-								"base": "10.00",
+								"base": "5.00",
 								"percent": "0.0%",
 								"amount": "0.00"
 							}
@@ -141,8 +147,8 @@
 				"sum": "340.20"
 			},
 			"tax": "340.20",
-			"total_with_tax": "1970.20",
-			"payable": "1970.20"
+			"total_with_tax": "1965.20",
+			"payable": "1965.20"
 		},
 		"notes": [
 			{
