@@ -244,9 +244,9 @@ func (c *Client) fetchDuplicate(ctx context.Context, d *Document) (*doc.TicketBA
 
 // Cancel will send the cancel document in the TicketBAI gateway.
 func (c *Client) Cancel(ctx context.Context, d *CancelDocument) error {
-	conn := c.list.For(d.zone)
+	conn := c.list.For(c.zone)
 	if conn == nil {
-		return fmt.Errorf("no gateway available for %s", d.zone)
+		return fmt.Errorf("no gateway available for %s", c.zone)
 	}
 
 	return conn.Cancel(ctx, d.inv, d.tbai)

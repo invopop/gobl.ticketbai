@@ -17,7 +17,6 @@ import (
 type CancelDocument struct {
 	env  *gobl.Envelope
 	inv  *bill.Invoice
-	zone l10n.Code
 	tbai *doc.AnulaTicketBAI // output
 
 	client *Client
@@ -41,12 +40,6 @@ func (c *Client) NewCancelDocument(env *gobl.Envelope) (*CancelDocument, error) 
 
 	if d.inv.Supplier.TaxID.Country != l10n.ES {
 		return nil, ErrNotSpanish
-	}
-
-	// Set the zone for later use
-	d.zone = d.inv.Supplier.TaxID.Zone
-	if d.zone == "" {
-		return nil, ErrInvalidZone
 	}
 
 	// Extract the time when the invoice was posted to TicketBAI gateway
