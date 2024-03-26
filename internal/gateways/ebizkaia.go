@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/invopop/gobl.ticketbai/internal/doc"
@@ -29,11 +30,19 @@ const (
 	eBizkaiaN3ResponseHeader  = "Eus-Bizkaia-N3-Tipo-Respuesta"
 	eBizkaiaN3RespCodeHeader  = "Eus-Bizkaia-N3-Codigo-Respuesta"
 	eBizkaiaN3RegNumberHeader = "Eus-Bizkaia-N3-Numero-Registro"
+	eBizkaiaN3ResponseInvalid = "Incorrecto"
 
-	eBizkaiaN3ResponseInvalid    = "Incorrecto"
-	eBizkaiaN3RespCodeTechnical  = "B4_1000004"
-	eBizkaiaN3RespCodeDuplicated = "B4_2000003"
+	// Response codes of interest
+	eBizkaiaN3RespCodeTechnical  = "B4_1000004" // “Error técnico”
+	eBizkaiaN3RespCodeDuplicated = "B4_2000003" // “El registro no puede existir en el sistema”
+	eBizkaiaN3RespCodeOther      = "N3_0000011" // “Otros, consulte el mensaje recibido (...)”
 )
+
+// Server-side error codes
+var serverErrors = []string{
+	eBizkaiaN3RespCodeTechnical,
+	eBizkaiaN3RespCodeOther,
+}
 
 // EBizkaiaConn keeps all the connection details together for the Vizcaya region.
 type EBizkaiaConn struct {
@@ -170,9 +179,9 @@ func (c *EBizkaiaConn) sendRequest(ctx context.Context, doc *ebizkaia.Request, p
 		msg = convertToUTF8(msg)
 
 		code := res.Header().Get(eBizkaiaN3RespCodeHeader)
-		if code != eBizkaiaN3RespCodeTechnical {
-			// Not a technical error, so the cause of it is in the request. We identify
-			// it as an ErrInvalidRequest to handle it properly later.
+		if !slices.Contains(serverErrors, code) {
+			// Not a server-side error, so the cause of it is in the request. We identify
+			// it as an ErrInvalidRequest to handle it downstream.
 			return fmt.Errorf("ebizcaia: %w: %v: %v", ErrInvalidRequest, code, msg)
 		}
 
