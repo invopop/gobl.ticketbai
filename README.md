@@ -121,7 +121,7 @@ Usage is very straightforward:
 gobl.ticketbai convert ./test/data/invoice.json
 ```
 
-At the moment, it's not possible to add a fingertip or sign TicketBAI files using the CLI.
+At the moment, it's not possible to add a fingerprint or sign TicketBAI files using the CLI.
 
 ## Limitations
 
