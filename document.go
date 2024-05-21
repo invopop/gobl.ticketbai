@@ -51,9 +51,9 @@ func (c *Client) NewDocument(env *gobl.Envelope) (*Document, error) {
 	if err != nil {
 		if _, ok := err.(*doc.ValidationError); ok {
 			return nil, &ClientError{err}
-		} else {
-			return nil, err
 		}
+
+		return nil, err
 	}
 
 	return d, nil
