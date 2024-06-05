@@ -49,6 +49,10 @@ func (c *Client) NewDocument(env *gobl.Envelope) (*Document, error) {
 	var err error
 	d.tbai, err = doc.NewTicketBAI(d.inv, c.CurrentTime(), c.issuerRole, c.zone)
 	if err != nil {
+		if _, ok := err.(*doc.ValidationError); ok {
+			return nil, &ClientError{err}
+		}
+
 		return nil, err
 	}
 
