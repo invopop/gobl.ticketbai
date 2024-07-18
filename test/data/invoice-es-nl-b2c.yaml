@@ -1,4 +1,5 @@
 $schema: "https://gobl.org/draft-0/bill/invoice"
+uuid: "7fe11346-a0ce-11ee-b8f0-e6a7901137ed"
 currency: "EUR"
 issue_date: "2023-12-18"
 series: "EXPORT-X"
@@ -26,6 +27,9 @@ customer:
   tax_id:
     country: "NL"
   name: "Sample End-Consumer"
+  identities:
+    - key: "es-passport"
+      code: "123456789"
 
 lines:
   - quantity: 20

@@ -1,6 +1,8 @@
 package doc
 
 import (
+	"fmt"
+
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
 )
@@ -15,8 +17,10 @@ func (e *ValidationError) Error() string {
 	return e.text
 }
 
-func validationErr(text string) error {
-	return &ValidationError{text}
+func validationErr(text string, args ...any) error {
+	return &ValidationError{
+		text: fmt.Sprintf(text, args...),
+	}
 }
 
 var validSupplierLocalities = []l10n.Code{

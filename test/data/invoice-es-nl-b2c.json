@@ -1,15 +1,16 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "7fe11346-a0ce-11ee-b8f0-e6a7901137ed",
+		"uuid": "0190c63b-4615-7ba1-8562-452670f15064",
 		"dig": {
 			"alg": "sha256",
-			"val": "d75aa136abccf9d9574c13810fb3c69e33a999ecabbac35e36ed722fe92d5441"
+			"val": "02f9ffdf0bfd342fd7e16a7795f0242ca74cd36a02f087525c7ccdea54e16153"
 		},
 		"draft": true
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"uuid": "7fe11346-a0ce-11ee-b8f0-e6a7901137ed",
 		"type": "standard",
 		"series": "EXPORT-X",
 		"code": "0002",
@@ -46,7 +47,13 @@
 			"name": "Sample End-Consumer",
 			"tax_id": {
 				"country": "NL"
-			}
+			},
+			"identities": [
+				{
+					"key": "es-passport",
+					"code": "123456789"
+				}
+			]
 		},
 		"lines": [
 			{

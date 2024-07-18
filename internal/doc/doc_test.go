@@ -9,7 +9,7 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/num"
-	"github.com/invopop/gobl/regimes/es"
+	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -86,13 +86,19 @@ func TestInvoiceConversion(t *testing.T) {
 
 	t.Run("should change the document type from the default (02) if stated", func(t *testing.T) {
 		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
-		goblInvoice.Customer.TaxID = &tax.Identity{
-			Country: "GB", Code: "PP-123456-S", Type: es.TaxIdentityTypeResident,
+		goblInvoice.Customer.TaxID = nil
+		goblInvoice.Customer.Identities = []*org.Identity{
+			{
+				Key:  "es-passport",
+				Code: "PP123456S",
+			},
 		}
-
 		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
-		assert.Equal(t, "05", invoice.Sujetos.Destinatarios.IDDestinatario[0].IDOtro.IDType)
+		dest := invoice.Sujetos.Destinatarios.IDDestinatario[0]
+		assert.Equal(t, "03", dest.IDOtro.IDType)
+		assert.Equal(t, "PP123456S", dest.IDOtro.ID)
+		assert.Empty(t, dest.IDOtro.CodigoPais)
 	})
 
 	t.Run("should allow having no customer (useful for simplied invoices)", func(t *testing.T) {

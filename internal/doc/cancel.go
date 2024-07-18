@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/xmldsig"
 )
 
@@ -18,8 +17,6 @@ type AnulaTicketBAI struct {
 	IDFactura  *IDFactura
 	HuellaTBAI *HuellaTBAI
 	Signature  *xmldsig.Signature `xml:"ds:Signature,omitempty"`
-
-	zone l10n.Code // copied from invoice
 }
 
 // IDFactura contains the info to identify the invoice to cancel
@@ -52,8 +49,6 @@ func NewAnulaTicketBAI(inv *bill.Invoice, ts time.Time) (*AnulaTicketBAI, error)
 		},
 	}
 
-	doc.zone = inv.Supplier.TaxID.Zone
-
 	return doc, nil
 }
 
@@ -65,7 +60,8 @@ func (doc *AnulaTicketBAI) Fingerprint(conf *FingerprintConfig) error {
 
 // Sign signs the document with the given certificate and role
 func (doc *AnulaTicketBAI) Sign(docID string, cert *xmldsig.Certificate, role IssuerRole, opts ...xmldsig.Option) error {
-	s, err := newSignature(doc, docID, doc.zone, role, cert, opts...)
+	// TODO: Fix the zone so that it can be determined from a configuration.
+	s, err := newSignature(doc, docID, ZoneBI, role, cert, opts...)
 	if err != nil {
 		return err
 	}

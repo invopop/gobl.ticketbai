@@ -80,7 +80,7 @@ type NoSujeta struct {
 	DetalleNoSujeta []*DetalleNoSujeta
 }
 
-// DetalleNoSujeta contails details about the not liable amount
+// DetalleNoSujeta contains details about the not liable amount
 type DetalleNoSujeta struct {
 	Causa   string
 	Importe num.Amount
@@ -101,7 +101,7 @@ func newTipoDesglose(gobl *bill.Invoice) *TipoDesglose {
 
 	desglose := &TipoDesglose{}
 
-	if gobl.Customer == nil || gobl.Customer.TaxID.Country == l10n.ES {
+	if gobl.Customer == nil || partyTaxCountry(gobl.Customer) == l10n.ES {
 		desglose.DesgloseFactura = newDesgloseFactura(taxInfo, catTotal.Rates)
 	} else {
 		goods, services := splitByTBAIProduct(catTotal.Rates)
@@ -234,7 +234,7 @@ func newDetalleIVA(taxInfo taxInfo, rate *tax.RateTotal) *DetalleIVA {
 }
 
 func formatPercent(percent num.Percentage) string {
-	maybeNegative := percent.Rescale(4).Multiply(num.MakeAmount(100, 0)).Rescale(2).String()
+	maybeNegative := percent.Amount().Rescale(2).String()
 	if strings.Contains(maybeNegative, "-") {
 		return strings.Replace(maybeNegative, "-", "", -1)
 	}
@@ -274,18 +274,16 @@ func (t taxInfo) isNoSujeta(r *tax.RateTotal) bool {
 	if t.customerRates {
 		return true
 	}
-
-	return r.Key == tax.RateExempt && r.Ext[es.ExtKeyTBAIExemption].Code().In(notSubjectExemptionCodes...)
+	return r.Percent == nil && r.Ext[es.ExtKeyTBAIExemption].Code().In(notSubjectExemptionCodes...)
 }
 
 func (t taxInfo) causaNoSujeta(r *tax.RateTotal) string {
 	if t.customerRates {
 		return "RL"
 	}
-
 	return r.Ext[es.ExtKeyTBAIExemption].String()
 }
 
 func (taxInfo) isExenta(r *tax.RateTotal) bool {
-	return r.Key == tax.RateExempt && !r.Ext[es.ExtKeyTBAIExemption].Code().In(notSubjectExemptionCodes...)
+	return r.Percent == nil && !r.Ext[es.ExtKeyTBAIExemption].Code().In(notSubjectExemptionCodes...)
 }
