@@ -84,7 +84,7 @@ func TestFacturaConversion(t *testing.T) {
 
 		_, err := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
-		assert.ErrorContains(t, err, "missing general description of invoice")
+		assert.ErrorContains(t, err, "notes: missing note with key 'general'")
 	})
 
 	t.Run("should include VAT and discounts to the total of the invoice", func(t *testing.T) {

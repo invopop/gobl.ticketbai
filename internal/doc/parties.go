@@ -59,7 +59,7 @@ func newDestinatario(party *org.Party) (*IDDestinatario, error) {
 		ApellidosNombreRazonSocial: party.Name,
 	}
 
-	if party.TaxID.Country == "ES" {
+	if partyTaxCountry(party) == "ES" {
 		d.NIF = party.TaxID.Code.String()
 	} else {
 		d.IDOtro = otherIdentity(party)
@@ -98,4 +98,11 @@ func otherIdentity(party *org.Party) *IDOtro {
 	}
 
 	return nil
+}
+
+func partyTaxCountry(party *org.Party) l10n.CountryCode {
+	if party != nil && party.TaxID != nil {
+		return party.TaxID.Country
+	}
+	return ""
 }

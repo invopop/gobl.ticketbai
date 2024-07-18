@@ -114,7 +114,7 @@ func newDescription(notes []*cbc.Note) (string, error) {
 			return note.Text, nil
 		}
 	}
-	return "", validationErr(`notes: missing note with key "%s"`, cbc.NoteKeyGeneral)
+	return "", validationErr(`notes: missing note with key '%s'`, cbc.NoteKeyGeneral)
 }
 
 func newImporteTotal(inv *bill.Invoice) string {
@@ -144,7 +144,7 @@ func newRetencionSoportada(inv *bill.Invoice) string {
 func newClaves(inv *bill.Invoice) []IDClave {
 	claves := []IDClave{}
 
-	if inv.Customer != nil && inv.Customer.TaxID.Country != "ES" {
+	if partyTaxCountry(inv.Customer) != "ES" {
 		claves = append(claves, IDClave{
 			ClaveRegimenIvaOpTrascendencia: "02",
 		})

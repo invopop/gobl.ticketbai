@@ -12,23 +12,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v1
-        with:
-          go-version: "1.21"
-        id: go
-
       - name: Check out code
         uses: actions/checkout@v3
 
-      - name: Prepare .netrc
-        uses: extractions/netrc@v1
+      - name: Set up Go
+        uses: actions/setup-go@v4
         with:
-          machine: github.com
-          username: ${{ secrets.GO_MOD_USER }}
-          password: ${{ secrets.GO_MOD_PASS }}
+          go-version-file: "go.mod"
+        id: go
 
       - name: Lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.55
+          version: v1.58
