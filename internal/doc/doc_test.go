@@ -9,7 +9,6 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/num"
-	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -87,7 +86,7 @@ func TestInvoiceConversion(t *testing.T) {
 	t.Run("should change the document type from the default (02) if stated", func(t *testing.T) {
 		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Customer.TaxID = &tax.Identity{
-			Country: "GB", Code: "PP-123456-S", Type: es.TaxIdentityTypeResident,
+			Country: "GB", Code: "PP123456S",
 		}
 
 		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)

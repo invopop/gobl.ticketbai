@@ -6,7 +6,7 @@ toolchain go1.22.1
 
 require (
 	github.com/go-resty/resty/v2 v2.10.0
-	github.com/invopop/gobl v0.69.1
+	github.com/invopop/gobl v0.81.0
 	github.com/invopop/xmldsig v0.9.0
 	github.com/lestrrat-go/libxml2 v0.0.0-20231124114421-99c71026c2f5
 	github.com/magefile/mage v1.15.0
@@ -24,10 +24,11 @@ require (
 	github.com/beevik/etree v1.2.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/google/uuid v1.4.0 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/invopop/jsonschema v0.12.0 // indirect
 	github.com/invopop/validation v0.3.0 // indirect
+	github.com/invopop/yaml v0.3.1 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

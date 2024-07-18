@@ -1,8 +1,6 @@
 package doc
 
 import (
-	"errors"
-
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
@@ -111,17 +109,12 @@ func newDatosFactura(inv *bill.Invoice) (*DatosFactura, error) {
 }
 
 func newDescription(notes []*cbc.Note) (string, error) {
-	if notes == nil {
-		return "", errors.New("missing general description of invoice")
-	}
-
 	for _, note := range notes {
 		if note.Key == cbc.NoteKeyGeneral {
 			return note.Text, nil
 		}
 	}
-
-	return "", errors.New("missing general description of invoice")
+	return "", validationErr(`notes: missing note with key "%s"`, cbc.NoteKeyGeneral)
 }
 
 func newImporteTotal(inv *bill.Invoice) string {

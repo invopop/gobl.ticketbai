@@ -1,11 +1,14 @@
 package doc
 
 import (
-	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/gobl/tax"
+)
+
+const (
+	idTypeCodeTaxID = "02"
 )
 
 // Sujetos contains invoice parties info
@@ -25,7 +28,7 @@ type Emisor struct {
 // Tickebai allows up to 100 customers but GOBL only allows one
 // per invoice
 type Destinatarios struct {
-	IDDestinatario []IDDestinatario
+	IDDestinatario []*IDDestinatario
 }
 
 // IDDestinatario contains info about a single customer
@@ -51,42 +54,48 @@ func newEmisor(party *org.Party) *Emisor {
 	}
 }
 
-func newDestinatario(party *org.Party) IDDestinatario {
-	destinatario := IDDestinatario{
+func newDestinatario(party *org.Party) (*IDDestinatario, error) {
+	d := &IDDestinatario{
 		ApellidosNombreRazonSocial: party.Name,
 	}
 
 	if party.TaxID.Country == "ES" {
-		destinatario.NIF = party.TaxID.Code.String()
+		d.NIF = party.TaxID.Code.String()
 	} else {
-		destinatario.IDOtro = &IDOtro{
-			CodigoPais: party.TaxID.Country.String(),
-			IDType:     taxDocumentType(party).String(),
-			ID:         party.TaxID.Code.String(),
-		}
+		d.IDOtro = otherIdentity(party)
+	}
+	if d.NIF == "" && d.IDOtro == nil {
+		return nil, validationErr("customer with tax ID or other identity is required")
 	}
 
 	if len(party.Addresses) > 0 && party.Addresses[0].Code != "" {
-		destinatario.CodigoPostal = party.Addresses[0].Code
-		destinatario.Direccion = formatAddress(party.Addresses[0])
+		d.CodigoPostal = party.Addresses[0].Code
+		d.Direccion = formatAddress(party.Addresses[0])
 	}
 
-	return destinatario
+	return d, nil
 }
 
-func taxDocumentType(party *org.Party) cbc.Code {
-	r := tax.RegimeFor(l10n.ES)
-
-	t := party.TaxID.Type
-	if t == "" {
-		t = es.TaxIdentityTypeFiscal
+func otherIdentity(party *org.Party) *IDOtro {
+	oid := new(IDOtro)
+	if party.TaxID != nil {
+		oid.CodigoPais = party.TaxID.Country.String()
 	}
 
-	for _, it := range r.IdentityTypeKeys {
-		if it.Key == t {
-			return it.Map[es.KeyTicketBAIIDType]
+	if party.TaxID != nil && party.TaxID.Code != "" {
+		oid.IDType = idTypeCodeTaxID
+		oid.ID = party.TaxID.Code.String()
+		return oid
+	}
+
+	r := tax.RegimeFor(l10n.ES)
+	for _, it := range r.IdentityKeys {
+		if id := org.IdentityForKey(party.Identities, it.Key); id != nil {
+			oid.IDType = it.Map[es.KeyTicketBAIIDType].String()
+			oid.ID = id.Code.String()
+			return oid
 		}
 	}
 
-	return ""
+	return nil
 }

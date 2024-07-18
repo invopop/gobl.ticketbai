@@ -1,4 +1,5 @@
 $schema: "https://gobl.org/draft-0/bill/invoice"
+uuid: "328f20c8-a0ac-11ee-bb1d-e6a7901137ed"
 currency: "EUR"
 issue_date: "2023-12-18"
 series: "EXPORT-X"
@@ -23,6 +24,9 @@ customer:
   tax_id:
     country: "NL"
   name: "Sample End-Consumer"
+  identities:
+    - key: "es-passport"
+      code: "123456789"
 
 lines:
   - quantity: 20
@@ -35,7 +39,7 @@ lines:
         reason: "Special discount"
     taxes:
       - cat: VAT
-        rate: exempt
+        rate: "exempt"
         ext:
           es-tbai-product: "services"
           es-tbai-exemption: "RL"

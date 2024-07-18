@@ -23,25 +23,25 @@ const (
 
 // Standard error responses.
 var (
-	ErrNotSpanish       = newClientError("only spanish invoices are supported")
-	ErrAlreadyProcessed = newClientError("already processed")
-	ErrOnlyInvoices     = newClientError("only invoices are supported")
-	ErrInvalidZone      = newClientError("invalid zone")
+	ErrNotSpanish       = newValidationError("only spanish invoices are supported")
+	ErrAlreadyProcessed = newValidationError("already processed")
+	ErrOnlyInvoices     = newValidationError("only invoices are supported")
+	ErrInvalidZone      = newValidationError("invalid zone")
 )
 
-// ClientError is a simple wrapper around client-side errors (that should not be retried) as opposed
+// ValidationError is a simple wrapper around validation errors (that should not be retried) as opposed
 // to server-side errors (that should be retried).
-type ClientError struct {
+type ValidationError struct {
 	err error
 }
 
 // Error implements the error interface for ClientError.
-func (e *ClientError) Error() string {
+func (e *ValidationError) Error() string {
 	return e.err.Error()
 }
 
-func newClientError(text string) error {
-	return &ClientError{errors.New(text)}
+func newValidationError(text string) error {
+	return &ValidationError{errors.New(text)}
 }
 
 // Client provides the main interface to the TicketBAI package.
@@ -189,7 +189,7 @@ func (c *Client) Post(ctx context.Context, d *Document) error {
 
 	err := conn.Post(ctx, d.inv, d.tbai)
 	if errors.Is(err, gateways.ErrInvalidRequest) {
-		return &ClientError{err}
+		return &ValidationError{err}
 	}
 	if errors.Is(err, gateways.ErrDuplicatedRecord) {
 		dup, err := c.fetchDuplicate(ctx, d)
