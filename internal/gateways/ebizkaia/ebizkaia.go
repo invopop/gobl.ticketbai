@@ -294,7 +294,6 @@ func newRequest(sup *Supplier, body any) (*Request, error) {
 	if err != nil {
 		return nil, fmt.Errorf("encode body to XML: %w", err)
 	}
-	fmt.Printf("********\n%v\n******\n", string(bdata))
 	req.Payload, err = compressBody(bdata)
 	if err != nil {
 		return nil, fmt.Errorf("compressing body: %w", err)
