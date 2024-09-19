@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"os"
 	"slices"
 
 	"github.com/go-resty/resty/v2"
@@ -52,18 +53,17 @@ type EBizkaiaConn struct {
 func newEbizkaia(env Environment, tlsConfig *tls.Config) *EBizkaiaConn {
 	c := new(EBizkaiaConn)
 	c.client = resty.New()
+
 	switch env {
 	case EnvironmentProduction:
-		c.client = c.client.SetBaseURL(eBizkaiaProductionBaseURL)
-		c.client.SetDebug(true)
-		tlsConfig.InsecureSkipVerify = true
+		c.client.SetBaseURL(eBizkaiaProductionBaseURL)
 	default:
-		c.client = c.client.SetBaseURL(eBizkaiaTestingBaseURL)
-		c.client.SetDebug(true)
-		tlsConfig.InsecureSkipVerify = true
+		c.client.SetBaseURL(eBizkaiaTestingBaseURL)
 	}
 
+	tlsConfig.InsecureSkipVerify = true
 	c.client.SetTLSClientConfig(tlsConfig)
+	c.client.SetDebug(os.Getenv("DEBUG") == "true")
 
 	return c
 }
