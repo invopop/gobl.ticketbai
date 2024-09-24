@@ -1,15 +1,16 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "ecd1d445-8d35-11ee-860f-e6a7901137ed",
+		"uuid": "0192237d-4a57-7812-9320-52e86cc6fc30",
 		"dig": {
 			"alg": "sha256",
-			"val": "cb069fd6e597749c1f514a4b1bb67abffd80eda3917e4c6aaeaa72e29dfd0b31"
-		},
-		"draft": true
+			"val": "726586d091f822dfe0ef13019996a8af583fd58d3909770c6dde6dd531415740"
+		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "ES",
+		"uuid": "01922336-8c6b-70df-9f8f-87c5d58e9582",
 		"type": "standard",
 		"code": "SAMPLE-002",
 		"issue_date": "2022-02-02",

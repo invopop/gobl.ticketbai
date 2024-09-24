@@ -1,4 +1,5 @@
 $schema: "https://gobl.org/draft-0/bill/invoice"
+uuid: "01922336-8c0a-773e-b16e-6a7313423e54"
 currency: "EUR"
 issue_date: "2022-02-03"
 series: "SAMPLE"

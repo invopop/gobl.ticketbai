@@ -1,15 +1,15 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0190c64f-5f0f-757a-8264-9c0840feda74",
+		"uuid": "0192237d-498e-7273-bc95-6a1daf16cb37",
 		"dig": {
 			"alg": "sha256",
-			"val": "cae66b61d3fbd0b098be947959bb7c2eb28b3e4d97210f4fc736d3409e865710"
-		},
-		"draft": true
+			"val": "2f74bd4edcdf44ab6bbf39a98d3f48b09fc0eeb1189ca25f816c07b638fae981"
+		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "ES",
 		"uuid": "328f20c8-a0ac-11ee-bb1d-e6a7901137ed",
 		"type": "standard",
 		"series": "EXPORT-X",
@@ -45,7 +45,7 @@
 			},
 			"identities": [
 				{
-					"key": "es-passport",
+					"key": "passport",
 					"code": "123456789"
 				}
 			]

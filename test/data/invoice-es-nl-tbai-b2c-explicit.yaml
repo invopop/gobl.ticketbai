@@ -25,7 +25,7 @@ customer:
     country: "NL"
   name: "Sample End-Consumer"
   identities:
-    - key: "es-passport"
+    - key: "passport"
       code: "123456789"
 
 lines:

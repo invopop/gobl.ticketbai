@@ -1,15 +1,16 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "ef544466-8df3-11ee-844a-e6a7901137ed",
+		"uuid": "0192237d-4a32-7ac8-8962-364f66f0dbec",
 		"dig": {
 			"alg": "sha256",
-			"val": "18ad6e7b903b509f69b2a33cc42b8fd743cd2fdeb47de4ae1dd5395e84883cd4"
-		},
-		"draft": true
+			"val": "de64e2400398f7f70e798077ec5a5d2a341ac472066dcb5271878fee33f9faa4"
+		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "ES",
+		"uuid": "01922336-8c24-771b-96bd-5086f8b3d3a1",
 		"type": "standard",
 		"series": "TEST",
 		"code": "001",
