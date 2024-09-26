@@ -6,7 +6,7 @@ toolchain go1.22.1
 
 require (
 	github.com/go-resty/resty/v2 v2.13.1
-	github.com/invopop/gobl v0.200.0-rc3.0.20240924080804-4b2640fe9889
+	github.com/invopop/gobl v0.200.0
 	github.com/invopop/xmldsig v0.10.0
 	github.com/lestrrat-go/libxml2 v0.0.0-20231124114421-99c71026c2f5
 	github.com/magefile/mage v1.15.0
