@@ -1,15 +1,21 @@
 package doc
 
 import (
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
-	"github.com/invopop/gobl/regimes/es"
-	"github.com/invopop/gobl/tax"
 )
 
 const (
 	idTypeCodeTaxID = "02"
 )
+
+var idTypeCodeMap = map[cbc.Key]string{
+	org.IdentityKeyPassport: "03",
+	org.IdentityKeyForeign:  "04",
+	org.IdentityKeyResident: "05",
+	org.IdentityKeyOther:    "06",
+}
 
 // Sujetos contains invoice parties info
 type Sujetos struct {
@@ -88,19 +94,21 @@ func otherIdentity(party *org.Party) *IDOtro {
 		return oid
 	}
 
-	r := tax.RegimeFor(l10n.ES)
-	for _, it := range r.IdentityKeys {
-		if id := org.IdentityForKey(party.Identities, it.Key); id != nil {
-			oid.IDType = it.Map[es.KeyTicketBAIIDType].String()
-			oid.ID = id.Code.String()
-			return oid
+	for _, id := range party.Identities {
+		it, ok := idTypeCodeMap[id.Key]
+		if !ok {
+			continue
 		}
+
+		oid.IDType = it
+		oid.ID = id.Code.String()
+		return oid
 	}
 
 	return nil
 }
 
-func partyTaxCountry(party *org.Party) l10n.CountryCode {
+func partyTaxCountry(party *org.Party) l10n.TaxCountryCode {
 	if party != nil && party.TaxID != nil {
 		return party.TaxID.Country
 	}

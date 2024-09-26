@@ -7,9 +7,9 @@ import (
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.ticketbai/internal/doc"
+	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
-	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/xmldsig"
 )
 
@@ -38,7 +38,7 @@ func (c *Client) NewCancelDocument(env *gobl.Envelope) (*CancelDocument, error) 
 		return nil, ErrOnlyInvoices
 	}
 
-	if d.inv.Supplier.TaxID.Country != l10n.ES {
+	if d.inv.Supplier.TaxID.Country != l10n.ES.Tax() {
 		return nil, ErrNotSpanish
 	}
 
@@ -85,7 +85,7 @@ func (d *CancelDocument) Sign() error {
 
 func extractPostTime(env *gobl.Envelope) (time.Time, error) {
 	for _, stamp := range env.Head.Stamps {
-		if stamp.Provider == es.StampProviderTBAICode {
+		if stamp.Provider == tbai.StampCode {
 			parts := strings.Split(stamp.Value, "-")
 			ts, err := time.Parse("020106", parts[2])
 			if err != nil {
@@ -96,5 +96,5 @@ func extractPostTime(env *gobl.Envelope) (time.Time, error) {
 		}
 	}
 
-	return time.Time{}, fmt.Errorf("missing previous %s stamp in envelope", es.StampProviderTBAICode)
+	return time.Time{}, fmt.Errorf("missing previous %s stamp in envelope", tbai.StampCode)
 }

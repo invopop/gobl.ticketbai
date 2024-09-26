@@ -1,6 +1,7 @@
 package doc
 
 import (
+	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
@@ -69,13 +70,13 @@ type IDFacturaRectificadaSustituida struct {
 
 func newCabeceraFactura(inv *bill.Invoice) *CabeceraFactura {
 	simplifiedInvoice := "N"
-	if inv.Tax.ContainsTag(tax.TagSimplified) {
+	if inv.HasTags(tax.TagSimplified) {
 		simplifiedInvoice = "S"
 	}
 
 	return &CabeceraFactura{
-		SerieFactura:                    inv.Series,
-		NumFactura:                      inv.Code,
+		SerieFactura:                    inv.Series.String(),
+		NumFactura:                      inv.Code.String(),
 		FacturaSimplificada:             simplifiedInvoice,
 		FacturaRectificativa:            newFacturaRectificativa(inv),
 		FacturasRectificadasSustituidas: newFacturasRectificadasSustituidas(inv),
@@ -179,7 +180,7 @@ func newFacturaRectificativa(inv *bill.Invoice) *FacturaRectificativa {
 	p := inv.Preceding[0]
 
 	return &FacturaRectificativa{
-		Codigo: p.Ext[es.ExtKeyTBAICorrection].String(),
+		Codigo: p.Ext[tbai.ExtKeyCorrection].String(),
 		Tipo:   CorrectiveTypeDifferences, // Only differences are supported for now
 	}
 }
@@ -194,8 +195,8 @@ func newFacturasRectificadasSustituidas(inv *bill.Invoice) *FacturasRectificadas
 	return &FacturasRectificadasSustituidas{
 		IDFacturaRectificadaSustituida: []*IDFacturaRectificadaSustituida{
 			{
-				SerieFactura:           p.Series,
-				NumFactura:             p.Code,
+				SerieFactura:           p.Series.String(),
+				NumFactura:             p.Code.String(),
 				FechaExpedicionFactura: formatDate(p.IssueDate),
 			},
 		},
@@ -209,7 +210,7 @@ func hasSurchargedLines(inv *bill.Invoice) bool {
 	}
 
 	for _, rate := range vat.Rates {
-		if rate.Ext[es.ExtKeyTBAIProduct] == "resale" {
+		if rate.Ext[tbai.ExtKeyProduct] == "resale" {
 			return true
 		}
 	}
@@ -218,5 +219,5 @@ func hasSurchargedLines(inv *bill.Invoice) bool {
 }
 
 func underSimplifiedRegime(inv *bill.Invoice) bool {
-	return inv.Tax != nil && inv.Tax.ContainsTag(es.TagSimplifiedScheme)
+	return inv.HasTags(es.TagSimplifiedScheme)
 }

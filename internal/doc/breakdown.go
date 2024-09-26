@@ -3,6 +3,7 @@ package doc
 import (
 	"strings"
 
+	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
@@ -101,7 +102,7 @@ func newTipoDesglose(gobl *bill.Invoice) *TipoDesglose {
 
 	desglose := &TipoDesglose{}
 
-	if gobl.Customer == nil || partyTaxCountry(gobl.Customer) == l10n.ES {
+	if gobl.Customer == nil || partyTaxCountry(gobl.Customer) == l10n.ES.Tax() {
 		desglose.DesgloseFactura = newDesgloseFactura(taxInfo, catTotal.Rates)
 	} else {
 		goods, services := splitByTBAIProduct(catTotal.Rates)
@@ -136,7 +137,7 @@ func newDesgloseFactura(taxInfo taxInfo, rates []*tax.RateTotal) *DesgloseFactur
 			})
 		} else if taxInfo.isExenta(rate) {
 			df.Sujeta.Exenta.appendDetalle(&DetalleExenta{
-				CausaExencion: rate.Ext[es.ExtKeyTBAIExemption].String(),
+				CausaExencion: rate.Ext[tbai.ExtKeyExemption].String(),
 				BaseImponible: rate.Base.Rescale(2).String(),
 			})
 		} else {
@@ -156,7 +157,7 @@ func newDesgloseFactura(taxInfo taxInfo, rates []*tax.RateTotal) *DesgloseFactur
 
 func splitByTBAIProduct(rates []*tax.RateTotal) (goods, services []*tax.RateTotal) {
 	for _, rate := range rates {
-		if rate.Ext[es.ExtKeyTBAIProduct] == "goods" {
+		if rate.Ext[tbai.ExtKeyProduct] == "goods" {
 			goods = append(goods, rate)
 		} else {
 			services = append(services, rate)
@@ -226,7 +227,7 @@ func newDetalleIVA(taxInfo taxInfo, rate *tax.RateTotal) *DetalleIVA {
 		diva.CuotaRecargoEquivalencia = rate.Surcharge.Amount.Rescale(2).String()
 	}
 
-	if taxInfo.simplifiedRegime || rate.Ext[es.ExtKeyTBAIProduct] == "resale" {
+	if taxInfo.simplifiedRegime || rate.Ext[tbai.ExtKeyProduct] == "resale" {
 		diva.OperacionEnRecargoDeEquivalenciaORegimenSimplificado = "S"
 	}
 
@@ -243,21 +244,11 @@ func formatPercent(percent num.Percentage) string {
 }
 
 func newTaxInfo(gobl *bill.Invoice) taxInfo {
-	taxInfo := taxInfo{}
-	if gobl.Tax != nil {
-		for _, scheme := range gobl.Tax.Tags {
-			switch scheme {
-			case es.TagSimplifiedScheme:
-				taxInfo.simplifiedRegime = true
-			case tax.TagReverseCharge:
-				taxInfo.reverseCharge = true
-			case tax.TagCustomerRates:
-				taxInfo.customerRates = true
-			}
-		}
+	return taxInfo{
+		simplifiedRegime: gobl.HasTags(es.TagSimplifiedScheme),
+		reverseCharge:    gobl.HasTags(tax.TagReverseCharge),
+		customerRates:    gobl.HasTags(tax.TagCustomerRates),
 	}
-
-	return taxInfo
 }
 
 func (t taxInfo) nonExemptedType() string {
@@ -274,16 +265,16 @@ func (t taxInfo) isNoSujeta(r *tax.RateTotal) bool {
 	if t.customerRates {
 		return true
 	}
-	return r.Percent == nil && r.Ext[es.ExtKeyTBAIExemption].Code().In(notSubjectExemptionCodes...)
+	return r.Percent == nil && r.Ext[tbai.ExtKeyExemption].Code().In(notSubjectExemptionCodes...)
 }
 
 func (t taxInfo) causaNoSujeta(r *tax.RateTotal) string {
 	if t.customerRates {
 		return "RL"
 	}
-	return r.Ext[es.ExtKeyTBAIExemption].String()
+	return r.Ext[tbai.ExtKeyExemption].String()
 }
 
 func (taxInfo) isExenta(r *tax.RateTotal) bool {
-	return r.Percent == nil && !r.Ext[es.ExtKeyTBAIExemption].Code().In(notSubjectExemptionCodes...)
+	return r.Percent == nil && !r.Ext[tbai.ExtKeyExemption].Code().In(notSubjectExemptionCodes...)
 }

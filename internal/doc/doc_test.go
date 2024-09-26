@@ -89,7 +89,7 @@ func TestInvoiceConversion(t *testing.T) {
 		goblInvoice.Customer.TaxID = nil
 		goblInvoice.Customer.Identities = []*org.Identity{
 			{
-				Key:  "es-passport",
+				Key:  "passport",
 				Code: "PP123456S",
 			},
 		}

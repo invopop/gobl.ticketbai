@@ -6,6 +6,7 @@ import (
 
 	"github.com/invopop/gobl.ticketbai/internal/doc"
 	"github.com/invopop/gobl.ticketbai/test"
+	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"
@@ -46,9 +47,7 @@ func TestFacturaConversion(t *testing.T) {
 
 	t.Run("should mark an invoice as simplified (ticket)", func(t *testing.T) {
 		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
-		goblInvoice.Tax = &bill.Tax{
-			Tags: []cbc.Key{tax.TagSimplified},
-		}
+		goblInvoice.SetTags(tax.TagSimplified)
 
 		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
@@ -183,7 +182,7 @@ func TestFacturaConversion(t *testing.T) {
 				&tax.Combo{
 					Category: "VAT",
 					Rate:     "standard",
-					Ext:      tax.Extensions{es.ExtKeyTBAIProduct: "resale"},
+					Ext:      tax.Extensions{tbai.ExtKeyProduct: "resale"},
 				},
 			},
 		}}
@@ -198,7 +197,7 @@ func TestFacturaConversion(t *testing.T) {
 	t.Run("should add simplified tax regime (52) is the issuer works this way",
 		func(t *testing.T) {
 			goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
-			goblInvoice.Tax = &bill.Tax{Tags: []cbc.Key{es.TagSimplifiedScheme}}
+			goblInvoice.SetTags(es.TagSimplifiedScheme)
 
 			invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 

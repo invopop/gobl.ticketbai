@@ -42,8 +42,8 @@ func NewAnulaTicketBAI(inv *bill.Invoice, ts time.Time) (*AnulaTicketBAI, error)
 		IDFactura: &IDFactura{
 			Emisor: newEmisor(inv.Supplier),
 			CabeceraFactura: &CabeceraAnulacionFactura{
-				SerieFactura:           inv.Series,
-				NumFactura:             inv.Code,
+				SerieFactura:           inv.Series.String(),
+				NumFactura:             inv.Code.String(),
 				FechaExpedicionFactura: formatDate(ts),
 			},
 		},

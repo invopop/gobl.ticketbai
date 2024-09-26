@@ -6,10 +6,10 @@ import (
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.ticketbai/internal/doc"
+	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/head"
 	"github.com/invopop/gobl/l10n"
-	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/xmldsig"
 )
 
@@ -42,7 +42,7 @@ func (c *Client) NewDocument(env *gobl.Envelope) (*Document, error) {
 	if d.hasExistingStamps() {
 		return nil, ErrAlreadyProcessed
 	}
-	if d.inv.Supplier.TaxID.Country != l10n.ES {
+	if d.inv.Supplier.TaxID.Country != l10n.ES.Tax() {
 		return nil, ErrNotSpanish
 	}
 
@@ -97,13 +97,13 @@ func (d *Document) Sign() error {
 	codes := d.tbai.QRCodes()
 	d.env.Head.AddStamp(
 		&head.Stamp{
-			Provider: es.StampProviderTBAICode,
+			Provider: tbai.StampCode,
 			Value:    codes.TBAICode,
 		},
 	)
 	d.env.Head.AddStamp(
 		&head.Stamp{
-			Provider: es.StampProviderTBAIQR,
+			Provider: tbai.StampQR,
 			Value:    codes.QRCode,
 		},
 	)
@@ -138,7 +138,7 @@ func (d *Document) SignatureValue() string {
 
 func (d *Document) hasExistingStamps() bool {
 	for _, stamp := range d.env.Head.Stamps {
-		if stamp.Provider.In(es.StampProviderTBAICode, es.StampProviderTBAIQR) {
+		if stamp.Provider.In(tbai.StampCode, tbai.StampQR) {
 			return true
 		}
 	}

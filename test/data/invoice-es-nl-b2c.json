@@ -1,26 +1,25 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0190c63b-4615-7ba1-8562-452670f15064",
+		"uuid": "0192237d-4965-7c4b-914e-3a62f8e074e5",
 		"dig": {
 			"alg": "sha256",
-			"val": "02f9ffdf0bfd342fd7e16a7795f0242ca74cd36a02f087525c7ccdea54e16153"
-		},
-		"draft": true
+			"val": "2ca60e3c0bfecce88424186fdbe07e99fad54e68f90b53e057c63807655221ef"
+		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "ES",
+		"$tags": [
+			"customer-rates"
+		],
 		"uuid": "7fe11346-a0ce-11ee-b8f0-e6a7901137ed",
 		"type": "standard",
 		"series": "EXPORT-X",
 		"code": "0002",
 		"issue_date": "2023-12-18",
 		"currency": "EUR",
-		"tax": {
-			"tags": [
-				"customer-rates"
-			]
-		},
+		"tax": {},
 		"supplier": {
 			"name": "Provide One S.L.",
 			"tax_id": {
@@ -50,7 +49,7 @@
 			},
 			"identities": [
 				{
-					"key": "es-passport",
+					"key": "passport",
 					"code": "123456789"
 				}
 			]
@@ -75,6 +74,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"country": "NL",
 						"rate": "standard",
 						"percent": "21.0%",
 						"ext": {
@@ -95,6 +95,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"country": "NL",
 						"rate": "standard",
 						"percent": "21.0%",
 						"ext": {
@@ -115,6 +116,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"country": "NL",
 						"rate": "reduced",
 						"percent": "9.0%",
 						"ext": {
@@ -135,6 +137,7 @@
 						"rates": [
 							{
 								"key": "standard",
+								"country": "NL",
 								"ext": {
 									"es-tbai-product": "services"
 								},
@@ -144,6 +147,7 @@
 							},
 							{
 								"key": "standard",
+								"country": "NL",
 								"ext": {
 									"es-tbai-product": "goods"
 								},
@@ -153,6 +157,7 @@
 							},
 							{
 								"key": "reduced",
+								"country": "NL",
 								"ext": {
 									"es-tbai-product": "goods"
 								},

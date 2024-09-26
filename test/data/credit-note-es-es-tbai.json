@@ -1,15 +1,16 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "78f1695c-e5ce-11ee-9527-e6a7901137ed",
+		"uuid": "0192237d-4943-72a7-b1d0-51dca3e8bc71",
 		"dig": {
 			"alg": "sha256",
-			"val": "0c28b4a60a0330ad4c2f419c9c3b8a3d43eb8cd51f24eef926710bea9cdb1134"
-		},
-		"draft": true
+			"val": "3abe712288ca184ad4edd7b8033fb71badc0b402b95732e9f71978782029b260"
+		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "ES",
+		"uuid": "01922336-8b5e-72a9-8282-0188c1cdaefa",
 		"type": "credit-note",
 		"series": "FR",
 		"code": "012",
@@ -18,9 +19,9 @@
 		"preceding": [
 			{
 				"type": "standard",
+				"issue_date": "2022-01-10",
 				"series": "SAMPLE",
 				"code": "085",
-				"issue_date": "2022-01-10",
 				"ext": {
 					"es-tbai-correction": "R2"
 				}
