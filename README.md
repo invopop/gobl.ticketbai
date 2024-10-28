@@ -150,21 +150,22 @@ Invoice tax tags can be added to invoice documents in order to reflect a special
 The following extension can be applied to each line tax:
 
 - `es-tbai-product` – allows to correctly group the invoice's lines taxes in the TicketBAI breakdowns (a.k.a. desgloses). These are the valid values:
-	- `services` - indicates that the product being sold is a service (as opposed to a physical good). Services are accounted in the `DesgloseTipoOperacion > PrestacionServicios` breakdown of invoices to foreign customers. By default, all items are considered services.
-	- `goods` - indicates that the product being sold is a physical good. Products are accounted in the `DesgloseTipoOperacion > Entrega` breakdown of invoices to foreign customers.
-	- `resale` - indicates that a line item is sold without modification from a provider under the Equalisation Charge scheme. (This implies that the `OperacionEnRecargoDeEquivalenciaORegimenSimplificado` tag will be set to `S`).
+
+  - `services` - indicates that the product being sold is a service (as opposed to a physical good). Services are accounted in the `DesgloseTipoOperacion > PrestacionServicios` breakdown of invoices to foreign customers. By default, all items are considered services.
+  - `goods` - indicates that the product being sold is a physical good. Products are accounted in the `DesgloseTipoOperacion > Entrega` breakdown of invoices to foreign customers.
+  - `resale` - indicates that a line item is sold without modification from a provider under the Equalisation Charge scheme. (This implies that the `OperacionEnRecargoDeEquivalenciaORegimenSimplificado` tag will be set to `S`).
 
 - `es-tbai-exemption` - identifies the specific TicketBAI reason code as to why taxes should not be applied to the line according to the whole set of exemptions or not-subject scenarios defined in the law. It has to be set along with the tax rate value of `exempt`. These are the valid values:
-	- `E1` – Exenta por el artículo 20 de la Norma Foral del IVA
+  - `E1` – Exenta por el artículo 20 de la Norma Foral del IVA
   - `E2` – Exenta por el artículo 21 de la Norma Foral del IVA
   - `E3` – Exenta por el artículo 22 de la Norma Foral del IVA
   - `E4` – Exenta por el artículo 23 y 24 de la Norma Foral del IVA
   - `E5` – Exenta por el artículo 25 de la Norma Foral del IVA
   - `E6` – Exenta por otra causa
   - `OT` – No sujeto por el artículo 7 de la Norma Foral de IVA / Otros supuestos
-  - `RL` – No sujeto por reglas de localización (*)
+  - `RL` – No sujeto por reglas de localización (\*)
 
-_(*) As noted elsewhere, `RL` will be set automatically set in invoices using the `customer-rates` tax tag. It can also be set explicitly using the `es-tbai-exemption` extension in invoices not using that tag._
+_(\*) As noted elsewhere, `RL` will be set automatically set in invoices using the `customer-rates` tax tag. It can also be set explicitly using the `es-tbai-exemption` extension in invoices not using that tag._
 
 ### Use-Cases
 
@@ -181,6 +182,10 @@ Under what situations should the TicketBAI system be expected to function:
 
 Some sample test data is available in the `./test` directory.
 
-If you make any modifications to the source YAML files, the JSON envelopes will need to be updated.
+If you make any modifications to the source YAML files, the JSON envelopes will need to be updated, for example:
+
+```bash
+gobl build -i --envelop test/data/invoice-es-es-b2c.yaml > test/data/invoice-es-es-b2c.json
+```
 
 Make sure you have the GOBL CLI installed ([more details](https://docs.gobl.org/quick-start/cli)).
