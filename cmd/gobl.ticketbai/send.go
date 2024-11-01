@@ -13,28 +13,32 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type cancelOpts struct {
+type sendOpts struct {
 	*rootOpts
+
+	previous string
 }
 
-func cancel(o *rootOpts) *cancelOpts {
-	return &cancelOpts{rootOpts: o}
+func send(o *rootOpts) *sendOpts {
+	return &sendOpts{rootOpts: o}
 }
 
-func (c *cancelOpts) cmd() *cobra.Command {
+func (c *sendOpts) cmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "cancel [infile]",
-		Short: "Cancels an invoice in the TicketBAI provider",
+		Use:   "send [infile]",
+		Short: "Sends the GOBL invoice to the TicketBAI service",
 		RunE:  c.runE,
 	}
 
 	f := cmd.Flags()
 	c.prepareFlags(f)
 
+	f.StringVar(&c.previous, "prev", "", "Previous document fingerprint to chain with")
+
 	return cmd
 }
 
-func (c *cancelOpts) runE(cmd *cobra.Command, args []string) error {
+func (c *sendOpts) runE(cmd *cobra.Command, args []string) error {
 	input, err := openInput(cmd, args)
 	if err != nil {
 		return err
@@ -73,12 +77,20 @@ func (c *cancelOpts) runE(cmd *cobra.Command, args []string) error {
 		panic(err)
 	}
 
-	doc, err := tbai.NewCancelDocument(env)
+	doc, err := tbai.NewDocument(env)
 	if err != nil {
 		panic(err)
 	}
 
-	err = doc.Fingerprint()
+	var prev *ticketbai.PreviousInvoice
+	if c.previous != "" {
+		prev = new(ticketbai.PreviousInvoice)
+		if err := json.Unmarshal([]byte(c.previous), prev); err != nil {
+			panic(err)
+		}
+	}
+
+	err = doc.Fingerprint(prev)
 	if err != nil {
 		panic(err)
 	}
@@ -87,10 +99,22 @@ func (c *cancelOpts) runE(cmd *cobra.Command, args []string) error {
 		panic(err)
 	}
 
-	err = tbai.Cancel(cmd.Context(), doc)
+	err = tbai.Post(cmd.Context(), doc)
 	if err != nil {
 		panic(err)
 	}
+
+	np := &ticketbai.PreviousInvoice{
+		Series:    doc.Head().SerieFactura,
+		Code:      doc.Head().NumFactura,
+		IssueDate: doc.Head().FechaExpedicionFactura,
+		Signature: doc.SignatureValue(),
+	}
+	data, err := json.Marshal(np)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("Generated document with fingerprint: \n%s\n", string(data))
 
 	return nil
 }

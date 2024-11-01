@@ -96,7 +96,7 @@ func (c *EBizkaiaConn) Post(ctx context.Context, inv *bill.Invoice, doc *doc.Tic
 		}
 
 		if resp.FirstErrorDescription() != "" {
-			return fmt.Errorf("ebizcaia: %w: %v", ErrInvalidRequest, resp.FirstErrorDescription())
+			return ErrInvalidRequest.withCode(resp.FirstErrorCode()).withMessage(resp.FirstErrorDescription())
 		}
 	}
 
@@ -167,10 +167,10 @@ func (c *EBizkaiaConn) sendRequest(ctx context.Context, doc *ebizkaia.Request, p
 
 	res, err := r.Post(path)
 	if err != nil {
-		return fmt.Errorf("%w: ebizkaia: %s", ErrConnection, err.Error())
+		return ErrConnection.withCause(err)
 	}
 	if res.StatusCode() != 200 {
-		return fmt.Errorf("ebizkaia: status %d", res.StatusCode())
+		return ErrConnection.withCode(fmt.Sprintf("%d", res.StatusCode()))
 	}
 
 	code := res.Header().Get(eBizkaiaN3ResponseHeader)
@@ -182,10 +182,9 @@ func (c *EBizkaiaConn) sendRequest(ctx context.Context, doc *ebizkaia.Request, p
 		if !slices.Contains(serverErrors, code) {
 			// Not a server-side error, so the cause of it is in the request. We identify
 			// it as an ErrInvalidRequest to handle it downstream.
-			return fmt.Errorf("ebizcaia: %w: %v: %v", ErrInvalidRequest, code, msg)
+			return ErrInvalidRequest.withCode(code).withMessage(msg)
 		}
-
-		return fmt.Errorf("ebizkaia: %v: %v", code, msg)
+		return ErrConnection.withCode(code).withMessage(msg)
 	}
 
 	return nil

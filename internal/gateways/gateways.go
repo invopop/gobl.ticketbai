@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/invopop/gobl.ticketbai/internal/doc"
 	"github.com/invopop/gobl/bill"
@@ -24,10 +25,82 @@ const (
 
 // Standard gateway error responses
 var (
-	ErrConnection       = errors.New("connection")
-	ErrInvalidRequest   = errors.New("invalid request")
-	ErrDuplicatedRecord = errors.New("duplicated record")
+	ErrConnection       = newError("connection")
+	ErrInvalidRequest   = newError("invalid-request")
+	ErrDuplicatedRecord = newError("duplicate")
 )
+
+// Error allows for structured responses from the gateway to be able to
+// response codes and messages.
+type Error struct {
+	key     string
+	code    string
+	message string
+	cause   error
+}
+
+// Error produces a human readable error message.
+func (e *Error) Error() string {
+	out := []string{e.key}
+	if e.code != "" {
+		out = append(out, e.code)
+	}
+	if e.message != "" {
+		out = append(out, e.message)
+	}
+	return strings.Join(out, ": ")
+}
+
+// Message returns the human message for the error.
+func (e *Error) Message() string {
+	return e.message
+}
+
+// Code returns the code provided by the remote service.
+func (e *Error) Code() string {
+	return e.code
+}
+
+func newError(key string) *Error {
+	return &Error{key: key}
+}
+
+// withCode duplicates and adds the code to the error.
+func (e *Error) withCode(code string) *Error {
+	e = e.clone()
+	e.code = code
+	return e
+}
+
+// withMessage duplicates and adds the message to the error.
+func (e *Error) withMessage(msg string) *Error {
+	e = e.clone()
+	e.message = msg
+	return e
+}
+
+func (e *Error) withCause(err error) *Error {
+	e = e.clone()
+	e.cause = err
+	e.message = err.Error()
+	return e
+}
+
+func (e *Error) clone() *Error {
+	ne := new(Error)
+	*ne = *e
+	return ne
+}
+
+// Is checks to see if the target error is the same as the current one
+// or forms part of the chain.
+func (e *Error) Is(target error) bool {
+	t, ok := target.(*Error)
+	if !ok {
+		return errors.Is(e.cause, target)
+	}
+	return e.key == t.key
+}
 
 // Connection defines what is expected from a connection to a gateway.
 type Connection interface {
@@ -53,6 +126,7 @@ func New(env Environment, cert *xmldsig.Certificate) (*List, error) {
 	}
 
 	l.Register(doc.ZoneBI, newEbizkaia(env, tlsConf))
+	l.Register(doc.ZoneSS, newGipuzkoa(env, tlsConf))
 
 	return l, nil
 }

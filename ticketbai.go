@@ -16,9 +16,9 @@ import (
 
 // Expose zone codes for external use.
 const (
-	ZoneBI l10n.Code = doc.ZoneBI
-	ZoneSS l10n.Code = doc.ZoneSS
-	ZoneVI l10n.Code = doc.ZoneVI
+	ZoneBI l10n.Code = doc.ZoneBI // Bizkaia
+	ZoneSS l10n.Code = doc.ZoneSS // Gipuzkoa
+	ZoneVI l10n.Code = doc.ZoneVI // Araba
 )
 
 // Standard error responses.
@@ -146,10 +146,10 @@ type Software struct {
 // PreviousInvoice stores the fields from the previously generated invoice
 // document that are linked to in the new document.
 type PreviousInvoice struct {
-	Series    string
-	Code      string
-	IssueDate string
-	Signature string
+	Series    string `json:"series"`
+	Code      string `json:"code"`
+	IssueDate string `json:"issue_date"`
+	Signature string `json:"signature"`
 }
 
 // New creates a new TicketBAI client with shared software and configuration
