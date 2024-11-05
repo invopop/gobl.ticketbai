@@ -12,29 +12,28 @@ import (
 	"github.com/invopop/gobl.ticketbai/doc"
 )
 
+// Integration Guide for Araba region:
 //
-// Gipuzkoa region
+//  * Testing - https://web.araba.eus/documents/105044/5608600/Gu%C3%ADa+entorno+pruebas+TicketBAI+-+castellano.pdf/b74f0114-0b35-73c4-5c10-7741ad393658?t=1642408082727
+//  * Production - https://web.araba.eus/documents/105044/5608600/Anexo+IV+TicketBAI.pdf/fdf77a97-cbdb-8655-7e3f-b87c046da48e?t=1652787434485
 //
-//  * Docs: https://www.gipuzkoa.eus/es/web/ogasuna/ticketbai/documentacion-y-normativa
-//  * Testing: https://www.gipuzkoa.eus/documents/2456431/13761128/Guia+de+entono+de+pruebas+TicketBAI.pdf/d8b052ec-d40a-7f9c-0961-fcf7a631a948
-//  * Production: https://www.gipuzkoa.eus/documents/2456431/27508852/cast+03+ANEXO+IV+web+26-01-2022.pdf/a991d1ae-2b1c-f039-36a6-ae9220cc7127
 
 const (
 	// Requests
-	gipuzkoaProductionBaseURL = "https://tbai-z.egoitza.gipuzkoa.eus"
-	gipuzkoaTestingBaseURL    = "https://tbai-z.prep.gipuzkoa.eus"
+	arabaProductionBaseURL = "https://ticketbai.araba.eus"
+	arabaTestingBaseURL    = "https://pruebas-ticketbai.araba.eus"
 
-	gipuzkoaExecutePath = "/sarrerak/alta"
-	gipuzkoaCancelPath  = "/sarrerak/baja"
+	arabaExecutePath = "/TicketBAI/v1/facturas/"
+	arabaCancelPath  = "/TicketBAI/v1/anulaciones/"
 )
 
 const (
-	GipuzkoaStatusReceived = "00" // looks good.
-	GipuzkoaStatusRejected = "01" // there are errors that need fixing.
+	ArabaStatusReceived = "00" // looks good.
+	ArabaStatusRejected = "01" // there are errors that need fixing.
 )
 
-// GipuzkoaResponse defines the response fields from the Gipuzkoa region.
-type GipuzkoaResponse struct {
+// ArabaResponse defines the response fields from the Araba region.
+type ArabaResponse struct {
 	Output struct {
 		ID                string `xml:"IdentificadoTBAI"`
 		Data              string `xml:"FechaRecepcion"`
@@ -50,20 +49,20 @@ type GipuzkoaResponse struct {
 	} `xml:"Salida"`
 }
 
-// GipuzkoaConn keeps all the connection details together for the Gipuzkoa region.
-type GipuzkoaConn struct {
+// ArabaConn keeps all the connection details together for the Araba region.
+type ArabaConn struct {
 	client *resty.Client
 }
 
-func newGipuzkoa(env Environment, tlsConfig *tls.Config) *GipuzkoaConn {
-	c := new(GipuzkoaConn)
+func newAraba(env Environment, tlsConfig *tls.Config) *ArabaConn {
+	c := new(ArabaConn)
 	c.client = resty.New()
 
 	switch env {
 	case EnvironmentProduction:
-		c.client.SetBaseURL(gipuzkoaProductionBaseURL)
+		c.client.SetBaseURL(arabaProductionBaseURL)
 	default:
-		c.client.SetBaseURL(gipuzkoaTestingBaseURL)
+		c.client.SetBaseURL(arabaTestingBaseURL)
 	}
 
 	tlsConfig.InsecureSkipVerify = true
@@ -74,26 +73,26 @@ func newGipuzkoa(env Environment, tlsConfig *tls.Config) *GipuzkoaConn {
 	return c
 }
 
-// Post sends the complete TicketBAI document to the Gipuzkoa API.
-func (c *GipuzkoaConn) Post(ctx context.Context, doc *doc.TicketBAI) error {
+// Post sends the complete TicketBAI document to the Araba API.
+func (c *ArabaConn) Post(ctx context.Context, doc *doc.TicketBAI) error {
 	payload, err := doc.Bytes()
 	if err != nil {
 		return fmt.Errorf("generating payload: %w", err)
 	}
-	return c.post(ctx, gipuzkoaExecutePath, payload)
+	return c.post(ctx, arabaExecutePath, payload)
 }
 
-// Cancel will send a request to the Gipuzkoa API to cancel a previously issued document.
-func (c *GipuzkoaConn) Cancel(ctx context.Context, doc *doc.AnulaTicketBAI) error {
+// Cancel will send a request to the Araba API to cancel a previously issued document.
+func (c *ArabaConn) Cancel(ctx context.Context, doc *doc.AnulaTicketBAI) error {
 	payload, err := doc.Bytes()
 	if err != nil {
 		return fmt.Errorf("generating payload: %w", err)
 	}
-	return c.post(ctx, gipuzkoaCancelPath, payload)
+	return c.post(ctx, arabaCancelPath, payload)
 }
 
-func (c *GipuzkoaConn) post(ctx context.Context, path string, payload []byte) error {
-	out := new(GipuzkoaResponse)
+func (c *ArabaConn) post(ctx context.Context, path string, payload []byte) error {
+	out := new(ArabaResponse)
 	req := c.client.R().
 		SetContext(ctx).
 		SetDebug(true).
@@ -110,7 +109,7 @@ func (c *GipuzkoaConn) post(ctx context.Context, path string, payload []byte) er
 		return ErrInvalid.withCode(strconv.Itoa(res.StatusCode()))
 	}
 
-	if out.Output.Status != GipuzkoaStatusReceived {
+	if out.Output.Status != ArabaStatusReceived {
 		err := ErrInvalid
 		if len(out.Output.Errors) > 0 {
 			e1 := out.Output.Errors[0]

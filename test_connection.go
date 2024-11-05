@@ -3,7 +3,7 @@ package ticketbai
 import (
 	"context"
 
-	"github.com/invopop/gobl.ticketbai/internal/doc"
+	"github.com/invopop/gobl.ticketbai/doc"
 	"github.com/invopop/gobl/bill"
 )
 

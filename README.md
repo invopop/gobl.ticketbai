@@ -26,10 +26,9 @@ Links to key information for each agency are described in the following subchapt
 
 You must have first created a GOBL Envelope containing an Invoice that you'd like to send to one of the TicketBAI web services.
 
-For the document to accepted, the supplier contained in the invoice should have a "Tax ID" that includes:
+For the document to be converted, the supplier contained in the invoice should have a "Tax ID" with the country set to `ES`.
 
-- A country code set to `ES`
-- A zone code set to region of one of the three Basque Country tax agencies, i.e. `BI`, `SS`, or `VI`. (We don't consider the address field reliable for this.)
+TicketBAI is used by three different tax agencies (Haciendas Forales), each of which has their own API and specific requirements. The `es-tbai-region` extension defined in the GOBL Invoice's `tax` property is used to set the determine the correct API to utilize. This will be set automatically in most cases.
 
 The following is an example of how the GOBL TicketBAI package could be used:
 
@@ -47,6 +46,8 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
+
 	// Load sample envelope:
 	data, _ := os.ReadFile("./test/data/sample-invoice.json")
 
@@ -54,6 +55,7 @@ func main() {
 	if err := json.Unmarshal(data, env); err != nil {
 		panic(err)
 	}
+	zone := ticketbai.ZoneFor(env)
 
 	// Prepare software configuration:
 	soft := &ticketbai.Software{
@@ -70,8 +72,9 @@ func main() {
 		panic(err)
 	}
 
-	// Instantiate the TicketBAI client:
-	tbai, err := ticketbai.New(soft,
+	// Instantiate the TicketBAI client with sofrward config
+	// and specific zone.
+	tc, err := ticketbai.New(soft, zone,
 		ticketbai.WithCertificate(cert), // Use the certificate previously loaded
 		ticketbai.WithSupplierIssuer(),  // The issuer is the invoice's supplier
 		ticketbai.InTesting(),           // Use the tax agency testing environment
@@ -81,18 +84,19 @@ func main() {
 	}
 
 	// Create a new TBAI document:
-	doc, err := tbai.NewDocument(env)
+	doc, err := tc.Convert(env)
 	if err != nil {
 		panic(err)
 	}
 
-	// Create the document fingerprint:
-	if err = doc.Fingerprint(prev); err != nil {
+	// Create the document fingerprint
+	// Assume here that we don't have a previous chain data object.
+	if err = tc.Fingerprint(doc, nil); err != nil {
 		panic(err)
 	}
 
 	// Sign the document:
-	if err := doc.Sign(); err != nil {
+	if err := tc.Sign(doc, env); err != nil {
 		panic(err)
 	}
 
@@ -102,8 +106,21 @@ func main() {
 		panic(err)
 	}
 
-	// Do something with the output
+	// Do something with the output, you probably want to store
+	// it somewhere.
 	fmt.Println("Document created:\n", string(bytes))
+
+	// Grab and persist the Chain Data somewhere so you can use this
+	// for the next call to the Fingerprint method.
+	cd := doc.ChainData()
+
+	// Send to TicketBAI, if rejected, you'll want to fix any
+	// issues and send in a new XML document. The original
+	// version should not be modified.
+	if err := tc.Post(ctx, doc); err != nil {
+		panic(err)
+	}
+
 }
 ```
 
@@ -115,13 +132,29 @@ The GOBL TicketBAI package tool also includes a command line helper. You can fin
 go install github.com/invopop/gobl.ticketbai
 ```
 
-Usage is very straightforward:
+We recommend using a `.env` file to prepare configuration settings, although all parameters can be set using command line flags. Heres an example:
 
-```bash
-gobl.ticketbai convert ./test/data/invoice.json
+```
+CERTIFICATE_PATH="./test/certs/EntitateOrdezkaria_RepresentanteDeEntidad.p12"
+CERTIFICATE_PASSWORD=IZDesa2021
+SOFTWARE_COMPANY_NIF=B85905495
+SOFTWARE_COMPANY_NAME="Invopop S.L."
+SOFTWARE_NAME="Invopop"
+SOFTWARE_LICENSE="TBAIBI00000000PRUEBA" # BI & SS
+SOFTWARE_VERSION="1.0"
 ```
 
-At the moment, it's not possible to add a fingerprint or sign TicketBAI files using the CLI.
+To convert a document to XML, run:
+
+```bash
+gobl.ticketbai convert ./test/data/sample-invoice.json
+```
+
+To submit to the tax agency testing environment:
+
+```bash
+gobl.ticketbai send ./test/data/sample-invoice.json
+```
 
 ## Limitations
 
@@ -180,12 +213,10 @@ Under what situations should the TicketBAI system be expected to function:
 
 ## Test Data
 
-Some sample test data is available in the `./test` directory.
-
-If you make any modifications to the source YAML files, the JSON envelopes will need to be updated, for example:
+Some sample test data is available in the `./test` directory. To update the JSON documents and regenerate the XML files for testing, use the following command:
 
 ```bash
-gobl build -i --envelop test/data/invoice-es-es-b2c.yaml > test/data/invoice-es-es-b2c.json
+go test ./examples_test.go --update
 ```
 
-Make sure you have the GOBL CLI installed ([more details](https://docs.gobl.org/quick-start/cli)).
+All generate XML documents will be validated against the TicketBAI XSD documents.

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/invopop/gobl.ticketbai/internal/doc"
+	"github.com/invopop/gobl.ticketbai/doc"
 	"github.com/invopop/gobl.ticketbai/test"
 	"github.com/invopop/xmldsig"
 	"github.com/stretchr/testify/assert"
@@ -21,10 +21,10 @@ func TestQRCodes(t *testing.T) {
 	require.NoError(t, err)
 	role := doc.IssuerRoleThirdParty
 
-	conf := &doc.FingerprintConfig{
-		NIF:             "12345678A",
-		SoftwareName:    "My Software",
-		SoftwareVersion: "1.0",
+	conf := &doc.Software{
+		NIF:     "12345678A",
+		Name:    "My Software",
+		Version: "1.0",
 	}
 
 	cert, err := xmldsig.LoadCertificate(test.Path("test", "certs", "EntitateOrdezkaria_RepresentanteDeEntidad.p12"), "IZDesa2021")
@@ -32,14 +32,14 @@ func TestQRCodes(t *testing.T) {
 
 	beforeEach := func(t *testing.T) *TestCase {
 		t.Helper()
-		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		invoice, err := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 		require.NoError(t, err)
 
-		err = invoice.Fingerprint(conf)
+		err = invoice.Fingerprint(conf, nil)
 		require.NoError(t, err)
 
-		err = invoice.Sign("TEST", cert, role, xmldsig.WithCurrentTime(func() time.Time {
+		err = invoice.Sign("TEST", cert, role, doc.ZoneBI, xmldsig.WithCurrentTime(func() time.Time {
 			// Make sure same time is always returned so signature values are
 			// always the same
 			return ts
@@ -55,7 +55,7 @@ func TestQRCodes(t *testing.T) {
 		testCase := beforeEach(t)
 
 		tbai := testCase.invoice
-		codes := tbai.QRCodes()
+		codes := tbai.QRCodes(doc.ZoneBI)
 
 		assert.Equal(t, 39, len(codes.TBAICode))
 		assert.Equal(t, true, strings.HasPrefix(codes.TBAICode, "TBAI-"))
@@ -69,7 +69,7 @@ func TestQRCodes(t *testing.T) {
 		testCase := beforeEach(t)
 
 		tbai := testCase.invoice
-		codes := tbai.QRCodes()
+		codes := tbai.QRCodes(doc.ZoneBI)
 
 		assert.Equal(t, true, strings.HasPrefix(codes.QRCode, "https://batuz.eus/QRTBAI/"))
 		assert.Contains(t, codes.QRCode, "?id=TBAI-A99805194-020222-")

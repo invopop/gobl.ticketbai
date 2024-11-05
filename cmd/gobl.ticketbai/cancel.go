@@ -8,7 +8,6 @@ import (
 
 	"github.com/invopop/gobl"
 	ticketbai "github.com/invopop/gobl.ticketbai"
-	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/xmldsig"
 	"github.com/spf13/cobra"
 )
@@ -50,6 +49,10 @@ func (c *cancelOpts) runE(cmd *cobra.Command, args []string) error {
 	if err := json.Unmarshal(buf.Bytes(), env); err != nil {
 		return fmt.Errorf("unmarshaling gobl envelope: %w", err)
 	}
+	zone := ticketbai.ZoneFor(env)
+	if zone == "" {
+		return fmt.Errorf("no zone found in envelope")
+	}
 
 	cert, err := xmldsig.LoadCertificate(c.cert, c.password)
 	if err != nil {
@@ -58,7 +61,6 @@ func (c *cancelOpts) runE(cmd *cobra.Command, args []string) error {
 
 	opts := []ticketbai.Option{
 		ticketbai.WithCertificate(cert),
-		ticketbai.WithZone(l10n.Code(c.zone)),
 		ticketbai.WithThirdPartyIssuer(),
 	}
 
@@ -68,26 +70,26 @@ func (c *cancelOpts) runE(cmd *cobra.Command, args []string) error {
 		opts = append(opts, ticketbai.InTesting())
 	}
 
-	tbai, err := ticketbai.New(c.software(), opts...)
+	tc, err := ticketbai.New(c.software(), zone, opts...)
 	if err != nil {
 		panic(err)
 	}
 
-	doc, err := tbai.NewCancelDocument(env)
+	tcd, err := tc.GenerateCancel(env)
 	if err != nil {
 		panic(err)
 	}
 
-	err = doc.Fingerprint()
+	err = tc.FingerprintCancel(tcd)
 	if err != nil {
 		panic(err)
 	}
 
-	if err := doc.Sign(); err != nil {
+	if err := tc.SignCancel(tcd, env); err != nil {
 		panic(err)
 	}
 
-	err = tbai.Cancel(cmd.Context(), doc)
+	err = tc.Cancel(cmd.Context(), tcd)
 	if err != nil {
 		panic(err)
 	}

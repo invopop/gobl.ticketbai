@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/invopop/gobl.ticketbai/internal/doc"
+	"github.com/invopop/gobl.ticketbai/doc"
 	"github.com/invopop/gobl.ticketbai/test"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/num"
@@ -20,7 +20,7 @@ func TestLines(t *testing.T) {
 	role := doc.IssuerRoleThirdParty
 
 	t.Run("should show line info", func(t *testing.T) {
-		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Lines = []*bill.Line{{
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
@@ -40,7 +40,7 @@ func TestLines(t *testing.T) {
 	})
 
 	t.Run("should show line discount", func(t *testing.T) {
-		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Lines = []*bill.Line{{
 			Index:     1,
 			Quantity:  num.MakeAmount(100, 0),
@@ -58,7 +58,7 @@ func TestLines(t *testing.T) {
 	})
 
 	t.Run("should subtract taxes if included in prices per unit", func(t *testing.T) {
-		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Tax = &bill.Tax{PricesInclude: "VAT"}
 
 		goblInvoice.Lines = []*bill.Line{{
@@ -77,7 +77,7 @@ func TestLines(t *testing.T) {
 	})
 
 	t.Run("should return error if more than 1000 lines included and not Vizcaya", func(t *testing.T) {
-		inv, _ := test.LoadInvoice("sample-invoice.json")
+		inv := test.LoadInvoice("sample-invoice.json")
 		inv.Lines = []*bill.Line{}
 		for i := 1; i <= 1001; i++ {
 			inv.Lines = append(inv.Lines, &bill.Line{

@@ -1,10 +1,10 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0192fbd4-81b4-75ed-899b-eb4c18a65f1c",
+		"uuid": "0192fd51-6cd8-73f2-a182-8c4d3901d125",
 		"dig": {
 			"alg": "sha256",
-			"val": "177b1a668214b82d634010ca686f671872c4f98865f4c259b88d8025dfbc3aaf"
+			"val": "a9fcef2ca22b63043a5c66137a39f8ad2be7db01c42ad94f4c5c80ee060c49b0"
 		}
 	},
 	"doc": {
@@ -13,74 +13,74 @@
 		"$addons": [
 			"es-tbai-v1"
 		],
-		"uuid": "01922336-8c0a-773e-b16e-6a7313423e54",
+		"uuid": "0192fd50-b568-7819-acf7-c2cfc5478b18",
 		"type": "standard",
-		"series": "SAMPLE",
-		"code": "003",
-		"issue_date": "2022-02-03",
+		"series": "TEST",
+		"code": "004",
+		"issue_date": "2022-02-01",
 		"currency": "EUR",
 		"tax": {
 			"ext": {
-				"es-tbai-region": "BI"
+				"es-tbai-region": "VI"
 			}
 		},
 		"supplier": {
-			"name": "Provider Two S.L.",
+			"name": "HFPn5yhXZ9tdD4pHRbvwymaVPrGZQr",
 			"tax_id": {
 				"country": "ES",
-				"code": "B64847106"
+				"code": "A99805194"
 			},
 			"addresses": [
 				{
-					"num": "42",
-					"street": "San Frantzisko",
-					"locality": "Bilbo",
-					"region": "Bizkaia",
-					"code": "48003",
+					"num": "18",
+					"street": "Calle Postas",
+					"locality": "Vitoria-Gasteiz",
+					"region": "Araba",
+					"code": "01001",
 					"country": "ES"
 				}
 			],
 			"emails": [
 				{
-					"addr": "billing@provider2.com"
+					"addr": "billing@example.com"
 				}
 			]
 		},
 		"customer": {
-			"name": "Pere Sancho Latorre",
+			"name": "Sample Customer",
 			"tax_id": {
 				"country": "ES",
-				"code": "93542762Z"
+				"code": "54387763P"
 			},
 			"addresses": [
 				{
-					"num": "58",
-					"street": "Praza Real",
-					"locality": "Caudete de las Fuentes",
-					"region": "Valencia",
-					"code": "46701",
+					"num": "13",
+					"street": "Calle del Barro",
+					"locality": "Alcañiz",
+					"region": "Teruel",
+					"code": "44600",
 					"country": "ES"
 				}
 			],
 			"emails": [
 				{
-					"addr": "mzkrme5v@blu.it"
+					"addr": "customer@example.com"
 				}
 			]
 		},
 		"lines": [
 			{
 				"i": 1,
-				"quantity": "15",
+				"quantity": "10",
 				"item": {
 					"name": "Item being purchased",
-					"price": "90.00"
+					"price": "100.00"
 				},
-				"sum": "1350.00",
+				"sum": "1000.00",
 				"discounts": [
 					{
 						"percent": "10%",
-						"amount": "135.00"
+						"amount": "100.00"
 					}
 				],
 				"taxes": [
@@ -90,12 +90,12 @@
 						"percent": "21.0%"
 					}
 				],
-				"total": "1215.00"
+				"total": "900.00"
 			}
 		],
 		"totals": {
-			"sum": "1215.00",
-			"total": "1215.00",
+			"sum": "900.00",
+			"total": "900.00",
 			"taxes": {
 				"categories": [
 					{
@@ -103,19 +103,19 @@
 						"rates": [
 							{
 								"key": "standard",
-								"base": "1215.00",
+								"base": "900.00",
 								"percent": "21.0%",
-								"amount": "255.15"
+								"amount": "189.00"
 							}
 						],
-						"amount": "255.15"
+						"amount": "189.00"
 					}
 				],
-				"sum": "255.15"
+				"sum": "189.00"
 			},
-			"tax": "255.15",
-			"total_with_tax": "1470.15",
-			"payable": "1470.15"
+			"tax": "189.00",
+			"total_with_tax": "1089.00",
+			"payable": "1089.00"
 		},
 		"notes": [
 			{

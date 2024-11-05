@@ -36,7 +36,6 @@ func (o *rootOpts) cmd() *cobra.Command {
 	cmd.AddCommand(versionCmd())
 	cmd.AddCommand(send(o).cmd())
 	cmd.AddCommand(convert(o).cmd())
-	cmd.AddCommand(fetch(o).cmd())
 	cmd.AddCommand(cancel(o).cmd())
 
 	return cmd
@@ -50,7 +49,6 @@ func (o *rootOpts) prepareFlags(f *pflag.FlagSet) {
 	f.StringVar(&o.swName, "sw-name", os.Getenv("SOFTWARE_NAME"), "Name of the software")
 	f.StringVar(&o.swVersion, "sw-version", os.Getenv("SOFTWARE_VERSION"), "Version of the software")
 	f.StringVar(&o.swLicense, "sw-license", os.Getenv("SOFTWARE_LICENSE"), "License of the software")
-	f.StringVarP(&o.zone, "zone", "z", os.Getenv("ZONE"), "Zone to send the invoice to")
 	f.BoolVarP(&o.production, "production", "p", false, "Production environment")
 }
 

@@ -1,10 +1,10 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0192fbd4-a54b-7d7a-be6e-258ea15f17a2",
+		"uuid": "0192fbbc-005b-7eea-8973-210ca4c0ffdc",
 		"dig": {
 			"alg": "sha256",
-			"val": "2900e06e5224e2b3c6bf004d036ee3356d3f2a4220fd3deaa80ae871915670b7"
+			"val": "265465a226476105b9339754dd8e8856033fca217b8b6e89a984295de402b4b6"
 		}
 	},
 	"doc": {
@@ -21,7 +21,7 @@
 		"currency": "EUR",
 		"tax": {
 			"ext": {
-				"es-tbai-region": "BI"
+				"es-tbai-region": "SS"
 			}
 		},
 		"supplier": {
@@ -33,10 +33,10 @@
 			"addresses": [
 				{
 					"num": "42",
-					"street": "San Frantzisko",
-					"locality": "Bilbo",
-					"region": "Bizkaia",
-					"code": "48003",
+					"street": "Zubieta Kalea",
+					"locality": "San Sebastian",
+					"region": "Gipuzkoa",
+					"code": "20007",
 					"country": "ES"
 				}
 			],
@@ -86,9 +86,8 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "standard+eqs",
-						"percent": "21.0%",
-						"surcharge": "5.2%"
+						"rate": "standard",
+						"percent": "21.0%"
 					},
 					{
 						"cat": "IRPF",
@@ -108,18 +107,13 @@
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "standard+eqs",
+								"key": "standard",
 								"base": "900.00",
 								"percent": "21.0%",
-								"surcharge": {
-									"percent": "5.2%",
-									"amount": "46.80"
-								},
 								"amount": "189.00"
 							}
 						],
-						"amount": "189.00",
-						"surcharge": "46.80"
+						"amount": "189.00"
 					},
 					{
 						"code": "IRPF",
@@ -135,11 +129,11 @@
 						"amount": "135.00"
 					}
 				],
-				"sum": "100.80"
+				"sum": "54.00"
 			},
-			"tax": "100.80",
-			"total_with_tax": "1000.80",
-			"payable": "1000.80"
+			"tax": "54.00",
+			"total_with_tax": "954.00",
+			"payable": "954.00"
 		},
 		"notes": [
 			{

@@ -1,21 +1,29 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0192237d-49e3-78cf-8c0e-180608d638fd",
+		"uuid": "0192fbd4-5087-708c-9b31-e8f653ef0c52",
 		"dig": {
 			"alg": "sha256",
-			"val": "d68c389e7a7acd0a27999e44325ec9a3f165c8fd962b9de883376b7a427e40dc"
+			"val": "27db0398b2f300511bfb0401a576876e5061248930ba31fb4d3bd140bddd5a6f"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "ES",
+		"$addons": [
+			"es-tbai-v1"
+		],
 		"uuid": "01922336-8bed-76dc-9a2b-6ed73f70163c",
 		"type": "standard",
 		"series": "TEST",
 		"code": "001",
 		"issue_date": "2022-02-01",
 		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"es-tbai-region": "BI"
+			}
+		},
 		"supplier": {
 			"name": "HFPn5yhXZ9tdD4pHRbvwymaVPrGZQr",
 			"tax_id": {
@@ -25,10 +33,10 @@
 			"addresses": [
 				{
 					"num": "42",
-					"street": "Calle Pradillo",
-					"locality": "Madrid",
-					"region": "Madrid",
-					"code": "28002",
+					"street": "San Frantzisko",
+					"locality": "Bilbo",
+					"region": "Bizkaia",
+					"code": "48003",
 					"country": "ES"
 				}
 			],

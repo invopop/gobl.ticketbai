@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/invopop/gobl.ticketbai/internal/doc"
+	"github.com/invopop/gobl.ticketbai/doc"
 	"github.com/invopop/gobl.ticketbai/test"
 	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
@@ -35,7 +35,7 @@ func TestDesgloseConversion(t *testing.T) {
 
 	t.Run("should fill DesgloseFactura when there is no customer (simplified invoice / ticket)",
 		func(t *testing.T) {
-			goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
+			goblInvoice := test.LoadInvoice("sample-invoice.json")
 			goblInvoice.Customer = nil
 
 			invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
@@ -464,7 +464,7 @@ func TestDesgloseConversion(t *testing.T) {
 }
 
 func invoiceFromCountry(countryCode l10n.TaxCountryCode) *bill.Invoice {
-	goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
+	goblInvoice := test.LoadInvoice("sample-invoice.json")
 	goblInvoice.Customer.TaxID.Country = countryCode
 	return goblInvoice
 }

@@ -51,18 +51,22 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 	if err := json.Unmarshal(buf.Bytes(), env); err != nil {
 		return fmt.Errorf("unmarshaling gobl envelope: %w", err)
 	}
+	zone := ticketbai.ZoneFor(env)
+	if zone == "" {
+		return fmt.Errorf("no zone found in envelope")
+	}
 
-	tbai, err := ticketbai.New(&ticketbai.Software{})
+	tc, err := ticketbai.New(&ticketbai.Software{}, zone)
 	if err != nil {
 		return fmt.Errorf("creating ticketbai client: %w", err)
 	}
 
-	doc, err := tbai.NewDocument(env)
+	td, err := tc.Convert(env)
 	if err != nil {
 		panic(err)
 	}
 
-	data, err := doc.BytesIndent()
+	data, err := td.BytesIndent()
 	if err != nil {
 		return fmt.Errorf("generating ticketbai xml: %w", err)
 	}

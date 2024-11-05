@@ -8,8 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/invopop/gobl.ticketbai/internal/doc"
-	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl.ticketbai/doc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/xmldsig"
 )
@@ -25,9 +24,9 @@ const (
 
 // Standard gateway error responses
 var (
-	ErrConnection       = newError("connection")
-	ErrInvalidRequest   = newError("invalid-request")
-	ErrDuplicatedRecord = newError("duplicate")
+	ErrConnection = newError("connection")
+	ErrInvalid    = newError("invalid")
+	ErrDuplicate  = newError("duplicate")
 )
 
 // Error allows for structured responses from the gateway to be able to
@@ -49,6 +48,11 @@ func (e *Error) Error() string {
 		out = append(out, e.message)
 	}
 	return strings.Join(out, ": ")
+}
+
+// Key returns the key for the error.
+func (e *Error) Key() string {
+	return e.key
 }
 
 // Message returns the human message for the error.
@@ -106,44 +110,25 @@ func (e *Error) Is(target error) bool {
 type Connection interface {
 	// Post sends the complete TicketBAI document to the remote end-point. We assume
 	// the document has been fully prepared and signed.
-	Post(ctx context.Context, inv *bill.Invoice, doc *doc.TicketBAI) error
-	Fetch(ctx context.Context, nif string, name string, year int, page int, head *doc.CabeceraFactura) ([]*doc.TicketBAI, error)
-	Cancel(ctx context.Context, inv *bill.Invoice, doc *doc.AnulaTicketBAI) error
+	Post(ctx context.Context, doc *doc.TicketBAI) error
+	Cancel(ctx context.Context, doc *doc.AnulaTicketBAI) error
 }
 
-// List keeps together the list of connections
-type List struct {
-	conns map[l10n.Code]Connection
-}
-
-// New instantiates a new set of connections using the provided config.
-func New(env Environment, cert *xmldsig.Certificate) (*List, error) {
-	l := new(List)
-
+// New instantiates a new connection for the given zone and environment.
+func New(env Environment, zone l10n.Code, cert *xmldsig.Certificate) (Connection, error) {
 	tlsConf, err := cert.TLSAuthConfig()
 	if err != nil {
 		return nil, fmt.Errorf("preparing TLS config: %w", err)
 	}
 
-	l.Register(doc.ZoneBI, newEbizkaia(env, tlsConf))
-	l.Register(doc.ZoneSS, newGipuzkoa(env, tlsConf))
-
-	return l, nil
-}
-
-// Register adds a connection to use in a zone
-func (l *List) Register(zone l10n.Code, c Connection) {
-	if l.conns == nil {
-		l.conns = make(map[l10n.Code]Connection)
+	switch zone {
+	case doc.ZoneBI:
+		return newEbizkaia(env, tlsConf), nil
+	case doc.ZoneSS:
+		return newGipuzkoa(env, tlsConf), nil
+	case doc.ZoneVI:
+		return newAraba(env, tlsConf), nil
 	}
-	l.conns[zone] = c
-}
 
-// For provides the connection needed for the given zone, or nil, if not
-// supported.
-func (l *List) For(zone l10n.Code) Connection {
-	if l.conns == nil {
-		return nil
-	}
-	return l.conns[zone]
+	return nil, fmt.Errorf("zone %s not supported", zone)
 }

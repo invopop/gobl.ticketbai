@@ -8,7 +8,7 @@ import (
 
 	"github.com/invopop/gobl"
 	ticketbai "github.com/invopop/gobl.ticketbai"
-	"github.com/invopop/gobl/l10n"
+	"github.com/invopop/gobl.ticketbai/doc"
 	"github.com/invopop/xmldsig"
 	"github.com/spf13/cobra"
 )
@@ -27,7 +27,9 @@ func (c *sendOpts) cmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "send [infile]",
 		Short: "Sends the GOBL invoice to the TicketBAI service",
-		RunE:  c.runE,
+		Run: func(cmd *cobra.Command, args []string) {
+			handleError(c.runE(cmd, args))
+		},
 	}
 
 	f := cmd.Flags()
@@ -55,14 +57,18 @@ func (c *sendOpts) runE(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("unmarshaling gobl envelope: %w", err)
 	}
 
+	zone := ticketbai.ZoneFor(env)
+	if zone == "" {
+		return fmt.Errorf("unable to determine zone")
+	}
+
 	cert, err := xmldsig.LoadCertificate(c.cert, c.password)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	opts := []ticketbai.Option{
 		ticketbai.WithCertificate(cert),
-		ticketbai.WithZone(l10n.Code(c.zone)),
 		ticketbai.WithThirdPartyIssuer(),
 	}
 
@@ -72,47 +78,41 @@ func (c *sendOpts) runE(cmd *cobra.Command, args []string) error {
 		opts = append(opts, ticketbai.InTesting())
 	}
 
-	tbai, err := ticketbai.New(c.software(), opts...)
+	tc, err := ticketbai.New(c.software(), zone, opts...)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	doc, err := tbai.NewDocument(env)
+	td, err := tc.Convert(env)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	var prev *ticketbai.PreviousInvoice
+	var prev *doc.ChainData
 	if c.previous != "" {
-		prev = new(ticketbai.PreviousInvoice)
+		prev = new(doc.ChainData)
 		if err := json.Unmarshal([]byte(c.previous), prev); err != nil {
-			panic(err)
+			return err
 		}
 	}
 
-	err = doc.Fingerprint(prev)
+	err = tc.Fingerprint(td, prev)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	if err := doc.Sign(); err != nil {
-		panic(err)
+	if err := tc.Sign(td, env); err != nil {
+		return err
 	}
 
-	err = tbai.Post(cmd.Context(), doc)
+	err = tc.Post(cmd.Context(), td)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	np := &ticketbai.PreviousInvoice{
-		Series:    doc.Head().SerieFactura,
-		Code:      doc.Head().NumFactura,
-		IssueDate: doc.Head().FechaExpedicionFactura,
-		Signature: doc.SignatureValue(),
-	}
-	data, err := json.Marshal(np)
+	data, err := json.Marshal(td.ChainData())
 	if err != nil {
-		panic(err)
+		return err
 	}
 	fmt.Printf("Generated document with fingerprint: \n%s\n", string(data))
 
