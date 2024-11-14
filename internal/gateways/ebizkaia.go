@@ -60,7 +60,6 @@ func newEbizkaia(env Environment, tlsConfig *tls.Config) *EBizkaiaConn {
 		c.client.SetBaseURL(eBizkaiaTestingBaseURL)
 	}
 
-	tlsConfig.InsecureSkipVerify = true
 	c.client.SetTLSClientConfig(tlsConfig)
 	c.client.SetDebug(os.Getenv("DEBUG") == "true")
 

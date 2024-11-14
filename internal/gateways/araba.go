@@ -65,8 +65,6 @@ func newAraba(env Environment, tlsConfig *tls.Config) *ArabaConn {
 		c.client.SetBaseURL(arabaTestingBaseURL)
 	}
 
-	tlsConfig.InsecureSkipVerify = true
-	tlsConfig.Renegotiation = tls.RenegotiateOnceAsClient
 	c.client.SetTLSClientConfig(tlsConfig)
 	c.client.SetDebug(os.Getenv("DEBUG") == "true")
 

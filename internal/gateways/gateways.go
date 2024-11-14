@@ -4,10 +4,13 @@ package gateways
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"fmt"
 	"strings"
 
+	"github.com/invopop/gobl.ticketbai/ca"
 	"github.com/invopop/gobl.ticketbai/doc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/xmldsig"
@@ -121,6 +124,14 @@ func New(env Environment, zone l10n.Code, cert *xmldsig.Certificate) (Connection
 		return nil, fmt.Errorf("preparing TLS config: %w", err)
 	}
 
+	certs, err := rootCAPool()
+	if err != nil {
+		return nil, fmt.Errorf("preparing cert pool: %w", err)
+	}
+
+	tlsConf.RootCAs = certs
+	tlsConf.Renegotiation = tls.RenegotiateOnceAsClient
+
 	switch zone {
 	case doc.ZoneBI:
 		return newEbizkaia(env, tlsConf), nil
@@ -131,4 +142,20 @@ func New(env Environment, zone l10n.Code, cert *xmldsig.Certificate) (Connection
 	}
 
 	return nil, fmt.Errorf("zone %s not supported", zone)
+}
+
+func rootCAPool() (*x509.CertPool, error) {
+	certs := x509.NewCertPool()
+	files, err := ca.Content.ReadDir(".")
+	if err != nil {
+		return nil, err
+	}
+	for _, f := range files {
+		data, err := ca.Content.ReadFile(f.Name())
+		if err != nil {
+			return nil, err
+		}
+		certs.AppendCertsFromPEM(data)
+	}
+	return certs, nil
 }

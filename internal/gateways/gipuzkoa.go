@@ -66,8 +66,6 @@ func newGipuzkoa(env Environment, tlsConfig *tls.Config) *GipuzkoaConn {
 		c.client.SetBaseURL(gipuzkoaTestingBaseURL)
 	}
 
-	tlsConfig.InsecureSkipVerify = true
-	tlsConfig.Renegotiation = tls.RenegotiateOnceAsClient
 	c.client.SetTLSClientConfig(tlsConfig)
 	c.client.SetDebug(os.Getenv("DEBUG") == "true")
 

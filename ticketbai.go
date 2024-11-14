@@ -50,19 +50,13 @@ func WithCurrentTime(curTime time.Time) Option {
 	}
 }
 
-/*
-// WithGateway defines a new gateway connection to use for a specific zone. This
-// option can be used multiple times to define multiple gateways. Useful for
-// testing.
-func WithGateway(code l10n.Code, conn gateways.Connection) Option {
+// WithConenction defines a new gateway connection to use for the client.
+// Useful for testing and mocking the connection responses.
+func WithConnection(conn gateways.Connection) Option {
 	return func(c *Client) {
-		if c.list == nil {
-			c.list = new(gateways.List)
-		}
-		c.list.Register(code, conn)
+		c.gw = conn
 	}
 }
-*/
 
 // WithSupplierIssuer set the issuer type to supplier. To be used when the
 // invoice's supplier, using their own certificate, is issuing the document.
