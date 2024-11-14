@@ -18,7 +18,6 @@ type rootOpts struct {
 	swName        string
 	swVersion     string
 	swLicense     string
-	zone          string
 	production    bool
 }
 

@@ -50,7 +50,7 @@ func WithCurrentTime(curTime time.Time) Option {
 	}
 }
 
-// WithConenction defines a new gateway connection to use for the client.
+// WithConnection defines a new gateway connection to use for the client.
 // Useful for testing and mocking the connection responses.
 func WithConnection(conn gateways.Connection) Option {
 	return func(c *Client) {

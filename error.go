@@ -82,13 +82,6 @@ func (e *Error) Cause() error {
 	return e.cause
 }
 
-// withCode duplicates and adds the code to the error.
-func (e *Error) withCode(code string) *Error {
-	e = e.clone()
-	e.code = code
-	return e
-}
-
 // withMessage duplicates and adds the message to the error.
 func (e *Error) withMessage(msg string, args ...any) *Error {
 	e = e.clone()

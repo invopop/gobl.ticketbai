@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/go-resty/resty/v2"
@@ -28,8 +27,8 @@ const (
 )
 
 const (
-	ArabaStatusReceived = "00" // looks good.
-	ArabaStatusRejected = "01" // there are errors that need fixing.
+	arabaStatusReceived = "00" // looks good.
+	arabaStatusRejected = "01" // there are errors that need fixing.
 )
 
 // ArabaResponse defines the response fields from the Araba region.
@@ -66,7 +65,7 @@ func newAraba(env Environment, tlsConfig *tls.Config) *ArabaConn {
 	}
 
 	c.client.SetTLSClientConfig(tlsConfig)
-	c.client.SetDebug(os.Getenv("DEBUG") == "true")
+	c.client.SetDebug(debug())
 
 	return c
 }
@@ -107,7 +106,7 @@ func (c *ArabaConn) post(ctx context.Context, path string, payload []byte) error
 		return ErrInvalid.withCode(strconv.Itoa(res.StatusCode()))
 	}
 
-	if out.Output.Status != ArabaStatusReceived {
+	if out.Output.Status != arabaStatusReceived {
 		err := ErrInvalid
 		if len(out.Output.Errors) > 0 {
 			e1 := out.Output.Errors[0]

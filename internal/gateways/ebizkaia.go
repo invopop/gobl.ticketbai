@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"os"
 	"slices"
 
 	"github.com/go-resty/resty/v2"
@@ -61,7 +60,7 @@ func newEbizkaia(env Environment, tlsConfig *tls.Config) *EBizkaiaConn {
 	}
 
 	c.client.SetTLSClientConfig(tlsConfig)
-	c.client.SetDebug(os.Getenv("DEBUG") == "true")
+	c.client.SetDebug(debug())
 
 	return c
 }

@@ -13,7 +13,7 @@ import (
 	"github.com/invopop/xmldsig"
 )
 
-// NewCancelDocument creates a new AnulaTicketBAI document from the provided
+// GenerateCancel creates a new AnulaTicketBAI document from the provided
 // GOBL Envelope.
 func (c *Client) GenerateCancel(env *gobl.Envelope) (*doc.AnulaTicketBAI, error) {
 	// Extract the Invoice
@@ -44,7 +44,7 @@ func (c *Client) GenerateCancel(env *gobl.Envelope) (*doc.AnulaTicketBAI, error)
 	return cd, nil
 }
 
-// Fingerprint generates a finger print for the TicketBAI document using the
+// FingerprintCancel generates a finger print for the TicketBAI document using the
 // data provided from the previous invoice data.
 func (c *Client) FingerprintCancel(cd *doc.AnulaTicketBAI) error {
 	conf := &doc.Software{
@@ -56,7 +56,7 @@ func (c *Client) FingerprintCancel(cd *doc.AnulaTicketBAI) error {
 	return cd.Fingerprint(conf)
 }
 
-// Sign is used to generate the XML DSig components of the final XML document.
+// SignCancel is used to generate the XML DSig components of the final XML document.
 func (c *Client) SignCancel(cd *doc.AnulaTicketBAI, env *gobl.Envelope) error {
 	inv, ok := env.Extract().(*bill.Invoice)
 	if !ok {

@@ -8,6 +8,7 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/invopop/gobl.ticketbai/ca"
@@ -158,4 +159,8 @@ func rootCAPool() (*x509.CertPool, error) {
 		certs.AppendCertsFromPEM(data)
 	}
 	return certs, nil
+}
+
+func debug() bool {
+	return os.Getenv("DEBUG") == "true"
 }

@@ -12,7 +12,7 @@ import (
 	"github.com/invopop/xmldsig"
 )
 
-// NewDocument creates a new TicketBAI document from the provided GOBL Envelope.
+// Convert creates a new TicketBAI document from the provided GOBL Envelope.
 // The envelope must contain a valid Invoice.
 func (c *Client) Convert(env *gobl.Envelope) (*doc.TicketBAI, error) {
 	// Extract the Invoice

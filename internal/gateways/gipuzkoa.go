@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/go-resty/resty/v2"
@@ -29,8 +28,8 @@ const (
 )
 
 const (
-	GipuzkoaStatusReceived = "00" // looks good.
-	GipuzkoaStatusRejected = "01" // there are errors that need fixing.
+	gipuzkoaStatusReceived = "00" // looks good.
+	gipuzkoaStatusRejected = "01" // there are errors that need fixing.
 )
 
 // GipuzkoaResponse defines the response fields from the Gipuzkoa region.
@@ -67,7 +66,7 @@ func newGipuzkoa(env Environment, tlsConfig *tls.Config) *GipuzkoaConn {
 	}
 
 	c.client.SetTLSClientConfig(tlsConfig)
-	c.client.SetDebug(os.Getenv("DEBUG") == "true")
+	c.client.SetDebug(debug())
 
 	return c
 }
@@ -108,7 +107,7 @@ func (c *GipuzkoaConn) post(ctx context.Context, path string, payload []byte) er
 		return ErrInvalid.withCode(strconv.Itoa(res.StatusCode()))
 	}
 
-	if out.Output.Status != GipuzkoaStatusReceived {
+	if out.Output.Status != gipuzkoaStatusReceived {
 		err := ErrInvalid
 		if len(out.Output.Errors) > 0 {
 			e1 := out.Output.Errors[0]
