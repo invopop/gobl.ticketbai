@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/xmldsig"
 )
 
@@ -52,22 +53,32 @@ func NewAnulaTicketBAI(inv *bill.Invoice, ts time.Time) (*AnulaTicketBAI, error)
 	return doc, nil
 }
 
+// IssueYear is a convenience method to extract the year of issue for headers.
+func (doc *AnulaTicketBAI) IssueYear() string {
+	if doc.IDFactura == nil ||
+		doc.IDFactura.CabeceraFactura == nil ||
+		doc.IDFactura.CabeceraFactura.FechaExpedicionFactura == "" {
+		return ""
+	}
+	year := doc.IDFactura.CabeceraFactura.FechaExpedicionFactura
+	year = year[len(year)-4:]
+	return year
+}
+
 // Fingerprint calculates the fingerprint of the document
-func (doc *AnulaTicketBAI) Fingerprint(conf *FingerprintConfig) error {
-	doc.HuellaTBAI = newHuellaTBAI(conf)
+func (doc *AnulaTicketBAI) Fingerprint(soft *Software) error {
+	doc.HuellaTBAI = newHuellaTBAI(soft, nil)
 	return nil
 }
 
 // Sign signs the document with the given certificate and role
-func (doc *AnulaTicketBAI) Sign(docID string, cert *xmldsig.Certificate, role IssuerRole, opts ...xmldsig.Option) error {
+func (doc *AnulaTicketBAI) Sign(docID string, cert *xmldsig.Certificate, role IssuerRole, zone l10n.Code, opts ...xmldsig.Option) error {
 	// TODO: Fix the zone so that it can be determined from a configuration.
-	s, err := newSignature(doc, docID, ZoneBI, role, cert, opts...)
+	s, err := newSignature(doc, docID, zone, role, cert, opts...)
 	if err != nil {
 		return err
 	}
-
 	doc.Signature = s
-
 	return nil
 }
 

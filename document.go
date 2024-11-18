@@ -2,10 +2,9 @@ package ticketbai
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/invopop/gobl"
-	"github.com/invopop/gobl.ticketbai/internal/doc"
+	"github.com/invopop/gobl.ticketbai/doc"
 	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/head"
@@ -13,131 +12,103 @@ import (
 	"github.com/invopop/xmldsig"
 )
 
-// Document is a wrapper around the internal TicketBAI document.
-type Document struct {
-	env  *gobl.Envelope
-	inv  *bill.Invoice
-	tbai *doc.TicketBAI // output
-
-	client *Client
-}
-
-// NewDocument creates a new TicketBAI document from the provided GOBL Envelope.
+// Convert creates a new TicketBAI document from the provided GOBL Envelope.
 // The envelope must contain a valid Invoice.
-func (c *Client) NewDocument(env *gobl.Envelope) (*Document, error) {
-	d := new(Document)
-
-	// Set the client for later use
-	d.client = c
-
+func (c *Client) Convert(env *gobl.Envelope) (*doc.TicketBAI, error) {
 	// Extract the Invoice
-	var ok bool
-	d.env = env
-	d.inv, ok = d.env.Extract().(*bill.Invoice)
+	inv, ok := env.Extract().(*bill.Invoice)
 	if !ok {
-		return nil, ErrOnlyInvoices
+		return nil, ErrValidation.withMessage("only invoices are supported")
 	}
-
 	// Check the existing stamps, we might not need to do anything
-	if d.hasExistingStamps() {
-		return nil, ErrAlreadyProcessed
+	if hasExistingStamps(env) {
+		return nil, ErrDuplicate.withMessage("already has stamps")
 	}
-	if d.inv.Supplier.TaxID.Country != l10n.ES.Tax() {
-		return nil, ErrNotSpanish
+	if inv.Supplier.TaxID.Country != l10n.ES.Tax() {
+		return nil, ErrValidation.withMessage("only spanish invoices are supported")
 	}
 
-	var err error
-	d.tbai, err = doc.NewTicketBAI(d.inv, c.CurrentTime(), c.issuerRole, c.zone)
+	zone := zoneFor(inv)
+	if zone == "" {
+		return nil, ErrValidation.withMessage("invalid zone")
+	}
+
+	out, err := doc.NewTicketBAI(inv, c.CurrentTime(), c.issuerRole, zone)
 	if err != nil {
 		if _, ok := err.(*doc.ValidationError); ok {
-			return nil, &ValidationError{err}
+			return nil, ErrValidation.withMessage(err.Error())
 		}
 
 		return nil, err
 	}
 
-	return d, nil
+	return out, nil
 }
 
-// Fingerprint generates a finger print for the TicketBAI document using the
-// data provided from the previous invoice data. If there was no previous
-// invoice, the parameter should be nil.
-func (d *Document) Fingerprint(prev *PreviousInvoice) error {
-	c := d.client // shortcut
-
-	conf := &doc.FingerprintConfig{
-		License:         c.software.License,
-		NIF:             c.software.NIF,
-		SoftwareName:    c.software.Name,
-		SoftwareVersion: c.software.Version,
+// ZoneFor determines the zone of the envelope.
+func ZoneFor(env *gobl.Envelope) l10n.Code {
+	inv, ok := env.Extract().(*bill.Invoice)
+	if !ok {
+		return ""
 	}
+	return zoneFor(inv)
+}
 
-	if prev != nil {
-		conf.LastSeries = prev.Series
-		conf.LastCode = prev.Code
-		conf.LastIssueDate = prev.IssueDate
-		conf.LastSignature = prev.Signature
+// zoneFor determines the zone of the invoice.
+func zoneFor(inv *bill.Invoice) l10n.Code {
+	// Figure out the zone
+	if inv == nil ||
+		inv.Tax == nil ||
+		inv.Tax.Ext == nil ||
+		inv.Tax.Ext[tbai.ExtKeyRegion] == "" {
+		return ""
 	}
+	return l10n.Code(inv.Tax.Ext[tbai.ExtKeyRegion])
+}
 
-	return d.tbai.Fingerprint(conf)
+// Fingerprint generates a fingerprint for the TicketBAI document using the
+// data provided from the previous chain data. If there was no previous
+// document in the chain, the parameter should be nil. The document is updated
+// in place.
+func (c *Client) Fingerprint(d *doc.TicketBAI, prev *doc.ChainData) error {
+	soft := &doc.Software{
+		License: c.software.License,
+		NIF:     c.software.NIF,
+		Name:    c.software.Name,
+		Version: c.software.Version,
+	}
+	return d.Fingerprint(soft, prev)
 }
 
 // Sign is used to generate the XML DSig components of the final XML document.
 // This method will also update the GOBL Envelope with the QR codes that are
 // generated.
-func (d *Document) Sign() error {
-	c := d.client // shortcut
-
-	dID := d.env.Head.UUID.String()
-	if err := d.tbai.Sign(dID, c.cert, c.issuerRole, xmldsig.WithCurrentTime(d.tbai.IssueTimestamp)); err != nil {
+func (c *Client) Sign(d *doc.TicketBAI, env *gobl.Envelope) error {
+	zone := ZoneFor(env)
+	dID := env.Head.UUID.String()
+	if err := d.Sign(dID, c.cert, c.issuerRole, zone, xmldsig.WithCurrentTime(d.IssueTimestamp)); err != nil {
 		return fmt.Errorf("signing: %w", err)
 	}
 
 	// now generate the QR codes and add them to the envelope
-	codes := d.tbai.QRCodes()
-	d.env.Head.AddStamp(
+	codes := d.QRCodes(zone)
+	env.Head.AddStamp(
 		&head.Stamp{
 			Provider: tbai.StampCode,
 			Value:    codes.TBAICode,
 		},
 	)
-	d.env.Head.AddStamp(
+	env.Head.AddStamp(
 		&head.Stamp{
 			Provider: tbai.StampQR,
 			Value:    codes.QRCode,
 		},
 	)
-
 	return nil
 }
 
-// SetIssueTimestamp updates the issue date and time of the TicketBAI document.
-func (d *Document) SetIssueTimestamp(ts time.Time) {
-	d.tbai.SetIssueTimestamp(ts)
-}
-
-// Bytes generates the byte output of the TicketBAI Document.
-func (d *Document) Bytes() ([]byte, error) {
-	return d.tbai.Bytes()
-}
-
-// BytesIndent generates the indented byte output of the TicketBAI Document.
-func (d *Document) BytesIndent() ([]byte, error) {
-	return d.tbai.BytesIndent()
-}
-
-// Head returns the CabeceraFactura from the TicketBAI document.
-func (d *Document) Head() *doc.CabeceraFactura {
-	return d.tbai.Factura.CabeceraFactura
-}
-
-// SignatureValue provides quick access to the XML signatures final value.
-func (d *Document) SignatureValue() string {
-	return d.tbai.SignatureValue()
-}
-
-func (d *Document) hasExistingStamps() bool {
-	for _, stamp := range d.env.Head.Stamps {
+func hasExistingStamps(env *gobl.Envelope) bool {
+	for _, stamp := range env.Head.Stamps {
 		if stamp.Provider.In(tbai.StampCode, tbai.StampQR) {
 			return true
 		}

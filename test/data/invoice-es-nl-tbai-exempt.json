@@ -4,18 +4,26 @@
 		"uuid": "0192237d-49c2-79a7-8249-4280119d8ade",
 		"dig": {
 			"alg": "sha256",
-			"val": "e738033af1a801aeaee086f780e0b5a52e4993ab6c4a4e70376905f28a65dc9a"
+			"val": "0294246ded2b071f8c6eb6011251f3bd254726613b5e7402abcbc2c91e96ecd1"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "ES",
+		"$addons": [
+			"es-tbai-v1"
+		],
 		"uuid": "3b445a46-a0ac-11ee-a4ee-e6a7901137ed",
 		"type": "standard",
 		"series": "EXPORT",
 		"code": "0002",
 		"issue_date": "2022-02-01",
 		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"es-tbai-region": "BI"
+			}
+		},
 		"supplier": {
 			"name": "Provide One S.L.",
 			"tax_id": {
@@ -57,9 +65,9 @@
 				"sum": "1800.00",
 				"discounts": [
 					{
+						"reason": "Special discount",
 						"percent": "10%",
-						"amount": "180.00",
-						"reason": "Special discount"
+						"amount": "180.00"
 					}
 				],
 				"taxes": [

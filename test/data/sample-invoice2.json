@@ -1,20 +1,29 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0192237d-4a57-7812-9320-52e86cc6fc30",
+		"uuid": "0192fbd5-3b54-7735-a8de-2e4f13219f68",
 		"dig": {
 			"alg": "sha256",
-			"val": "726586d091f822dfe0ef13019996a8af583fd58d3909770c6dde6dd531415740"
+			"val": "61ef29f84ae8f5fe2e0366a0a0dd3582c75dcd46884335619a9d1129343bfa56"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "ES",
+		"$addons": [
+			"es-tbai-v1"
+		],
 		"uuid": "01922336-8c6b-70df-9f8f-87c5d58e9582",
 		"type": "standard",
-		"code": "SAMPLE-002",
+		"series": "SAMPLE",
+		"code": "002",
 		"issue_date": "2022-02-02",
 		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"es-tbai-region": "BI"
+			}
+		},
 		"supplier": {
 			"name": "Provider One S.L.",
 			"tax_id": {
@@ -24,10 +33,10 @@
 			"addresses": [
 				{
 					"num": "42",
-					"street": "Calle Pradillo",
-					"locality": "Madrid",
-					"region": "Madrid",
-					"code": "28002",
+					"street": "San Frantzisko",
+					"locality": "Bilbo",
+					"region": "Bizkaia",
+					"code": "48003",
 					"country": "ES"
 				}
 			],

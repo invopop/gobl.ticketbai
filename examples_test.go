@@ -1,7 +1,6 @@
 package ticketbai_test
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,7 +9,7 @@ import (
 	"time"
 
 	ticketbai "github.com/invopop/gobl.ticketbai"
-	"github.com/invopop/gobl.ticketbai/internal/doc"
+	"github.com/invopop/gobl.ticketbai/doc"
 	"github.com/invopop/gobl.ticketbai/test"
 	"github.com/invopop/xmldsig"
 	"github.com/lestrrat-go/libxml2"
@@ -18,8 +17,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-var updateOut = flag.Bool("update", false, "Update the XML files in the test/data/out directory")
 
 const (
 	msgMissingOutFile    = "output file %s missing, run tests with `--update` flag to create"
@@ -47,7 +44,7 @@ func TestXMLGeneration(t *testing.T) {
 				strings.TrimSuffix(example, ".json")+".xml",
 			)
 
-			if *updateOut {
+			if *test.UpdateOut {
 				errs := validateDoc(schema, data)
 				for _, e := range errs {
 					assert.NoError(t, e)
@@ -109,10 +106,10 @@ func loadTBAIClient() (*ticketbai.Client, error) {
 		Name:    "My Software",
 		Version: "1.0",
 	},
+		ticketbai.ZoneBI,
 		ticketbai.WithCertificate(cert),
 		ticketbai.WithCurrentTime(ts),
 		ticketbai.WithThirdPartyIssuer(),
-		ticketbai.WithZone(doc.ZoneBI),
 	)
 }
 
@@ -129,18 +126,15 @@ func lookupExamples() ([]string, error) {
 	return examples, nil
 }
 
-func convertExample(tbai *ticketbai.Client, example string) ([]byte, error) {
-	env, err := test.LoadEnvelope(example)
+func convertExample(tc *ticketbai.Client, example string) ([]byte, error) {
+	env := test.LoadEnvelope(example)
+
+	td, err := tc.Convert(env)
 	if err != nil {
 		return nil, err
 	}
 
-	doc, err := tbai.NewDocument(env)
-	if err != nil {
-		return nil, err
-	}
-
-	err = doc.Fingerprint(&ticketbai.PreviousInvoice{
+	err = tc.Fingerprint(td, &doc.ChainData{
 		Series:    "AF",
 		Code:      "1234567890",
 		IssueDate: "01-01-2021",
@@ -150,12 +144,12 @@ func convertExample(tbai *ticketbai.Client, example string) ([]byte, error) {
 		return nil, err
 	}
 
-	err = doc.Sign()
+	err = tc.Sign(td, env)
 	if err != nil {
 		return nil, err
 	}
 
-	return doc.BytesIndent()
+	return td.BytesIndent()
 }
 
 func validateDoc(schema *xsd.Schema, doc []byte) []error {

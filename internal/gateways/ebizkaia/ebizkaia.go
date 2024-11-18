@@ -10,7 +10,7 @@ import (
 	"encoding/xml"
 	"fmt"
 
-	"github.com/invopop/gobl.ticketbai/internal/doc"
+	"github.com/invopop/gobl.ticketbai/doc"
 )
 
 // Bizkaia has extra complications when sending documents, so we define all the additional
@@ -208,7 +208,7 @@ type NIFPersonaType struct {
 // Supplier contains the details of the supplier who is making the
 // request.
 type Supplier struct {
-	Year int    // invoice issue year
+	Year string // invoice issue year
 	NIF  string // Tax code
 	Name string // Name of the company
 }
@@ -278,7 +278,7 @@ func newCabecera240Type(sup *Supplier, op string) *Cabecera240Type {
 		Subcapitulo: apartado1_1,
 		Operacion:   op,
 		Version:     "1.0",
-		Ejercicio:   fmt.Sprintf("%d", sup.Year),
+		Ejercicio:   sup.Year,
 		ObligadoTributario: &NIFPersonaType{
 			NIF:                        sup.NIF,
 			ApellidosNombreRazonSocial: sup.Name,
@@ -319,7 +319,7 @@ func newN3Header(sup *Supplier) *N3Header {
 		},
 		DatosRelevantes: N3DatosRelevantes{
 			Modelo:    modelo240,
-			Ejercicio: fmt.Sprintf("%d", sup.Year),
+			Ejercicio: sup.Year,
 		},
 	}
 	return head

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/invopop/gobl.ticketbai/internal/doc"
+	"github.com/invopop/gobl.ticketbai/doc"
 	"github.com/invopop/gobl.ticketbai/test"
 	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
@@ -24,7 +24,7 @@ func TestFacturaConversion(t *testing.T) {
 	role := doc.IssuerRoleThirdParty
 
 	t.Run("should add info about id of an invoice", func(t *testing.T) {
-		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Code = "something-001"
 		goblInvoice.Series = "SERIES"
 
@@ -36,7 +36,7 @@ func TestFacturaConversion(t *testing.T) {
 	})
 
 	t.Run("should add issue time / date info", func(t *testing.T) {
-		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
 
 		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 
@@ -46,7 +46,7 @@ func TestFacturaConversion(t *testing.T) {
 	})
 
 	t.Run("should mark an invoice as simplified (ticket)", func(t *testing.T) {
-		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.SetTags(tax.TagSimplified)
 
 		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
@@ -56,7 +56,7 @@ func TestFacturaConversion(t *testing.T) {
 	})
 
 	t.Run("should fill invoice operation date", func(t *testing.T) {
-		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.OperationDate = cal.NewDate(2022, 3, 15)
 
 		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
@@ -66,7 +66,7 @@ func TestFacturaConversion(t *testing.T) {
 	})
 
 	t.Run("should fill invoice description from general note", func(t *testing.T) {
-		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Notes = []*cbc.Note{
 			{Key: cbc.NoteKeyGeneral, Text: "Description of invoice"},
 		}
@@ -78,7 +78,7 @@ func TestFacturaConversion(t *testing.T) {
 	})
 
 	t.Run("should return error if no description (general note) found", func(t *testing.T) {
-		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Notes = []*cbc.Note{}
 
 		_, err := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
@@ -87,7 +87,7 @@ func TestFacturaConversion(t *testing.T) {
 	})
 
 	t.Run("should include VAT and discounts to the total of the invoice", func(t *testing.T) {
-		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Lines = []*bill.Line{{
 			Index:     1,
 			Quantity:  num.MakeAmount(100, 0),
@@ -104,7 +104,7 @@ func TestFacturaConversion(t *testing.T) {
 	})
 
 	t.Run("should not include retained taxes (IRPF) to the total of the invoice", func(t *testing.T) {
-		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Lines = []*bill.Line{{
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
@@ -123,7 +123,7 @@ func TestFacturaConversion(t *testing.T) {
 	})
 
 	t.Run("should add retained taxes (IRPF) to RetencionSoportada", func(t *testing.T) {
-		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Lines = []*bill.Line{{
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
@@ -142,7 +142,7 @@ func TestFacturaConversion(t *testing.T) {
 	})
 
 	t.Run("should add general regime (01) if no other VAT keys", func(t *testing.T) {
-		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Lines = []*bill.Line{{
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
@@ -160,7 +160,7 @@ func TestFacturaConversion(t *testing.T) {
 	})
 
 	t.Run("should add export (02) if the client is foreign", func(t *testing.T) {
-		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Customer.TaxID.Country = "GB"
 
 		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
@@ -170,7 +170,7 @@ func TestFacturaConversion(t *testing.T) {
 	})
 
 	t.Run("should add surcharge key (51) if any line is surcharged", func(t *testing.T) {
-		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Lines = []*bill.Line{{
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
@@ -196,7 +196,7 @@ func TestFacturaConversion(t *testing.T) {
 
 	t.Run("should add simplified tax regime (52) is the issuer works this way",
 		func(t *testing.T) {
-			goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
+			goblInvoice := test.LoadInvoice("sample-invoice.json")
 			goblInvoice.SetTags(es.TagSimplifiedScheme)
 
 			invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)

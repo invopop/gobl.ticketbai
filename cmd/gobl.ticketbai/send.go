@@ -8,32 +8,39 @@ import (
 
 	"github.com/invopop/gobl"
 	ticketbai "github.com/invopop/gobl.ticketbai"
+	"github.com/invopop/gobl.ticketbai/doc"
 	"github.com/invopop/xmldsig"
 	"github.com/spf13/cobra"
 )
 
-type cancelOpts struct {
+type sendOpts struct {
 	*rootOpts
+
+	previous string
 }
 
-func cancel(o *rootOpts) *cancelOpts {
-	return &cancelOpts{rootOpts: o}
+func send(o *rootOpts) *sendOpts {
+	return &sendOpts{rootOpts: o}
 }
 
-func (c *cancelOpts) cmd() *cobra.Command {
+func (c *sendOpts) cmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "cancel [infile]",
-		Short: "Cancels an invoice in the TicketBAI provider",
-		RunE:  c.runE,
+		Use:   "send [infile]",
+		Short: "Sends the GOBL invoice to the TicketBAI service",
+		Run: func(cmd *cobra.Command, args []string) {
+			handleError(c.runE(cmd, args))
+		},
 	}
 
 	f := cmd.Flags()
 	c.prepareFlags(f)
 
+	f.StringVar(&c.previous, "prev", "", "Previous document fingerprint to chain with")
+
 	return cmd
 }
 
-func (c *cancelOpts) runE(cmd *cobra.Command, args []string) error {
+func (c *sendOpts) runE(cmd *cobra.Command, args []string) error {
 	input, err := openInput(cmd, args)
 	if err != nil {
 		return err
@@ -49,14 +56,15 @@ func (c *cancelOpts) runE(cmd *cobra.Command, args []string) error {
 	if err := json.Unmarshal(buf.Bytes(), env); err != nil {
 		return fmt.Errorf("unmarshaling gobl envelope: %w", err)
 	}
+
 	zone := ticketbai.ZoneFor(env)
 	if zone == "" {
-		return fmt.Errorf("no zone found in envelope")
+		return fmt.Errorf("unable to determine zone")
 	}
 
 	cert, err := xmldsig.LoadCertificate(c.cert, c.password)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	opts := []ticketbai.Option{
@@ -72,27 +80,41 @@ func (c *cancelOpts) runE(cmd *cobra.Command, args []string) error {
 
 	tc, err := ticketbai.New(c.software(), zone, opts...)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	tcd, err := tc.GenerateCancel(env)
+	td, err := tc.Convert(env)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	err = tc.FingerprintCancel(tcd)
+	var prev *doc.ChainData
+	if c.previous != "" {
+		prev = new(doc.ChainData)
+		if err := json.Unmarshal([]byte(c.previous), prev); err != nil {
+			return err
+		}
+	}
+
+	err = tc.Fingerprint(td, prev)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	if err := tc.SignCancel(tcd, env); err != nil {
-		panic(err)
+	if err := tc.Sign(td, env); err != nil {
+		return err
 	}
 
-	err = tc.Cancel(cmd.Context(), tcd)
+	err = tc.Post(cmd.Context(), td)
 	if err != nil {
-		panic(err)
+		return err
 	}
+
+	data, err := json.Marshal(td.ChainData())
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Generated document with fingerprint: \n%s\n", string(data))
 
 	return nil
 }

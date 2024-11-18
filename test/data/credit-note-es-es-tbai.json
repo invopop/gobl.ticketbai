@@ -4,12 +4,15 @@
 		"uuid": "0192237d-4943-72a7-b1d0-51dca3e8bc71",
 		"dig": {
 			"alg": "sha256",
-			"val": "3abe712288ca184ad4edd7b8033fb71badc0b402b95732e9f71978782029b260"
+			"val": "f7165b79e26a6d53e163030b0312e80d15f8af189e0eb51d98864cb06c64e9fc"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "ES",
+		"$addons": [
+			"es-tbai-v1"
+		],
 		"uuid": "01922336-8b5e-72a9-8282-0188c1cdaefa",
 		"type": "credit-note",
 		"series": "FR",
@@ -27,6 +30,11 @@
 				}
 			}
 		],
+		"tax": {
+			"ext": {
+				"es-tbai-region": "BI"
+			}
+		},
 		"supplier": {
 			"name": "Provide One S.L.",
 			"tax_id": {
@@ -83,9 +91,9 @@
 				"sum": "1800.00",
 				"discounts": [
 					{
+						"reason": "Special discount",
 						"percent": "10%",
-						"amount": "180.00",
-						"reason": "Special discount"
+						"amount": "180.00"
 					}
 				],
 				"taxes": [
@@ -107,8 +115,8 @@
 				"sum": "10.00",
 				"discounts": [
 					{
-						"amount": "5.00",
-						"reason": "5-euro coupon"
+						"reason": "5-euro coupon",
+						"amount": "5.00"
 					}
 				],
 				"taxes": [

@@ -5,26 +5,26 @@ import (
 	"testing"
 	"time"
 
-	"github.com/invopop/gobl.ticketbai/internal/doc"
+	"github.com/invopop/gobl.ticketbai/doc"
 	"github.com/invopop/gobl.ticketbai/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestFingerprintGeneration(t *testing.T) {
-	var conf *doc.FingerprintConfig
+	var conf *doc.Software
 
 	beforeEach := func(t *testing.T) *doc.TicketBAI {
 		t.Helper()
 
-		conf = &doc.FingerprintConfig{
-			NIF:             "12345678A",
-			SoftwareName:    "My Software",
-			SoftwareVersion: "1.0",
+		conf = &doc.Software{
+			License: "12345",
+			NIF:     "12345678A",
+			Name:    "My Software",
+			Version: "1.0",
 		}
 
-		goblInvoice, err := test.LoadInvoice("sample-invoice.json")
-		require.NoError(t, err)
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
 
 		ts, err := time.Parse(time.RFC3339, "2022-02-01T04:00:00Z")
 		require.NoError(t, err)
@@ -39,19 +39,19 @@ func TestFingerprintGeneration(t *testing.T) {
 	t.Run("should identify the software used to create the tickebai", func(t *testing.T) {
 		testCase := beforeEach(t)
 
-		err := testCase.Fingerprint(conf)
+		err := testCase.Fingerprint(conf, nil)
 		require.NoError(t, err)
 
 		fingerprint := testCase.HuellaTBAI
 		assert.NoError(t, err)
-		assert.Equal(t, "My Software", fingerprint.Software.Nombre)
+		assert.Equal(t, "My Software", fingerprint.Software.Name)
 		assert.Equal(t, "1.0", fingerprint.Software.Version)
-		assert.Equal(t, "12345678A", fingerprint.Software.EntidadDesarrolladora.NIF)
+		assert.Equal(t, "12345678A", fingerprint.Software.NIF)
 	})
 
 	t.Run("should not chain invoice if no previous one from the taxpayer", func(t *testing.T) {
 		testCase := beforeEach(t)
-		err := testCase.Fingerprint(conf)
+		err := testCase.Fingerprint(conf, nil)
 		require.NoError(t, err)
 		fingerprint := testCase.HuellaTBAI
 		assert.NoError(t, err)
@@ -61,12 +61,14 @@ func TestFingerprintGeneration(t *testing.T) {
 	t.Run("should chain invoice with the previous one from the taxpayer", func(t *testing.T) {
 		testCase := beforeEach(t)
 
-		conf.LastSeries = "A"
-		conf.LastCode = "1"
-		conf.LastIssueDate = "01-01-2022"
-		conf.LastSignature = strings.Repeat("1234567890", 11)
+		prev := &doc.ChainData{
+			Series:    "A",
+			Code:      "1",
+			IssueDate: "01-01-2022",
+			Signature: strings.Repeat("1234567890", 11),
+		}
 
-		err := testCase.Fingerprint(conf)
+		err := testCase.Fingerprint(conf, prev)
 		require.NoError(t, err)
 		fingerprint := testCase.HuellaTBAI
 		chaining := fingerprint.EncadenamientoFacturaAnterior

@@ -65,8 +65,7 @@ type TicketBAI struct {
 	HuellaTBAI *HuellaTBAI        // Fingerprint
 	Signature  *xmldsig.Signature `xml:"ds:Signature,omitempty"` // XML Signature
 
-	zone l10n.Code // copied from invoice
-	ts   time.Time
+	ts time.Time
 }
 
 // Cabecera defines the document head with TBAI version ID.
@@ -132,8 +131,6 @@ func NewTicketBAI(inv *bill.Invoice, ts time.Time, role IssuerRole, zone l10n.Co
 		return nil, err
 	}
 
-	doc.zone = zone
-
 	return doc, nil
 }
 
@@ -150,16 +147,28 @@ func (doc *TicketBAI) IssueTimestamp() time.Time {
 	return doc.ts
 }
 
+// IssueYear returns the year of the issue date
+func (doc *TicketBAI) IssueYear() string {
+	if doc.Factura == nil ||
+		doc.Factura.CabeceraFactura == nil ||
+		doc.Factura.CabeceraFactura.FechaExpedicionFactura == "" {
+		return ""
+	}
+	year := doc.Factura.CabeceraFactura.FechaExpedicionFactura
+	year = year[len(year)-4:] // last four as in "01-02-2022" format
+	return year
+}
+
 // Fingerprint tries to generate the "HuellaTBAI" using the
 // previous invoice details (if available) as a reference.
-func (doc *TicketBAI) Fingerprint(conf *FingerprintConfig) error {
-	doc.HuellaTBAI = newHuellaTBAI(conf)
+func (doc *TicketBAI) Fingerprint(soft *Software, data *ChainData) error {
+	doc.HuellaTBAI = newHuellaTBAI(soft, data)
 	return nil
 }
 
 // Sign signs the document with the given certificate and role
-func (doc *TicketBAI) Sign(docID string, cert *xmldsig.Certificate, role IssuerRole, opts ...xmldsig.Option) error {
-	s, err := newSignature(doc, docID, doc.zone, role, cert, opts...)
+func (doc *TicketBAI) Sign(docID string, cert *xmldsig.Certificate, role IssuerRole, zone l10n.Code, opts ...xmldsig.Option) error {
+	s, err := newSignature(doc, docID, zone, role, cert, opts...)
 	if err != nil {
 		return err
 	}
@@ -169,13 +178,31 @@ func (doc *TicketBAI) Sign(docID string, cert *xmldsig.Certificate, role IssuerR
 	return nil
 }
 
+// ChainData generates the data to be used to link to this one
+// in the next entry.
+func (doc *TicketBAI) ChainData() *ChainData {
+	h := doc.Head()
+	sig := trunc(doc.SignatureValue(), 100)
+	return &ChainData{
+		Series:    h.SerieFactura,
+		Code:      h.NumFactura,
+		IssueDate: h.FechaExpedicionFactura,
+		Signature: sig,
+	}
+}
+
+// Head returns the CabeceraFactura.
+func (doc *TicketBAI) Head() *CabeceraFactura {
+	return doc.Factura.CabeceraFactura
+}
+
 // QRCodes generates the QR codes for this invoice, but requires the Fingerprint to have been
 // generated first.
-func (doc *TicketBAI) QRCodes() *Codes {
+func (doc *TicketBAI) QRCodes(zone l10n.Code) *Codes {
 	if doc.HuellaTBAI == nil {
 		return nil
 	}
-	return doc.generateCodes(doc.zone)
+	return doc.generateCodes(zone)
 }
 
 // Bytes returns the XML document bytes

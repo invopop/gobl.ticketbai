@@ -10,6 +10,10 @@ const (
 	XAdESSupplier   xmldsig.XAdESSignerRole = "Supplier"
 	XAdESCustomer   xmldsig.XAdESSignerRole = "Customer"
 	XAdESThirdParty xmldsig.XAdESSignerRole = "Thirdparty"
+
+	XAdESPolicyURLZoneBI string = "https://www.batuz.eus/fitxategiak/batuz/ticketbai/sinadura_elektronikoaren_zehaztapenak_especificaciones_de_la_firma_electronica_v1_0.pdf"
+	XAdESPolicyURLZoneSS string = "https://www.gipuzkoa.eus/ticketbai/sinadura"
+	XAdESPolicyURLZoneVI string = "https://ticketbai.araba.eus/tbai/sinadura/"
 )
 
 func newSignature(doc any, docID string, zone l10n.Code, role IssuerRole, cert *xmldsig.Certificate, opts ...xmldsig.Option) (*xmldsig.Signature, error) {
@@ -22,7 +26,7 @@ func newSignature(doc any, docID string, zone l10n.Code, role IssuerRole, cert *
 		xmldsig.WithDocID(docID),
 		xmldsig.WithXAdES(XAdESConfig(zone, signerRole(role))),
 		xmldsig.WithCertificate(cert),
-		xmldsig.WithNamespace("T", ticketBAIEmisionNamespace),
+		xmldsig.WithNamespace("T", ticketBAIEmisionNamespace), // default
 	)
 
 	return xmldsig.Sign(data, opts...)
@@ -52,15 +56,38 @@ func signerRole(role IssuerRole) xmldsig.XAdESSignerRole {
 
 // XAdESConfig returns the policies configuration for signing a TicketBAI doc
 func XAdESConfig(zone l10n.Code, role xmldsig.XAdESSignerRole) *xmldsig.XAdESConfig {
-	if zone == ZoneBI {
+	switch zone {
+	case ZoneBI: // Bizkaia
 		return &xmldsig.XAdESConfig{
 			Role:        role,
 			Description: "",
 			Policy: &xmldsig.XAdESPolicyConfig{
-				URL:         "https://www.batuz.eus/fitxategiak/batuz/ticketbai/sinadura_elektronikoaren_zehaztapenak_especificaciones_de_la_firma_electronica_v1_0.pdf",
+				URL:         XAdESPolicyURLZoneBI,
 				Description: "",
 				Algorithm:   xmldsig.AlgDSigRSASHA256,
 				Hash:        "Quzn98x3PMbSHwbUzaj5f5KOpiH0u8bvmwbbbNkO9Es=",
+			},
+		}
+	case ZoneSS: // Gipuzkoa
+		return &xmldsig.XAdESConfig{
+			Role:        role,
+			Description: "",
+			Policy: &xmldsig.XAdESPolicyConfig{
+				URL:         XAdESPolicyURLZoneSS,
+				Description: "",
+				Algorithm:   xmldsig.AlgDSigRSASHA256,
+				Hash:        "vSe1CH7eAFVkGN0X2Y7Nl9XGUoBnziDA5BGUSsyt8mg=",
+			},
+		}
+	case ZoneVI: // Araba
+		return &xmldsig.XAdESConfig{
+			Role:        role,
+			Description: "",
+			Policy: &xmldsig.XAdESPolicyConfig{
+				URL:         XAdESPolicyURLZoneVI,
+				Description: "",
+				Algorithm:   xmldsig.AlgDSigRSASHA256,
+				Hash:        "4Vk3uExj7tGn9DyUCPDsV9HRmK6KZfYdRiW3StOjcQA=",
 			},
 		}
 	}

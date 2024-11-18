@@ -4,7 +4,7 @@ package test
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
+	"flag"
 	"os"
 	"path"
 	"path/filepath"
@@ -14,42 +14,71 @@ import (
 	"github.com/invopop/gobl/bill"
 )
 
-// LoadEnvelope will load a test JSON document as a GOBL Envelope
-// from the test folder
-func LoadEnvelope(name string) (*gobl.Envelope, error) {
-	envelopeReader, err := os.Open(Path("test", "data", name))
+// UpdateOut is a flag that can be set to update example files
+var UpdateOut = flag.Bool("update", false, "Update the example files in test/data and test/data/out")
+
+// LoadEnvelope loads a test file from the test/data folder as a GOBL envelope
+// and will rebuild it if necessary to ensure any changes are accounted for.
+func LoadEnvelope(file string) *gobl.Envelope {
+	path := Path("test", "data", file)
+	f, err := os.Open(path)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	buf := new(bytes.Buffer)
-	_, err = buf.ReadFrom(envelopeReader)
-	if err != nil {
-		return nil, err
+	if _, err := buf.ReadFrom(f); err != nil {
+		panic(err)
 	}
 
-	envelope := new(gobl.Envelope)
-	err = json.Unmarshal(buf.Bytes(), envelope)
+	out, err := gobl.Parse(buf.Bytes())
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
-	return envelope, nil
+	var env *gobl.Envelope
+	switch doc := out.(type) {
+	case *gobl.Envelope:
+		env = doc
+	default:
+		env = gobl.NewEnvelope()
+		if err := env.Insert(doc); err != nil {
+			panic(err)
+		}
+	}
+
+	if err := env.Calculate(); err != nil {
+		panic(err)
+	}
+
+	if err := env.Validate(); err != nil {
+		panic(err)
+	}
+
+	if *UpdateOut {
+		data, err := json.MarshalIndent(env, "", "\t")
+		if err != nil {
+			panic(err)
+		}
+
+		if err := os.WriteFile(path, data, 0644); err != nil {
+			panic(err)
+		}
+	}
+
+	return env
 }
 
 // LoadInvoice grabs the gobl envelope and attempts to extract the invoice payload
-func LoadInvoice(name string) (*bill.Invoice, error) {
-	env, err := LoadEnvelope(name)
-	if err != nil {
-		return nil, err
-	}
+func LoadInvoice(name string) *bill.Invoice {
+	env := LoadEnvelope(name)
 
 	inv, ok := env.Extract().(*bill.Invoice)
 	if !ok {
-		return nil, errors.New("envelope does not contain an invoice")
+		panic("envelope does not contain an invoice")
 	}
 
-	return inv, nil
+	return inv
 }
 
 // Path joins the provided elements to the project root

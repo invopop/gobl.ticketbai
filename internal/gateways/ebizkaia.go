@@ -5,13 +5,11 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"os"
 	"slices"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/invopop/gobl.ticketbai/internal/doc"
+	"github.com/invopop/gobl.ticketbai/doc"
 	"github.com/invopop/gobl.ticketbai/internal/gateways/ebizkaia"
-	"github.com/invopop/gobl/bill"
 	"github.com/invopop/xmldsig"
 	"golang.org/x/net/html/charset"
 )
@@ -61,27 +59,25 @@ func newEbizkaia(env Environment, tlsConfig *tls.Config) *EBizkaiaConn {
 		c.client.SetBaseURL(eBizkaiaTestingBaseURL)
 	}
 
-	tlsConfig.InsecureSkipVerify = true
 	c.client.SetTLSClientConfig(tlsConfig)
-	c.client.SetDebug(os.Getenv("DEBUG") == "true")
+	c.client.SetDebug(debug())
 
 	return c
 }
 
 // Post sends the complete TicketBAI document to the remote end-point. We assume
 // the document has been signed and prepared.
-func (c *EBizkaiaConn) Post(ctx context.Context, inv *bill.Invoice, doc *doc.TicketBAI) error {
+func (c *EBizkaiaConn) Post(ctx context.Context, doc *doc.TicketBAI) error {
 	payload, err := doc.Bytes()
 	if err != nil {
 		return fmt.Errorf("generating payload: %w", err)
 	}
 
 	sup := &ebizkaia.Supplier{
-		Year: inv.IssueDate.Year,
-		NIF:  inv.Supplier.TaxID.Code.String(),
-		Name: inv.Supplier.Name,
+		Year: doc.IssueYear(),
+		NIF:  doc.Sujetos.Emisor.NIF,
+		Name: doc.Sujetos.Emisor.ApellidosNombreRazonSocial,
 	}
-
 	req, err := ebizkaia.NewCreateRequest(sup, payload)
 	if err != nil {
 		return fmt.Errorf("create request: %w", err)
@@ -90,13 +86,13 @@ func (c *EBizkaiaConn) Post(ctx context.Context, inv *bill.Invoice, doc *doc.Tic
 	resp := ebizkaia.LROEPJ240FacturasEmitidasConSGAltaRespuesta{}
 
 	err = c.sendRequest(ctx, req, eBizkaiaExecutePath, &resp)
-	if errors.Is(err, ErrInvalidRequest) {
+	if errors.Is(err, ErrInvalid) {
 		if resp.FirstErrorCode() == eBizkaiaN3RespCodeDuplicated {
-			return ErrDuplicatedRecord
+			return ErrDuplicate
 		}
 
 		if resp.FirstErrorDescription() != "" {
-			return fmt.Errorf("ebizcaia: %w: %v", ErrInvalidRequest, resp.FirstErrorDescription())
+			return ErrInvalid.withCode(resp.FirstErrorCode()).withMessage(resp.FirstErrorDescription())
 		}
 	}
 
@@ -104,8 +100,9 @@ func (c *EBizkaiaConn) Post(ctx context.Context, inv *bill.Invoice, doc *doc.Tic
 }
 
 // Fetch retrieves the TicketBAI from the remote end-point for the given
-// taxpayer and year.
-func (c *EBizkaiaConn) Fetch(ctx context.Context, nif string, name string, year int, page int, head *doc.CabeceraFactura) ([]*doc.TicketBAI, error) {
+// taxpayer and year. This is no longer used as it is only available in this
+// region.
+func (c *EBizkaiaConn) Fetch(ctx context.Context, nif, name, year string, page int, head *doc.CabeceraFactura) ([]*doc.TicketBAI, error) {
 	sup := &ebizkaia.Supplier{
 		Year: year,
 		NIF:  nif,
@@ -132,18 +129,17 @@ func (c *EBizkaiaConn) Fetch(ctx context.Context, nif string, name string, year 
 
 // Cancel sends the cancellation request for the TickeBAI invoice to the remote
 // end-point.
-func (c *EBizkaiaConn) Cancel(ctx context.Context, inv *bill.Invoice, doc *doc.AnulaTicketBAI) error {
+func (c *EBizkaiaConn) Cancel(ctx context.Context, doc *doc.AnulaTicketBAI) error {
 	payload, err := doc.Bytes()
 	if err != nil {
 		return fmt.Errorf("generating payload: %w", err)
 	}
 
 	sup := &ebizkaia.Supplier{
-		Year: inv.IssueDate.Year,
-		NIF:  inv.Supplier.TaxID.Code.String(),
-		Name: inv.Supplier.Name,
+		Year: doc.IssueYear(),
+		NIF:  doc.IDFactura.Emisor.NIF,
+		Name: doc.IDFactura.Emisor.ApellidosNombreRazonSocial,
 	}
-
 	req, err := ebizkaia.NewCancelRequest(sup, payload)
 	if err != nil {
 		return fmt.Errorf("create request: %w", err)
@@ -167,10 +163,10 @@ func (c *EBizkaiaConn) sendRequest(ctx context.Context, doc *ebizkaia.Request, p
 
 	res, err := r.Post(path)
 	if err != nil {
-		return fmt.Errorf("%w: ebizkaia: %s", ErrConnection, err.Error())
+		return ErrConnection.withCause(err)
 	}
 	if res.StatusCode() != 200 {
-		return fmt.Errorf("ebizkaia: status %d", res.StatusCode())
+		return ErrConnection.withCode(fmt.Sprintf("%d", res.StatusCode()))
 	}
 
 	code := res.Header().Get(eBizkaiaN3ResponseHeader)
@@ -182,10 +178,9 @@ func (c *EBizkaiaConn) sendRequest(ctx context.Context, doc *ebizkaia.Request, p
 		if !slices.Contains(serverErrors, code) {
 			// Not a server-side error, so the cause of it is in the request. We identify
 			// it as an ErrInvalidRequest to handle it downstream.
-			return fmt.Errorf("ebizcaia: %w: %v: %v", ErrInvalidRequest, code, msg)
+			return ErrInvalid.withCode(code).withMessage(msg)
 		}
-
-		return fmt.Errorf("ebizkaia: %v: %v", code, msg)
+		return ErrConnection.withCode(code).withMessage(msg)
 	}
 
 	return nil

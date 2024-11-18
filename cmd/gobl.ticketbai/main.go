@@ -2,10 +2,13 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/invopop/gobl.ticketbai/internal/gateways"
 )
 
 // build data provided by goreleaser and mage setup
@@ -33,4 +36,31 @@ func inputFilename(args []string) string {
 		return args[0]
 	}
 	return ""
+}
+
+type errorBody struct {
+	Key   string `json:"key,omitempty"`
+	Code  string `json:"code,omitempty"`
+	Error string `json:"error"`
+}
+
+func handleError(err error) {
+	if err == nil {
+		return
+	}
+
+	eb := new(errorBody)
+	if e, ok := err.(*gateways.Error); ok {
+		eb.Key = e.Key()
+		eb.Code = e.Code()
+		eb.Error = e.Message()
+	} else {
+		eb.Error = err.Error()
+	}
+
+	data, err := json.Marshal(eb)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Fprintf(os.Stderr, "%s\n", string(data))
 }

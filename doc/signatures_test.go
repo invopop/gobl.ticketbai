@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/invopop/gobl.ticketbai/internal/doc"
+	"github.com/invopop/gobl.ticketbai/doc"
 	"github.com/invopop/gobl.ticketbai/test"
 	"github.com/invopop/xmldsig"
 	"github.com/stretchr/testify/assert"
@@ -21,10 +21,11 @@ func TestSignatureGeneration(t *testing.T) {
 	t.Run("should set the proper signer role", func(t *testing.T) {
 		role := doc.IssuerRoleCustomer
 
-		goblInvoice, _ := test.LoadInvoice("sample-invoice.json")
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
+		invoice, err := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		require.NoError(t, err)
 
-		err := invoice.Sign("TEST", cert, role)
+		err = invoice.Sign("TEST", cert, role, doc.ZoneBI)
 		require.NoError(t, err)
 
 		assert.Equal(t,

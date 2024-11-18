@@ -4,10 +4,21 @@ import (
 	"io"
 	"os"
 
+	ticketbai "github.com/invopop/gobl.ticketbai"
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 type rootOpts struct {
+	cert          string
+	password      string
+	swNIF         string
+	swCompanyName string
+	swName        string
+	swVersion     string
+	swLicense     string
+	production    bool
 }
 
 func root() *rootOpts {
@@ -22,11 +33,32 @@ func (o *rootOpts) cmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(versionCmd())
+	cmd.AddCommand(send(o).cmd())
 	cmd.AddCommand(convert(o).cmd())
-	cmd.AddCommand(fetch(o).cmd())
 	cmd.AddCommand(cancel(o).cmd())
 
 	return cmd
+}
+
+func (o *rootOpts) prepareFlags(f *pflag.FlagSet) {
+	f.StringVar(&o.cert, "cert", os.Getenv("CERTIFICATE_PATH"), "Certificate for authentication")
+	f.StringVar(&o.password, "password", os.Getenv("CERTIFICATE_PASSWORD"), "Password of the certificate")
+	f.StringVar(&o.swNIF, "sw-nif", os.Getenv("SOFTWARE_COMPANY_NIF"), "NIF of the software company")
+	f.StringVar(&o.swCompanyName, "sw-company-name", os.Getenv("SOFTWARE_COMPANY_NAME"), "Name of the software company")
+	f.StringVar(&o.swName, "sw-name", os.Getenv("SOFTWARE_NAME"), "Name of the software")
+	f.StringVar(&o.swVersion, "sw-version", os.Getenv("SOFTWARE_VERSION"), "Version of the software")
+	f.StringVar(&o.swLicense, "sw-license", os.Getenv("SOFTWARE_LICENSE"), "License of the software")
+	f.BoolVarP(&o.production, "production", "p", false, "Production environment")
+}
+
+func (o *rootOpts) software() *ticketbai.Software {
+	return &ticketbai.Software{
+		NIF:         o.swNIF,
+		Name:        o.swName,
+		CompanyName: o.swCompanyName,
+		Version:     o.swVersion,
+		License:     o.swLicense,
+	}
 }
 
 func (o *rootOpts) outputFilename(args []string) string {

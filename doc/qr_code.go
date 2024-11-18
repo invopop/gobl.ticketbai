@@ -48,10 +48,14 @@ func (doc *TicketBAI) generateTbaiCode() string {
 
 func (doc *TicketBAI) generateQRCode(zone l10n.Code, tbaiCode string) string {
 	var pat string
-	if zone == ZoneBI {
+	switch zone {
+	case ZoneBI:
 		pat = "https://batuz.eus/QRTBAI/?id=%s&s=%s&nf=%s&i=%s"
-	}
-	if pat == "" {
+	case ZoneSS:
+		pat = "https://tbai.egoitza.gipuzkoa.eus/qr/?id=%s&s=%s&nf=%s&i=%s"
+	case ZoneVI:
+		pat = "https://ticketbai.araba.eus/tbai/qrtbai/?id=%s&s=%s&nf=%s&i=%s"
+	default:
 		return ""
 	}
 
