@@ -90,10 +90,10 @@ func InProduction() Option {
 	}
 }
 
-// InTesting defines the connection to use the testing environment.
-func InTesting() Option {
+// InSandbox defines the connection to use the testing environment.
+func InSandbox() Option {
 	return func(c *Client) {
-		c.env = gateways.EnvironmentTesting
+		c.env = gateways.EnvironmentSandbox
 	}
 }
 
@@ -116,17 +116,19 @@ func New(software *Software, zone l10n.Code, opts ...Option) (*Client, error) {
 	c.zone = zone
 
 	// Set default values that can be overwritten by the options
-	c.env = gateways.EnvironmentTesting
+	c.env = gateways.EnvironmentSandbox
 	c.issuerRole = doc.IssuerRoleSupplier
 
 	for _, opt := range opts {
 		opt(c)
 	}
 
-	var err error
-	c.gw, err = gateways.New(c.env, c.zone, c.cert)
-	if err != nil {
-		return nil, err
+	if c.gw == nil {
+		var err error
+		c.gw, err = gateways.New(c.env, c.zone, c.cert)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return c, nil
