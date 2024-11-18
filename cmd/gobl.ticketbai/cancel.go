@@ -67,7 +67,7 @@ func (c *cancelOpts) runE(cmd *cobra.Command, args []string) error {
 	if c.production {
 		opts = append(opts, ticketbai.InProduction())
 	} else {
-		opts = append(opts, ticketbai.InTesting())
+		opts = append(opts, ticketbai.InSandbox())
 	}
 
 	tc, err := ticketbai.New(c.software(), zone, opts...)
