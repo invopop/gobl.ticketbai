@@ -173,3 +173,13 @@ func (c *Client) CurrentTime() time.Time {
 	}
 	return time.Now()
 }
+
+// Zone returns the zone for this client.
+func (c *Client) Zone() l10n.Code {
+	return c.zone
+}
+
+// Sandbox returns true if the client is using the sandbox environment.
+func (c *Client) Sandbox() bool {
+	return c.env == gateways.EnvironmentSandbox
+}
