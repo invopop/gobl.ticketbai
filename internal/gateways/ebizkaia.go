@@ -86,13 +86,13 @@ func (c *EBizkaiaConn) Post(ctx context.Context, doc *doc.TicketBAI) error {
 	resp := ebizkaia.LROEPJ240FacturasEmitidasConSGAltaRespuesta{}
 
 	err = c.sendRequest(ctx, req, eBizkaiaExecutePath, &resp)
-	if errors.Is(err, ErrInvalid) {
+	if errors.Is(err, ErrValidation) {
 		if resp.FirstErrorCode() == eBizkaiaN3RespCodeDuplicated {
 			return ErrDuplicate
 		}
 
 		if resp.FirstErrorDescription() != "" {
-			return ErrInvalid.withCode(resp.FirstErrorCode()).withMessage(resp.FirstErrorDescription())
+			return ErrValidation.withCode(resp.FirstErrorCode()).withMessage(resp.FirstErrorDescription())
 		}
 	}
 
@@ -178,7 +178,7 @@ func (c *EBizkaiaConn) sendRequest(ctx context.Context, doc *ebizkaia.Request, p
 		if !slices.Contains(serverErrors, code) {
 			// Not a server-side error, so the cause of it is in the request. We identify
 			// it as an ErrInvalidRequest to handle it downstream.
-			return ErrInvalid.withCode(code).withMessage(msg)
+			return ErrValidation.withCode(code).withMessage(msg)
 		}
 		return ErrConnection.withCode(code).withMessage(msg)
 	}

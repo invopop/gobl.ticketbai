@@ -104,11 +104,11 @@ func (c *GipuzkoaConn) post(ctx context.Context, path string, payload []byte) er
 		return ErrConnection.withCause(err)
 	}
 	if res.StatusCode() != http.StatusOK {
-		return ErrInvalid.withCode(strconv.Itoa(res.StatusCode()))
+		return ErrValidation.withCode(strconv.Itoa(res.StatusCode()))
 	}
 
 	if out.Output.Status != gipuzkoaStatusReceived {
-		err := ErrInvalid
+		err := ErrValidation
 		if len(out.Output.Errors) > 0 {
 			e1 := out.Output.Errors[0]
 			err = err.withMessage(e1.Description).withCode(e1.Code)

@@ -26,10 +26,10 @@ const (
 	EnvironmentSandbox    Environment = "sandbox"
 )
 
-// Standard gateway error responses
+// Standard gateway error responses. Keys match the ones from main package.
 var (
 	ErrConnection = newError("connection")
-	ErrInvalid    = newError("invalid")
+	ErrValidation = newError("validation")
 	ErrDuplicate  = newError("duplicate")
 )
 
