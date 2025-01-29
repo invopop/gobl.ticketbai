@@ -4,7 +4,7 @@
 		"uuid": "0192fbd5-3b54-7735-a8de-2e4f13219f68",
 		"dig": {
 			"alg": "sha256",
-			"val": "61ef29f84ae8f5fe2e0366a0a0dd3582c75dcd46884335619a9d1129343bfa56"
+			"val": "f598c765c4aa997dff2f37c711415164a459dabd7805d39fcd0321b87bc21cd0"
 		}
 	},
 	"doc": {
@@ -74,7 +74,10 @@
 				"quantity": "15",
 				"item": {
 					"name": "Item being purchased",
-					"price": "90.00"
+					"price": "90.00",
+					"ext": {
+						"es-tbai-product": "services"
+					}
 				},
 				"sum": "1350.00",
 				"discounts": [

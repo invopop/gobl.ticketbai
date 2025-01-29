@@ -4,7 +4,7 @@
 		"uuid": "0192d3c7-2dc5-74cf-b263-5892feb44432",
 		"dig": {
 			"alg": "sha256",
-			"val": "58a808907be339175b8fa53ff5f326f1f074641cfbb653f7f1619763e1f4f2d7"
+			"val": "57cfc9eb9cc3c8b0013b7ad7ff6fc8b0320d9afbeda923eea05c463bd3cc16cd"
 		}
 	},
 	"doc": {
@@ -56,7 +56,10 @@
 				"item": {
 					"name": "Development services",
 					"price": "90.00",
-					"unit": "h"
+					"unit": "h",
+					"ext": {
+						"es-tbai-product": "services"
+					}
 				},
 				"sum": "1800.00",
 				"discounts": [
@@ -83,7 +86,10 @@
 				"quantity": "1",
 				"item": {
 					"name": "Some merch",
-					"price": "90.00"
+					"price": "90.00",
+					"ext": {
+						"es-tbai-product": "services"
+					}
 				},
 				"sum": "90.00",
 				"taxes": [
@@ -103,7 +109,10 @@
 				"quantity": "1",
 				"item": {
 					"name": "Some essential needs merch",
-					"price": "30.00"
+					"price": "30.00",
+					"ext": {
+						"es-tbai-product": "services"
+					}
 				},
 				"sum": "30.00",
 				"taxes": [

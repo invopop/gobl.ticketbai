@@ -122,9 +122,11 @@ func newImporteTotal(inv *bill.Invoice) string {
 	totalWithDiscounts := inv.Totals.Total
 
 	totalTaxes := num.MakeAmount(0, 2)
-	for _, category := range inv.Totals.Taxes.Categories {
-		if !category.Retained {
-			totalTaxes = totalTaxes.Add(category.Amount)
+	if inv.Totals.Taxes != nil {
+		for _, category := range inv.Totals.Taxes.Categories {
+			if !category.Retained {
+				totalTaxes = totalTaxes.Add(category.Amount)
+			}
 		}
 	}
 
@@ -133,9 +135,11 @@ func newImporteTotal(inv *bill.Invoice) string {
 
 func newRetencionSoportada(inv *bill.Invoice) string {
 	totalRetention := num.MakeAmount(0, 2)
-	for _, category := range inv.Totals.Taxes.Categories {
-		if category.Retained {
-			totalRetention = totalRetention.Add(category.Amount)
+	if inv.Totals.Taxes != nil {
+		for _, category := range inv.Totals.Taxes.Categories {
+			if category.Retained {
+				totalRetention = totalRetention.Add(category.Amount)
+			}
 		}
 	}
 
@@ -204,6 +208,9 @@ func newFacturasRectificadasSustituidas(inv *bill.Invoice) *FacturasRectificadas
 }
 
 func hasSurchargedLines(inv *bill.Invoice) bool {
+	if inv.Totals == nil || inv.Totals.Taxes == nil {
+		return false
+	}
 	vat := inv.Totals.Taxes.Category(tax.CategoryVAT)
 	if vat == nil {
 		return false

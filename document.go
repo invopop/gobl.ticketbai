@@ -27,6 +27,9 @@ func (c *Client) Convert(env *gobl.Envelope) (*doc.TicketBAI, error) {
 	if inv.Supplier.TaxID.Country != l10n.ES.Tax() {
 		return nil, ErrValidation.withMessage("only spanish invoices are supported")
 	}
+	if inv.Totals == nil || inv.Totals.Taxes == nil {
+		return nil, ErrValidation.withMessage("missing taxes")
+	}
 
 	zone := zoneFor(inv)
 	if zone == "" {
