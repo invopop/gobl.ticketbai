@@ -94,6 +94,9 @@ type taxInfo struct {
 }
 
 func newTipoDesglose(gobl *bill.Invoice) *TipoDesglose {
+	if gobl.Totals == nil || gobl.Totals.Taxes == nil {
+		return nil
+	}
 	catTotal := gobl.Totals.Taxes.Category(tax.CategoryVAT)
 	if catTotal == nil {
 		return nil
@@ -265,7 +268,7 @@ func (t taxInfo) isNoSujeta(r *tax.RateTotal) bool {
 	if t.customerRates {
 		return true
 	}
-	return r.Percent == nil && r.Ext[tbai.ExtKeyExemption].Code().In(notSubjectExemptionCodes...)
+	return r.Percent == nil && r.Ext[tbai.ExtKeyExemption].In(notSubjectExemptionCodes...)
 }
 
 func (t taxInfo) causaNoSujeta(r *tax.RateTotal) string {
@@ -276,5 +279,5 @@ func (t taxInfo) causaNoSujeta(r *tax.RateTotal) string {
 }
 
 func (taxInfo) isExenta(r *tax.RateTotal) bool {
-	return r.Percent == nil && !r.Ext[tbai.ExtKeyExemption].Code().In(notSubjectExemptionCodes...)
+	return r.Percent == nil && !r.Ext[tbai.ExtKeyExemption].In(notSubjectExemptionCodes...)
 }

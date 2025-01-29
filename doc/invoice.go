@@ -3,8 +3,8 @@ package doc
 import (
 	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
+	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/gobl/tax"
 )
@@ -109,13 +109,13 @@ func newDatosFactura(inv *bill.Invoice) (*DatosFactura, error) {
 	}, nil
 }
 
-func newDescription(notes []*cbc.Note) (string, error) {
+func newDescription(notes []*org.Note) (string, error) {
 	for _, note := range notes {
-		if note.Key == cbc.NoteKeyGeneral {
+		if note.Key == org.NoteKeyGeneral {
 			return note.Text, nil
 		}
 	}
-	return "", validationErr(`notes: missing note with key '%s'`, cbc.NoteKeyGeneral)
+	return "", validationErr(`notes: missing note with key '%s'`, org.NoteKeyGeneral)
 }
 
 func newImporteTotal(inv *bill.Invoice) string {
