@@ -39,7 +39,7 @@ func (c *Client) Convert(env *gobl.Envelope) (*doc.TicketBAI, error) {
 	out, err := doc.NewTicketBAI(inv, c.CurrentTime(), c.issuerRole, zone)
 	if err != nil {
 		if _, ok := err.(*doc.ValidationError); ok {
-			return nil, ErrValidation.withMessage(err.Error())
+			return nil, ErrValidation.withMessage(err.Error()) //nolint:govet
 		}
 
 		return nil, err
