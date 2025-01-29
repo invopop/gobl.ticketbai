@@ -9,7 +9,6 @@ import (
 	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
-	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/regimes/es"
@@ -67,8 +66,8 @@ func TestFacturaConversion(t *testing.T) {
 
 	t.Run("should fill invoice description from general note", func(t *testing.T) {
 		goblInvoice := test.LoadInvoice("sample-invoice.json")
-		goblInvoice.Notes = []*cbc.Note{
-			{Key: cbc.NoteKeyGeneral, Text: "Description of invoice"},
+		goblInvoice.Notes = []*org.Note{
+			{Key: org.NoteKeyGeneral, Text: "Description of invoice"},
 		}
 
 		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
@@ -79,7 +78,7 @@ func TestFacturaConversion(t *testing.T) {
 
 	t.Run("should return error if no description (general note) found", func(t *testing.T) {
 		goblInvoice := test.LoadInvoice("sample-invoice.json")
-		goblInvoice.Notes = []*cbc.Note{}
+		goblInvoice.Notes = []*org.Note{}
 
 		_, err := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
 

@@ -75,7 +75,7 @@ func newDestinatario(party *org.Party) (*IDDestinatario, error) {
 	}
 
 	if len(party.Addresses) > 0 && party.Addresses[0].Code != "" {
-		d.CodigoPostal = party.Addresses[0].Code
+		d.CodigoPostal = party.Addresses[0].Code.String()
 		d.Direccion = formatAddress(party.Addresses[0])
 	}
 

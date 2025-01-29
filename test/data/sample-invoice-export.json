@@ -4,7 +4,7 @@
 		"uuid": "0192fbd4-5087-708c-9b31-e8f653ef0c52",
 		"dig": {
 			"alg": "sha256",
-			"val": "27db0398b2f300511bfb0401a576876e5061248930ba31fb4d3bd140bddd5a6f"
+			"val": "963d8171e4ecb8b3c6fa952ce32849d2093fc9f56b9ee35a61741b043bc588d4"
 		}
 	},
 	"doc": {
@@ -71,7 +71,10 @@
 				"quantity": "6",
 				"item": {
 					"name": "Item being purchased",
-					"price": "100.00"
+					"price": "100.00",
+					"ext": {
+						"es-tbai-product": "services"
+					}
 				},
 				"sum": "600.00",
 				"taxes": [
@@ -91,7 +94,10 @@
 				"quantity": "5",
 				"item": {
 					"name": "Another item being purchased",
-					"price": "20.00"
+					"price": "20.00",
+					"ext": {
+						"es-tbai-product": "services"
+					}
 				},
 				"sum": "100.00",
 				"taxes": [
@@ -111,7 +117,10 @@
 				"quantity": "2",
 				"item": {
 					"name": "Service being paid",
-					"price": "150.00"
+					"price": "150.00",
+					"ext": {
+						"es-tbai-product": "services"
+					}
 				},
 				"sum": "300.00",
 				"taxes": [

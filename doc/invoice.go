@@ -3,8 +3,8 @@ package doc
 import (
 	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
+	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/gobl/tax"
 )
@@ -109,22 +109,24 @@ func newDatosFactura(inv *bill.Invoice) (*DatosFactura, error) {
 	}, nil
 }
 
-func newDescription(notes []*cbc.Note) (string, error) {
+func newDescription(notes []*org.Note) (string, error) {
 	for _, note := range notes {
-		if note.Key == cbc.NoteKeyGeneral {
+		if note.Key == org.NoteKeyGeneral {
 			return note.Text, nil
 		}
 	}
-	return "", validationErr(`notes: missing note with key '%s'`, cbc.NoteKeyGeneral)
+	return "", validationErr(`notes: missing note with key '%s'`, org.NoteKeyGeneral)
 }
 
 func newImporteTotal(inv *bill.Invoice) string {
 	totalWithDiscounts := inv.Totals.Total
 
 	totalTaxes := num.MakeAmount(0, 2)
-	for _, category := range inv.Totals.Taxes.Categories {
-		if !category.Retained {
-			totalTaxes = totalTaxes.Add(category.Amount)
+	if inv.Totals.Taxes != nil {
+		for _, category := range inv.Totals.Taxes.Categories {
+			if !category.Retained {
+				totalTaxes = totalTaxes.Add(category.Amount)
+			}
 		}
 	}
 
@@ -133,9 +135,11 @@ func newImporteTotal(inv *bill.Invoice) string {
 
 func newRetencionSoportada(inv *bill.Invoice) string {
 	totalRetention := num.MakeAmount(0, 2)
-	for _, category := range inv.Totals.Taxes.Categories {
-		if category.Retained {
-			totalRetention = totalRetention.Add(category.Amount)
+	if inv.Totals.Taxes != nil {
+		for _, category := range inv.Totals.Taxes.Categories {
+			if category.Retained {
+				totalRetention = totalRetention.Add(category.Amount)
+			}
 		}
 	}
 
@@ -204,6 +208,9 @@ func newFacturasRectificadasSustituidas(inv *bill.Invoice) *FacturasRectificadas
 }
 
 func hasSurchargedLines(inv *bill.Invoice) bool {
+	if inv.Totals == nil || inv.Totals.Taxes == nil {
+		return false
+	}
 	vat := inv.Totals.Taxes.Category(tax.CategoryVAT)
 	if vat == nil {
 		return false
