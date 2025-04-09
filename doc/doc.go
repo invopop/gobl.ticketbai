@@ -92,11 +92,6 @@ func NewTicketBAI(inv *bill.Invoice, ts time.Time, role IssuerRole, zone l10n.Co
 		}
 	}
 
-	goblWithoutIncludedTaxes, err := inv.RemoveIncludedTaxes()
-	if err != nil {
-		return nil, err
-	}
-
 	doc := &TicketBAI{
 		TNamespace: ticketBAIEmisionNamespace,
 		Cabecera: &Cabecera{
@@ -108,7 +103,7 @@ func NewTicketBAI(inv *bill.Invoice, ts time.Time, role IssuerRole, zone l10n.Co
 		},
 		Factura: &Factura{
 			CabeceraFactura: newCabeceraFactura(inv),
-			TipoDesglose:    newTipoDesglose(goblWithoutIncludedTaxes),
+			TipoDesglose:    newTipoDesglose(inv),
 		},
 	}
 
@@ -126,7 +121,7 @@ func NewTicketBAI(inv *bill.Invoice, ts time.Time, role IssuerRole, zone l10n.Co
 	}
 
 	// Complete invoice data
-	doc.Factura.DatosFactura, err = newDatosFactura(goblWithoutIncludedTaxes)
+	doc.Factura.DatosFactura, err = newDatosFactura(inv)
 	if err != nil {
 		return nil, err
 	}

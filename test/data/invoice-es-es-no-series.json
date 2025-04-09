@@ -1,0 +1,182 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0192d3c7-2dc5-74cf-b263-5892feb44432",
+		"dig": {
+			"alg": "sha256",
+			"val": "e027b52e8bb5f6791dd3e912594e4501d4fa5ea2bf7da59feeedb274d61bbe28"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "ES",
+		"$addons": [
+			"es-tbai-v1"
+		],
+		"$tags": [
+			"simplified"
+		],
+		"uuid": "7fe11346-a0ce-11ee-b8f0-e6a7901137ed",
+		"type": "standard",
+		"code": "SIMPL-0002",
+		"issue_date": "2023-12-18",
+		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"es-tbai-region": "BI"
+			}
+		},
+		"supplier": {
+			"name": "Provide One S.L.",
+			"tax_id": {
+				"country": "ES",
+				"code": "B98602642"
+			},
+			"addresses": [
+				{
+					"num": "42",
+					"street": "San Frantzisko",
+					"locality": "Bilbo",
+					"region": "Bizkaia",
+					"code": "48003",
+					"country": "ES"
+				}
+			],
+			"emails": [
+				{
+					"addr": "billing@example.com"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "20",
+				"item": {
+					"name": "Development services",
+					"price": "90.00",
+					"unit": "h",
+					"ext": {
+						"es-tbai-product": "services"
+					}
+				},
+				"sum": "1800.00",
+				"discounts": [
+					{
+						"reason": "Special discount",
+						"percent": "10%",
+						"amount": "180.00"
+					}
+				],
+				"taxes": [
+					{
+						"cat": "VAT",
+						"rate": "standard",
+						"percent": "21.0%",
+						"ext": {
+							"es-tbai-product": "services"
+						}
+					}
+				],
+				"total": "1620.00"
+			},
+			{
+				"i": 2,
+				"quantity": "1",
+				"item": {
+					"name": "Some merch",
+					"price": "90.00",
+					"ext": {
+						"es-tbai-product": "services"
+					}
+				},
+				"sum": "90.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"rate": "standard",
+						"percent": "21.0%",
+						"ext": {
+							"es-tbai-product": "goods"
+						}
+					}
+				],
+				"total": "90.00"
+			},
+			{
+				"i": 3,
+				"quantity": "1",
+				"item": {
+					"name": "Some essential needs merch",
+					"price": "30.00",
+					"ext": {
+						"es-tbai-product": "services"
+					}
+				},
+				"sum": "30.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"rate": "reduced",
+						"percent": "10.0%",
+						"ext": {
+							"es-tbai-product": "goods"
+						}
+					}
+				],
+				"total": "30.00"
+			}
+		],
+		"totals": {
+			"sum": "1740.00",
+			"total": "1740.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"es-tbai-product": "services"
+								},
+								"base": "1620.00",
+								"percent": "21.0%",
+								"amount": "340.20"
+							},
+							{
+								"key": "standard",
+								"ext": {
+									"es-tbai-product": "goods"
+								},
+								"base": "90.00",
+								"percent": "21.0%",
+								"amount": "18.90"
+							},
+							{
+								"key": "reduced",
+								"ext": {
+									"es-tbai-product": "goods"
+								},
+								"base": "30.00",
+								"percent": "10.0%",
+								"amount": "3.00"
+							}
+						],
+						"amount": "362.10"
+					}
+				],
+				"sum": "362.10"
+			},
+			"tax": "362.10",
+			"total_with_tax": "2102.10",
+			"payable": "2102.10"
+		},
+		"notes": [
+			{
+				"key": "general",
+				"text": "Some random description"
+			}
+		]
+	}
+}
