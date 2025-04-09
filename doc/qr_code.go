@@ -47,25 +47,29 @@ func (doc *TicketBAI) generateTbaiCode() string {
 }
 
 func (doc *TicketBAI) generateQRCode(zone l10n.Code, tbaiCode string) string {
-	var pat string
+	var u string
 	switch zone {
 	case ZoneBI:
-		pat = "https://batuz.eus/QRTBAI/?id=%s&s=%s&nf=%s&i=%s"
+		u = "https://batuz.eus/QRTBAI/?"
 	case ZoneSS:
-		pat = "https://tbai.egoitza.gipuzkoa.eus/qr/?id=%s&s=%s&nf=%s&i=%s"
+		u = "https://tbai.egoitza.gipuzkoa.eus/qr/?"
 	case ZoneVI:
-		pat = "https://ticketbai.araba.eus/tbai/qrtbai/?id=%s&s=%s&nf=%s&i=%s"
+		u = "https://ticketbai.araba.eus/tbai/qrtbai/?"
 	default:
 		return ""
 	}
 
-	tbaiCode = url.QueryEscape(tbaiCode)
-	invCode := url.QueryEscape(doc.Factura.CabeceraFactura.NumFactura)
-	invSeries := url.QueryEscape(doc.Factura.CabeceraFactura.SerieFactura)
-	invTotal := doc.Factura.DatosFactura.ImporteTotalFactura
+	query := []string{"id=" + tbaiCode}
+	if doc.Factura.CabeceraFactura.SerieFactura != "" {
+		query = append(query, "s="+url.QueryEscape(doc.Factura.CabeceraFactura.SerieFactura))
+	}
+	query = append(query,
+		"nf="+url.QueryEscape(doc.Factura.CabeceraFactura.NumFactura),
+		"i="+url.QueryEscape(doc.Factura.DatosFactura.ImporteTotalFactura),
+	)
+	u = u + strings.Join(query, "&")
 
-	qrCodeInfo := fmt.Sprintf(pat, tbaiCode, invSeries, invCode, invTotal)
-	qrCodeCRC := crc8.Checksum([]byte(qrCodeInfo), crcTable)
-
-	return fmt.Sprintf("%s&cr=%03d", qrCodeInfo, qrCodeCRC)
+	// Calculate the checksum
+	cs := crc8.Checksum([]byte(u), crcTable)
+	return fmt.Sprintf("%s&cr=%03d", u, cs)
 }
