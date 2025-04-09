@@ -78,4 +78,19 @@ func TestQRCodes(t *testing.T) {
 		assert.Contains(t, codes.QRCode, "&i=1089.00")
 		assert.Contains(t, codes.QRCode, "&cr=143") // changes according to test data
 	})
+
+	t.Run("should build QR code for an invoice without series", func(t *testing.T) {
+		testCase := beforeEach(t)
+
+		tbai := testCase.invoice
+		tbai.Factura.CabeceraFactura.SerieFactura = ""
+		codes := tbai.QRCodes(doc.ZoneBI)
+
+		assert.Equal(t, true, strings.HasPrefix(codes.QRCode, "https://batuz.eus/QRTBAI/"))
+		assert.Contains(t, codes.QRCode, "?id=TBAI-A99805194-020222-")
+		assert.NotContains(t, codes.QRCode, "&s=TEST")
+		assert.Contains(t, codes.QRCode, "&nf=001")
+		assert.Contains(t, codes.QRCode, "&i=1089.00")
+		assert.Contains(t, codes.QRCode, "&cr=191")
+	})
 }

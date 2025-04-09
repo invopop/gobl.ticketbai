@@ -86,7 +86,7 @@ func TestDesgloseConversion(t *testing.T) {
 			{
 				Index:    1,
 				Quantity: num.MakeAmount(1, 0),
-				Item:     &org.Item{Name: "A", Price: num.MakeAmount(10, 0)},
+				Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 				Taxes: tax.Set{
 					&tax.Combo{
 						Category: "VAT",
@@ -99,7 +99,7 @@ func TestDesgloseConversion(t *testing.T) {
 				Quantity: num.MakeAmount(1, 0),
 				Item: &org.Item{
 					Name:  "A",
-					Price: num.MakeAmount(20, 0),
+					Price: num.NewAmount(20, 0),
 				},
 				Taxes: tax.Set{
 					&tax.Combo{
@@ -116,7 +116,7 @@ func TestDesgloseConversion(t *testing.T) {
 				Quantity: num.MakeAmount(1, 0),
 				Item: &org.Item{
 					Name:  "A",
-					Price: num.MakeAmount(10, 0),
+					Price: num.NewAmount(10, 0),
 				},
 				Taxes: tax.Set{
 					&tax.Combo{
@@ -151,7 +151,7 @@ func TestDesgloseConversion(t *testing.T) {
 				{
 					Index:    1,
 					Quantity: num.MakeAmount(1, 0),
-					Item:     &org.Item{Name: "A", Price: num.MakeAmount(10, 0)},
+					Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 					Taxes:    tax.Set{&tax.Combo{Category: "VAT", Rate: "standard"}},
 				},
 				{
@@ -159,7 +159,7 @@ func TestDesgloseConversion(t *testing.T) {
 					Quantity: num.MakeAmount(1, 0),
 					Item: &org.Item{
 						Name:  "A",
-						Price: num.MakeAmount(20, 0),
+						Price: num.NewAmount(20, 0),
 					},
 					Taxes: tax.Set{
 						&tax.Combo{
@@ -186,7 +186,7 @@ func TestDesgloseConversion(t *testing.T) {
 		goblInvoice.Lines = []*bill.Line{{
 			Index:     1,
 			Quantity:  num.MakeAmount(100, 0),
-			Item:      &org.Item{Name: "A", Price: num.MakeAmount(10, 0)},
+			Item:      &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 			Discounts: []*bill.LineDiscount{DiscountOf(100)},
 			Taxes: tax.Set{
 				&tax.Combo{Category: "IRPF", Rate: "pro"},
@@ -211,7 +211,7 @@ func TestDesgloseConversion(t *testing.T) {
 		goblInvoice.Lines = []*bill.Line{{
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
-			Item:     &org.Item{Name: "A", Price: num.MakeAmount(10, 0)},
+			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 			Taxes: tax.Set{
 				&tax.Combo{
 					Category: "VAT",
@@ -233,7 +233,7 @@ func TestDesgloseConversion(t *testing.T) {
 		goblInvoice.Lines = []*bill.Line{{
 			Index:     1,
 			Quantity:  num.MakeAmount(100, 0),
-			Item:      &org.Item{Name: "A", Price: num.MakeAmount(10, 0)},
+			Item:      &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 			Discounts: []*bill.LineDiscount{DiscountOf(100)},
 			Taxes: tax.Set{
 				&tax.Combo{
@@ -256,7 +256,7 @@ func TestDesgloseConversion(t *testing.T) {
 		goblInvoice.Lines = []*bill.Line{{
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
-			Item:     &org.Item{Name: "A", Price: num.MakeAmount(10, 0)},
+			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 			Taxes: tax.Set{
 				&tax.Combo{Category: "VAT", Rate: "standard"},
 				&tax.Combo{Category: "VAT", Rate: "reduced"},
@@ -283,7 +283,7 @@ func TestDesgloseConversion(t *testing.T) {
 		goblInvoice.Lines = []*bill.Line{{
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
-			Item:     &org.Item{Name: "A", Price: num.MakeAmount(10, 0)},
+			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 			Taxes:    tax.Set{&tax.Combo{Category: tax.CategoryVAT, Rate: tax.RateStandard}},
 		}}
 		_ = goblInvoice.Calculate()
@@ -302,7 +302,7 @@ func TestDesgloseConversion(t *testing.T) {
 		goblInvoice.Lines = []*bill.Line{{
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
-			Item:     &org.Item{Name: "A", Price: num.MakeAmount(10, 0)},
+			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 			Taxes: tax.Set{
 				&tax.Combo{Category: "VAT", Rate: "standard+eqs"},
 			},
@@ -323,7 +323,7 @@ func TestDesgloseConversion(t *testing.T) {
 			{
 				Index:    1,
 				Quantity: num.MakeAmount(1, 0),
-				Item:     &org.Item{Name: "A", Price: num.MakeAmount(10, 0)},
+				Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 				Taxes:    tax.Set{&tax.Combo{Category: "VAT", Rate: "standard"}},
 			},
 			{
@@ -331,7 +331,7 @@ func TestDesgloseConversion(t *testing.T) {
 				Quantity: num.MakeAmount(100, 0),
 				Item: &org.Item{
 					Name:  "A",
-					Price: num.MakeAmount(10, 0),
+					Price: num.NewAmount(10, 0),
 				},
 				Taxes: tax.Set{
 					&tax.Combo{
@@ -359,7 +359,7 @@ func TestDesgloseConversion(t *testing.T) {
 		goblInvoice.Lines = []*bill.Line{{
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
-			Item:     &org.Item{Name: "A", Price: num.MakeAmount(10, 0)},
+			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 			Taxes: tax.Set{
 				&tax.Combo{
 					Category: tax.CategoryVAT,
@@ -384,7 +384,7 @@ func TestDesgloseConversion(t *testing.T) {
 				Quantity: num.MakeAmount(1, 0),
 				Item: &org.Item{
 					Name:  "A",
-					Price: num.MakeAmount(10, 0),
+					Price: num.NewAmount(10, 0),
 				},
 				Taxes: tax.Set{
 					&tax.Combo{
@@ -401,7 +401,7 @@ func TestDesgloseConversion(t *testing.T) {
 				Quantity: num.MakeAmount(1, 0),
 				Item: &org.Item{
 					Name:  "A",
-					Price: num.MakeAmount(20, 0),
+					Price: num.NewAmount(20, 0),
 				},
 				Taxes: tax.Set{
 					&tax.Combo{
@@ -433,7 +433,7 @@ func TestDesgloseConversion(t *testing.T) {
 		goblInvoice.Lines = []*bill.Line{{
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
-			Item:     &org.Item{Name: "A", Price: num.MakeAmount(10, 0)},
+			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 			Taxes:    tax.Set{&tax.Combo{Category: "VAT", Rate: "standard"}},
 		}}
 		_ = goblInvoice.Calculate()
@@ -451,7 +451,7 @@ func TestDesgloseConversion(t *testing.T) {
 		goblInvoice.Lines = []*bill.Line{{
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
-			Item:     &org.Item{Name: "A", Price: num.MakeAmount(10, 0)},
+			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 			Taxes:    tax.Set{&tax.Combo{Category: "VAT", Rate: "standard"}},
 		}}
 		_ = goblInvoice.Calculate()

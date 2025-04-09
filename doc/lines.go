@@ -22,6 +22,9 @@ type IDDetalleFactura struct {
 func newDetallesFactura(gobl *bill.Invoice) *DetallesFactura {
 	lines := []IDDetalleFactura{}
 	for _, line := range gobl.Lines {
+		if line.Item.Price == nil {
+			continue
+		}
 		lines = append(lines, IDDetalleFactura{
 			DescripcionDetalle: line.Item.Name,
 			Cantidad:           line.Quantity.String(),
@@ -36,6 +39,10 @@ func newDetallesFactura(gobl *bill.Invoice) *DetallesFactura {
 	}
 }
 
+func calculateDiscounts(line *bill.Line) num.Amount {
+	return line.Sum.Subtract(*line.Total)
+}
+
 func calculateTotal(line *bill.Line) num.Amount {
 	taxes := calculateTaxes(line)
 
@@ -47,7 +54,7 @@ func calculateTaxes(line *bill.Line) num.Amount {
 
 	for _, tax := range line.Taxes {
 		if tax.Percent != nil {
-			total = total.Add(tax.Percent.Of(line.Total))
+			total = total.Add(tax.Percent.Of(*line.Total))
 		}
 	}
 

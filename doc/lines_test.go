@@ -24,7 +24,7 @@ func TestLines(t *testing.T) {
 		goblInvoice.Lines = []*bill.Line{{
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
-			Item:     &org.Item{Name: "A", Price: num.MakeAmount(10, 0)},
+			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 			Taxes:    tax.Set{&tax.Combo{Category: "VAT", Rate: "standard"}},
 		}}
 		_ = goblInvoice.Calculate()
@@ -44,7 +44,7 @@ func TestLines(t *testing.T) {
 		goblInvoice.Lines = []*bill.Line{{
 			Index:     1,
 			Quantity:  num.MakeAmount(100, 0),
-			Item:      &org.Item{Name: "A", Price: num.MakeAmount(11, 0)},
+			Item:      &org.Item{Name: "A", Price: num.NewAmount(11, 0)},
 			Discounts: []*bill.LineDiscount{DiscountOf(100)},
 			Taxes:     tax.Set{&tax.Combo{Category: "VAT", Rate: "standard"}},
 		}}
@@ -58,20 +58,21 @@ func TestLines(t *testing.T) {
 	})
 
 	t.Run("should subtract taxes if included in prices per unit", func(t *testing.T) {
-		goblInvoice := test.LoadInvoice("sample-invoice.json")
-		goblInvoice.Tax = &bill.Tax{PricesInclude: "VAT"}
+		inv := test.LoadInvoice("sample-invoice.json")
+		inv.Tax = &bill.Tax{PricesInclude: "VAT"}
 
-		goblInvoice.Lines = []*bill.Line{{
+		inv.Lines = []*bill.Line{{
 			Index:    1,
 			Quantity: num.MakeAmount(10, 0),
-			Item:     &org.Item{Name: "A", Price: num.MakeAmount(121, 0)},
+			Item:     &org.Item{Name: "A", Price: num.NewAmount(121, 0)},
 			Taxes:    tax.Set{&tax.Combo{Category: "VAT", Rate: "standard"}},
 		}}
-		_ = goblInvoice.Calculate()
+		require.NoError(t, inv.Calculate())
+		require.NoError(t, inv.RemoveIncludedTaxes())
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		out, _ := doc.NewTicketBAI(inv, ts, role, doc.ZoneBI)
 
-		line := invoice.Factura.DatosFactura.DetallesFactura.IDDetalleFactura[0]
+		line := out.Factura.DatosFactura.DetallesFactura.IDDetalleFactura[0]
 		assert.Equal(t, "100.00", line.ImporteUnitario)
 		assert.Equal(t, "1210.00", line.ImporteTotal)
 	})
@@ -83,7 +84,7 @@ func TestLines(t *testing.T) {
 			inv.Lines = append(inv.Lines, &bill.Line{
 				Index:    1,
 				Quantity: num.MakeAmount(100, 0),
-				Item:     &org.Item{Name: "A", Price: num.MakeAmount(10, 0)},
+				Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 				Taxes:    tax.Set{&tax.Combo{Category: tax.CategoryVAT, Rate: tax.RateStandard}},
 			})
 		}
