@@ -59,7 +59,7 @@ func (doc *TicketBAI) generateQRCode(zone l10n.Code, tbaiCode string) string {
 		return ""
 	}
 
-	query := []string{"id=" + tbaiCode}
+	query := []string{"id=" + url.QueryEscape(tbaiCode)}
 	if doc.Factura.CabeceraFactura.SerieFactura != "" {
 		query = append(query, "s="+url.QueryEscape(doc.Factura.CabeceraFactura.SerieFactura))
 	}
