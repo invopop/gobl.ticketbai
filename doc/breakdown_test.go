@@ -215,7 +215,7 @@ func TestDesgloseConversion(t *testing.T) {
 			Taxes: tax.Set{
 				&tax.Combo{
 					Category: "VAT",
-					Rate:     tax.KeyOutsideScope,
+					Key:      tax.KeyOutsideScope,
 					Ext:      tax.Extensions{tbai.ExtKeyExempt: "RL"},
 				},
 			},
