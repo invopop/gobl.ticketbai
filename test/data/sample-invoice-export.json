@@ -4,7 +4,7 @@
 		"uuid": "0192fbd4-5087-708c-9b31-e8f653ef0c52",
 		"dig": {
 			"alg": "sha256",
-			"val": "963d8171e4ecb8b3c6fa952ce32849d2093fc9f56b9ee35a61741b043bc588d4"
+			"val": "098c7bf82f7023f2bdb469d6cf1e67e4b938babfaab629caa02c1825bdffbbfc"
 		}
 	},
 	"doc": {
@@ -80,7 +80,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "exempt",
+						"key": "exempt",
 						"ext": {
 							"es-tbai-exemption": "E1",
 							"es-tbai-product": "goods"
@@ -103,7 +103,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "exempt",
+						"key": "export",
 						"ext": {
 							"es-tbai-exemption": "E2",
 							"es-tbai-product": "goods"
@@ -126,7 +126,8 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "standard",
+						"key": "standard",
+						"rate": "general",
 						"percent": "21.0%",
 						"ext": {
 							"es-tbai-product": "services"
@@ -159,7 +160,7 @@
 								"amount": "0.00"
 							},
 							{
-								"key": "exempt",
+								"key": "export",
 								"ext": {
 									"es-tbai-exemption": "E2",
 									"es-tbai-product": "goods"
@@ -184,7 +185,6 @@
 						"retained": true,
 						"rates": [
 							{
-								"key": "pro",
 								"base": "300.00",
 								"percent": "15.0%",
 								"amount": "45.00"
@@ -193,10 +193,12 @@
 						"amount": "45.00"
 					}
 				],
-				"sum": "18.00"
+				"sum": "63.00",
+				"retained": "45.00"
 			},
-			"tax": "18.00",
-			"total_with_tax": "1018.00",
+			"tax": "63.00",
+			"total_with_tax": "1063.00",
+			"retained_tax": "45.00",
 			"payable": "1018.00"
 		},
 		"notes": [

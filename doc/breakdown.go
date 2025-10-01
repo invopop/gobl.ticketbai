@@ -140,7 +140,7 @@ func newDesgloseFactura(taxInfo taxInfo, rates []*tax.RateTotal) *DesgloseFactur
 			})
 		} else if taxInfo.isExenta(rate) {
 			df.Sujeta.Exenta.appendDetalle(&DetalleExenta{
-				CausaExencion: rate.Ext[tbai.ExtKeyExemption].String(),
+				CausaExencion: rate.Ext[tbai.ExtKeyExempt].String(),
 				BaseImponible: rate.Base.Rescale(2).String(),
 			})
 		} else {
@@ -268,16 +268,16 @@ func (t taxInfo) isNoSujeta(r *tax.RateTotal) bool {
 	if t.customerRates {
 		return true
 	}
-	return r.Percent == nil && r.Ext[tbai.ExtKeyExemption].In(notSubjectExemptionCodes...)
+	return r.Percent == nil && r.Ext[tbai.ExtKeyExempt].In(notSubjectExemptionCodes...)
 }
 
 func (t taxInfo) causaNoSujeta(r *tax.RateTotal) string {
 	if t.customerRates {
 		return "RL"
 	}
-	return r.Ext[tbai.ExtKeyExemption].String()
+	return r.Ext[tbai.ExtKeyExempt].String()
 }
 
 func (taxInfo) isExenta(r *tax.RateTotal) bool {
-	return r.Percent == nil && !r.Ext[tbai.ExtKeyExemption].In(notSubjectExemptionCodes...)
+	return r.Percent == nil && !r.Ext[tbai.ExtKeyExempt].In(notSubjectExemptionCodes...)
 }
