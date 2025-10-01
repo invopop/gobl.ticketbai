@@ -85,7 +85,7 @@ func TestLines(t *testing.T) {
 				Index:    1,
 				Quantity: num.MakeAmount(100, 0),
 				Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
-				Taxes:    tax.Set{&tax.Combo{Category: tax.CategoryVAT, Rate: tax.RateStandard}},
+				Taxes:    tax.Set{&tax.Combo{Category: tax.CategoryVAT, Rate: tax.KeyStandard}},
 			})
 		}
 		require.NoError(t, inv.Calculate())
