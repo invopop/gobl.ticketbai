@@ -78,7 +78,7 @@ func (c *sendOpts) runE(cmd *cobra.Command, args []string) error {
 		opts = append(opts, ticketbai.InSandbox())
 	}
 
-	tc, err := ticketbai.New(c.software(), zone, opts...)
+	tc, err := ticketbai.New(c.software(zone), zone, opts...)
 	if err != nil {
 		return err
 	}

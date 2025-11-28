@@ -47,12 +47,7 @@ func (c *Client) GenerateCancel(env *gobl.Envelope) (*doc.AnulaTicketBAI, error)
 // FingerprintCancel generates a finger print for the TicketBAI document using the
 // data provided from the previous invoice data.
 func (c *Client) FingerprintCancel(cd *doc.AnulaTicketBAI) error {
-	conf := &doc.Software{
-		License: c.software.License,
-		NIF:     c.software.NIF,
-		Name:    c.software.Name,
-		Version: c.software.Version,
-	}
+	conf := c.buildSoftware()
 	return cd.Fingerprint(conf)
 }
 
