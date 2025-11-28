@@ -97,6 +97,7 @@ func InSandbox() Option {
 	}
 }
 
+// Licenses stores the licenses for the different zones and environments.
 type Licenses map[gateways.Environment]map[l10n.Code]string
 
 // Software defines the details about the software that is using this library to
