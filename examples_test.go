@@ -10,6 +10,7 @@ import (
 
 	ticketbai "github.com/invopop/gobl.ticketbai"
 	"github.com/invopop/gobl.ticketbai/doc"
+	"github.com/invopop/gobl.ticketbai/internal/gateways"
 	"github.com/invopop/gobl.ticketbai/test"
 	"github.com/invopop/xmldsig"
 	"github.com/lestrrat-go/libxml2"
@@ -101,7 +102,11 @@ func loadTBAIClient() (*ticketbai.Client, error) {
 	}
 
 	return ticketbai.New(&ticketbai.Software{
-		License: "My License",
+		Licenses: ticketbai.Licenses{
+			gateways.EnvironmentSandbox: {
+				ticketbai.ZoneBI: "My License",
+			},
+		},
 		NIF:     "12345678A",
 		Name:    "My Software",
 		Version: "1.0",

@@ -5,6 +5,8 @@ import (
 	"os"
 
 	ticketbai "github.com/invopop/gobl.ticketbai"
+	"github.com/invopop/gobl.ticketbai/internal/gateways"
+	"github.com/invopop/gobl/l10n"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -51,13 +53,21 @@ func (o *rootOpts) prepareFlags(f *pflag.FlagSet) {
 	f.BoolVarP(&o.production, "production", "p", false, "Production environment")
 }
 
-func (o *rootOpts) software() *ticketbai.Software {
+func (o *rootOpts) software(zone l10n.Code) *ticketbai.Software {
+	env := gateways.EnvironmentSandbox
+	if o.production {
+		env = gateways.EnvironmentProduction
+	}
 	return &ticketbai.Software{
 		NIF:         o.swNIF,
 		Name:        o.swName,
 		CompanyName: o.swCompanyName,
 		Version:     o.swVersion,
-		License:     o.swLicense,
+		Licenses: ticketbai.Licenses{
+			env: {
+				zone: o.swLicense,
+			},
+		},
 	}
 }
 

@@ -97,11 +97,14 @@ func InSandbox() Option {
 	}
 }
 
+// Licenses stores the licenses for the different zones and environments.
+type Licenses map[gateways.Environment]map[l10n.Code]string
+
 // Software defines the details about the software that is using this library to
 // generate TicketBAI documents. These details are included in the final
 // document.
 type Software struct {
-	License     string
+	Licenses    Licenses
 	NIF         string
 	Name        string
 	CompanyName string
@@ -182,4 +185,13 @@ func (c *Client) Zone() l10n.Code {
 // Sandbox returns true if the client is using the sandbox environment.
 func (c *Client) Sandbox() bool {
 	return c.env == gateways.EnvironmentSandbox
+}
+
+func (c *Client) buildSoftware() *doc.Software {
+	return &doc.Software{
+		License: c.software.Licenses[c.env][c.zone],
+		NIF:     c.software.NIF,
+		Name:    c.software.Name,
+		Version: c.software.Version,
+	}
 }

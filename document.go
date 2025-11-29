@@ -74,12 +74,7 @@ func zoneFor(inv *bill.Invoice) l10n.Code {
 // document in the chain, the parameter should be nil. The document is updated
 // in place.
 func (c *Client) Fingerprint(d *doc.TicketBAI, prev *doc.ChainData) error {
-	soft := &doc.Software{
-		License: c.software.License,
-		NIF:     c.software.NIF,
-		Name:    c.software.Name,
-		Version: c.software.Version,
-	}
+	soft := c.buildSoftware()
 	return d.Fingerprint(soft, prev)
 }
 
