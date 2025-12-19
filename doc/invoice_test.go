@@ -174,6 +174,7 @@ func TestFacturaConversion(t *testing.T) {
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
 			Item: &org.Item{
+				Key:   "goods",
 				Name:  "A",
 				Price: num.NewAmount(10, 0),
 			},

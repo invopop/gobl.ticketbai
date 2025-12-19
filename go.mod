@@ -6,22 +6,22 @@ toolchain go1.23.4
 
 require (
 	github.com/go-resty/resty/v2 v2.13.1
-	github.com/invopop/gobl v0.214.1
+	github.com/invopop/gobl v0.304.2
 	github.com/invopop/xmldsig v0.10.0
 	github.com/joho/godotenv v1.5.1
 	github.com/lestrrat-go/libxml2 v0.0.0-20231124114421-99c71026c2f5
 	github.com/magefile/mage v1.15.0
 	github.com/nbio/xml v0.0.0-20241028124227-eac89c735a80
 	github.com/sigurn/crc8 v0.0.0-20220107193325-2243fe600f9f
-	github.com/spf13/cobra v1.8.1
-	github.com/spf13/pflag v1.0.5
+	github.com/spf13/cobra v1.9.1
+	github.com/spf13/pflag v1.0.6
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/net v0.37.0
+	golang.org/x/net v0.38.0
 )
 
 require (
-	cloud.google.com/go v0.115.0 // indirect
-	github.com/Masterminds/semver/v3 v3.2.1 // indirect
+	cloud.google.com/go v0.116.0 // indirect
+	github.com/Masterminds/semver/v3 v3.3.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/beevik/etree v1.4.1 // indirect
@@ -40,7 +40,6 @@ require (
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	golang.org/x/crypto v0.36.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
-	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	software.sslmate.com/src/go-pkcs12 v0.4.0 // indirect
 )

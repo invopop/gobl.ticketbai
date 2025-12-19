@@ -10,9 +10,7 @@
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "ES",
-		"$addons": [
-			"es-tbai-v1"
-		],
+		"$addons": ["es-tbai-v1"],
 		"uuid": "01922336-8b5e-72a9-8282-0188c1cdaefa",
 		"type": "credit-note",
 		"series": "FR",
@@ -102,7 +100,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "standard",
+						"rate": "general",
 						"percent": "21.0%"
 					}
 				],

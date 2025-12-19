@@ -71,7 +71,8 @@ func newDestinatario(party *org.Party) (*IDDestinatario, error) {
 		d.IDOtro = otherIdentity(party)
 	}
 	if d.NIF == "" && d.IDOtro == nil {
-		return nil, validationErr("customer with tax ID or other identity is required")
+		// Assume this is a B2C operation.
+		return nil, nil
 	}
 
 	if len(party.Addresses) > 0 && party.Addresses[0].Code != "" {
