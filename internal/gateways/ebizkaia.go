@@ -166,7 +166,11 @@ func (c *EBizkaiaConn) sendRequest(ctx context.Context, doc *ebizkaia.Request, p
 		return ErrConnection.withCause(err)
 	}
 	if res.StatusCode() != 200 {
-		return ErrConnection.withCode(fmt.Sprintf("%d", res.StatusCode()))
+		err := ErrConnection.withCode(fmt.Sprintf("%d", res.StatusCode()))
+		if body := res.String(); body != "" {
+			err = err.withMessage(body)
+		}
+		return err
 	}
 
 	code := res.Header().Get(eBizkaiaN3ResponseHeader)
