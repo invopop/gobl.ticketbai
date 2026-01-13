@@ -86,6 +86,16 @@ func TestInvoiceConversion(t *testing.T) {
 		assert.Equal(t, "Abroad Co LLC", invoice.Sujetos.Destinatarios.IDDestinatario[0].ApellidosNombreRazonSocial)
 	})
 
+	t.Run("should not include customer if no tax ID present", func(t *testing.T) {
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
+		goblInvoice.Customer.TaxID = nil
+		goblInvoice.Customer.Identities = nil
+
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+
+		assert.Empty(t, invoice.Sujetos.Destinatarios)
+	})
+
 	t.Run("should change the document type from the default (02) if stated", func(t *testing.T) {
 		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Customer.TaxID = nil

@@ -10,12 +10,8 @@
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "ES",
-		"$addons": [
-			"es-tbai-v1"
-		],
-		"$tags": [
-			"simplified"
-		],
+		"$addons": ["es-tbai-v1"],
+		"$tags": ["simplified"],
 		"uuid": "7fe11346-a0ce-11ee-b8f0-e6a7901137ed",
 		"type": "standard",
 		"series": "SIMPL",
@@ -54,12 +50,10 @@
 				"i": 1,
 				"quantity": "20",
 				"item": {
+					"key": "services",
 					"name": "Development services",
 					"price": "90.00",
-					"unit": "h",
-					"ext": {
-						"es-tbai-product": "services"
-					}
+					"unit": "h"
 				},
 				"sum": "1800.00",
 				"discounts": [
@@ -72,11 +66,9 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "standard",
-						"percent": "21.0%",
-						"ext": {
-							"es-tbai-product": "services"
-						}
+						"key": "standard",
+						"rate": "general",
+						"percent": "21.0%"
 					}
 				],
 				"total": "1620.00"
@@ -85,21 +77,16 @@
 				"i": 2,
 				"quantity": "1",
 				"item": {
+					"key": "goods",
 					"name": "Some merch",
-					"price": "90.00",
-					"ext": {
-						"es-tbai-product": "services"
-					}
+					"price": "90.00"
 				},
 				"sum": "90.00",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"rate": "standard",
-						"percent": "21.0%",
-						"ext": {
-							"es-tbai-product": "goods"
-						}
+						"percent": "21.0%"
 					}
 				],
 				"total": "90.00"
@@ -108,21 +95,16 @@
 				"i": 3,
 				"quantity": "1",
 				"item": {
+					"key": "goods",
 					"name": "Some essential needs merch",
-					"price": "30.00",
-					"ext": {
-						"es-tbai-product": "services"
-					}
+					"price": "30.00"
 				},
 				"sum": "30.00",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"rate": "reduced",
-						"percent": "10.0%",
-						"ext": {
-							"es-tbai-product": "goods"
-						}
+						"percent": "10.0%"
 					}
 				],
 				"total": "30.00"

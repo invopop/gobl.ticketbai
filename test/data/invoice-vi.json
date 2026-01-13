@@ -10,9 +10,7 @@
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "ES",
-		"$addons": [
-			"es-tbai-v1"
-		],
+		"$addons": ["es-tbai-v1"],
 		"uuid": "0192fd50-b568-7819-acf7-c2cfc5478b18",
 		"type": "standard",
 		"series": "TEST",
@@ -73,11 +71,9 @@
 				"i": 1,
 				"quantity": "10",
 				"item": {
+					"key": "services",
 					"name": "Item being purchased",
-					"price": "100.00",
-					"ext": {
-						"es-tbai-product": "services"
-					}
+					"price": "100.00"
 				},
 				"sum": "1000.00",
 				"discounts": [
@@ -89,7 +85,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "standard",
+						"rate": "general",
 						"percent": "21.0%"
 					}
 				],

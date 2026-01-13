@@ -10,9 +10,7 @@
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "ES",
-		"$addons": [
-			"es-tbai-v1"
-		],
+		"$addons": ["es-tbai-v1"],
 		"uuid": "01922336-8bed-76dc-9a2b-6ed73f70163c",
 		"type": "standard",
 		"series": "TEST",
@@ -70,21 +68,15 @@
 				"i": 1,
 				"quantity": "6",
 				"item": {
+					"key": "goods",
 					"name": "Item being purchased",
-					"price": "100.00",
-					"ext": {
-						"es-tbai-product": "services"
-					}
+					"price": "100.00"
 				},
 				"sum": "600.00",
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "exempt",
-						"ext": {
-							"es-tbai-exemption": "E1",
-							"es-tbai-product": "goods"
-						}
+						"key": "exempt"
 					}
 				],
 				"total": "600.00"
@@ -93,21 +85,15 @@
 				"i": 2,
 				"quantity": "5",
 				"item": {
+					"key": "goods",
 					"name": "Another item being purchased",
-					"price": "20.00",
-					"ext": {
-						"es-tbai-product": "services"
-					}
+					"price": "20.00"
 				},
 				"sum": "100.00",
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "exempt",
-						"ext": {
-							"es-tbai-exemption": "E2",
-							"es-tbai-product": "goods"
-						}
+						"key": "export"
 					}
 				],
 				"total": "100.00"
@@ -116,21 +102,16 @@
 				"i": 3,
 				"quantity": "2",
 				"item": {
+					"key": "services",
 					"name": "Service being paid",
-					"price": "150.00",
-					"ext": {
-						"es-tbai-product": "services"
-					}
+					"price": "150.00"
 				},
 				"sum": "300.00",
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "standard",
-						"percent": "21.0%",
-						"ext": {
-							"es-tbai-product": "services"
-						}
+						"rate": "general",
+						"percent": "21.0%"
 					},
 					{
 						"cat": "IRPF",

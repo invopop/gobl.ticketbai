@@ -111,12 +111,12 @@ func NewTicketBAI(inv *bill.Invoice, ts time.Time, role IssuerRole, zone l10n.Co
 
 	// Add customers
 	if inv.Customer != nil {
-		dest, err := newDestinatario(inv.Customer)
-		if err != nil {
-			return nil, err
-		}
-		doc.Sujetos.Destinatarios = &Destinatarios{
-			IDDestinatario: []*IDDestinatario{dest},
+		// If the customer is still nil, implies that they didn't have enough
+		// fiscal information to include in the output.
+		if dest := newDestinatario(inv.Customer); dest != nil {
+			doc.Sujetos.Destinatarios = &Destinatarios{
+				IDDestinatario: []*IDDestinatario{dest},
+			}
 		}
 	}
 

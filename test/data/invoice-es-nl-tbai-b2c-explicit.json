@@ -10,9 +10,7 @@
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "ES",
-		"$addons": [
-			"es-tbai-v1"
-		],
+		"$addons": ["es-tbai-v1"],
 		"uuid": "328f20c8-a0ac-11ee-bb1d-e6a7901137ed",
 		"type": "standard",
 		"series": "EXPORT-X",
@@ -81,7 +79,6 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "exempt",
 						"ext": {
 							"es-tbai-exemption": "RL",
 							"es-tbai-product": "services"
