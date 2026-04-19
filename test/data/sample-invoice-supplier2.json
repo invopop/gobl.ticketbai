@@ -4,7 +4,7 @@
 		"uuid": "0192fbd4-81b4-75ed-899b-eb4c18a65f1c",
 		"dig": {
 			"alg": "sha256",
-			"val": "cff6f81c8bb31fcf3fbed5429b07a2a9fd36d5ba349592ec83d70f63399be1c5"
+			"val": "b77b603355416dbdb0e684a0e7e92bd850b16993d3af286d32569c902e896bf9"
 		}
 	},
 	"doc": {
@@ -89,8 +89,12 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "standard",
-						"percent": "21.0%"
+						"key": "standard",
+						"rate": "general",
+						"percent": "21.0%",
+						"ext": {
+							"es-tbai-product": "services"
+						}
 					}
 				],
 				"total": "1215.00"
@@ -106,6 +110,9 @@
 						"rates": [
 							{
 								"key": "standard",
+								"ext": {
+									"es-tbai-product": "services"
+								},
 								"base": "1215.00",
 								"percent": "21.0%",
 								"amount": "255.15"

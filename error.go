@@ -89,6 +89,16 @@ func (e *Error) withMessage(msg string, args ...any) *Error {
 	return e
 }
 
+// withCause duplicates and adds the cause to the error.
+func (e *Error) withCause(err error) *Error {
+	e = e.clone()
+	if e.message == "" {
+		e.message = err.Error()
+	}
+	e.cause = err
+	return e
+}
+
 func (e *Error) clone() *Error {
 	ne := new(Error)
 	*ne = *e

@@ -1,10 +1,10 @@
-package doc_test
+package convert_test
 
 import (
 	"testing"
 	"time"
 
-	"github.com/invopop/gobl.ticketbai/doc"
+	"github.com/invopop/gobl.ticketbai/convert"
 	"github.com/invopop/gobl.ticketbai/test"
 	"github.com/invopop/xmldsig"
 	"github.com/stretchr/testify/assert"
@@ -19,19 +19,19 @@ func TestSignatureGeneration(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("should set the proper signer role", func(t *testing.T) {
-		role := doc.IssuerRoleCustomer
+		role := convert.IssuerRoleCustomer
 
 		goblInvoice := test.LoadInvoice("sample-invoice.json")
-		invoice, err := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		invoice, err := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 		require.NoError(t, err)
 
-		err = invoice.Sign("TEST", cert, role, doc.ZoneBI)
+		err = invoice.Sign("TEST", cert, role, convert.ZoneBI)
 		require.NoError(t, err)
 
 		assert.Equal(t,
-			string(doc.XAdESCustomer),
+			string(convert.XAdESCustomer),
 			invoice.Signature.Object.QualifyingProperties.SignedProperties.
-				SignatureProperties.SignerRole.ClaimedRoles.ClaimedRole[0],
+				SignedSignatureProperties.SignerRole.ClaimedRoles.ClaimedRole[0],
 		)
 	})
 

@@ -1,4 +1,4 @@
-package doc
+package convert
 
 // HuellaTBAI contains info about the Tickebai fingerprint
 type HuellaTBAI struct {
