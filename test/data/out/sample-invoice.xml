@@ -99,11 +99,14 @@
         <ds:DigestValue>PDpcPQH9LSD3M5AhLbC3kSVMY5m4gNdM0Px/RZHWFoL3sLM0pxad+w3jSSwsIKC8dcSF1aL4m3nCm3Fw+ofq6g==</ds:DigestValue>
       </ds:Reference>
       <ds:Reference Type="http://uri.etsi.org/01903#SignedProperties" URI="#Signature-0192fbd4-a54b-7d7a-be6e-258ea15f17a2-SignedProperties">
+        <ds:Transforms>
+          <ds:Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"></ds:Transform>
+        </ds:Transforms>
         <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></ds:DigestMethod>
-        <ds:DigestValue>M6emGAW2WGLgNdpLI0Rn4VVACY2zFb3Xs9U9VNWd04Vb8w2TdYPqGkNrusb7/DG2pp/+AeeU//KbYY5qhXvPMA==</ds:DigestValue>
+        <ds:DigestValue>hEN0NHfv6ulKiINF5v6AbbWOhuLnIZrmFl8jDbCciE/0AsX8i1RM4bslUNMJbu5Ds8m2RBHHfXCgbUYVrERESA==</ds:DigestValue>
       </ds:Reference>
     </ds:SignedInfo>
-    <ds:SignatureValue Id="Signature-0192fbd4-a54b-7d7a-be6e-258ea15f17a2-SignatureValue">bLcEL93+D1/kpm3E/OOTdKP/po+8HpKIxw2Yuq6QoylH+ZW8TgJQJruB4Mc76/bMSB3Wr2U6fuab0Z3+z/yrBRm/5Bm3JEHFJGI9kjcdD8/VZwPGiFiPJg/d1GWPW20PjHui3V4/1uYzbTVOrw81RkdAIP3ZgkMzFCG4hmtAC6/udcC6fWks2QsL4l9ViR7p0kNTkD928IWhe/BWiLYv+hHfbKK49ov72uEwdyhnc7BAquqE96cosbT4ZTIvje5QOl4C5B+cn6QzYKO4hujRSGzVtb/lYYQ/ZO9TwRrREIxe2cTQnfMib0xoHdRDWUyuRH/9H5knGJ+JmrxU1Yv3HQ==</ds:SignatureValue>
+    <ds:SignatureValue Id="Signature-0192fbd4-a54b-7d7a-be6e-258ea15f17a2-SignatureValue">nlo5Ne/TW6poprf0O70OmERevOo+gcPzOP6HkvLQ+e5BWn3/08Y/E7/8dfA6rnk+BniBAA6M1KgroqZpjrDF49ZmEC+BxhCddOXUEfkDonx2nAjeYjlCxpU/n5W4z6rSLO0+cqKJIe+rYqKr6utSPU48KwGa4HHeKMc3pZAHB0OKA2garNERijK/gnq1T/Np52WJB9fAtVw3Hsi03xer/k+TMcSN69pPiR3wFyeQvZ3159VvXBZZ/CQDfKgG7HVQbg6AVVZ7nw1sBkAtm9turPR6n7I/p8wLyQm9vpXTzWhfUrkI0dlewSZtMzOMtbGVLNGGkXg1bAAmfIpK5zWAow==</ds:SignatureValue>
     <ds:KeyInfo Id="Certificate-0192fbd4-a54b-7d7a-be6e-258ea15f17a2">
       <ds:X509Data>
         <ds:X509Certificate>MIIJtzCCB5+gAwIBAgICG3YwDQYJKoZIhvcNAQELBQAwgZcxCzAJBgNVBAYTAkVTMRQwEgYDVQQKDAtJWkVOUEUgUy5BLjE6MDgGA1UECwwxTlpaIFppdXJ0YWdpcmkgcHVibGlrb2EgLSBDZXJ0aWZpY2FkbyBwdWJsaWNvIFNDSTE2MDQGA1UEAwwtQ0EgZGUgQ2l1ZGFkYW5vcyB5IEVudGlkYWRlcyAoNCkgLSBERVNBUlJPTExPMB4XDTIxMDMxNTEwMDQzN1oXDTI1MDMxNTEwMDQzN1owggFtMQswCQYDVQQGEwJFUzFvMG0GA1UEDQxmUmVnOkdhc3RlaXogL0hvamE6Qi0xNjY0NzIgL1RvbW86MzczOTMgL1NlY2Npb246OCAvTGlicm86MSAvRm9saW86MjAgL0ZlY2hhOjEwLTAyLTE5NzQgL0luc2NyaXBjacOzbjoxMRgwFgYDVQRhDA9WQVRFUy1TNzgzNjEwN0gxPTA7BgNVBAsMNE9yZGV6a2FyaSB6aXVydGFnaXJpYSAtIENlcnRpZmljYWRvIGRlIHJlcHJlc2VudGFudGUxFDASBgNVBAoMC0laRU5QRSBTLkEuMRIwEAYDVQQFEwk5OTk5OTk3M0sxGDAWBgNVBAQMD0ZJQ1RJQ0lPIEFDVElWTzEWMBQGA1UEKgwNUkVQUkVTRU5UQU5URTE4MDYGA1UEAwwvOTk5OTk5NzNLIFJFUFJFU0VOVEFOVEUgRklDVElDSU8gKFI6IFM3ODM2MTA3SCkwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCsI8cbiOSsEMrK+lr6Vn7xeDlI1UJIVWM4kMTyXoFcU9F7LkdbSv5jS1D1g3/c8YId1nFjPrHXjpBbjv4Am9QEvHKPa9djI9lTKS3gut5DDU1ePRAagnSCAr2Y6m4isbMF54S5tp0/Ng+myx5c2E+hMmgNw6uZ9KvdwaYY1gQW/N/7qS0KlA1eB0CSHyzZeVRgbYAXI6AMCtuYCRVNLbnzJBvSN0J4SuZeiM/KK0I0oj/8THajszp8hg3v2cfOMAGu5cM3yuBAPTBPBZCkGofwZqMn2ioMZXwRYuXJv4UEncs+d9qZbVGFpc9y0vwbQuPhZU2omSGTWedL4DlnbXDHAgMBAAGjggQyMIIELjCBxwYDVR0SBIG/MIG8hhVodHRwOi8vd3d3Lml6ZW5wZS5jb22BD2luZm9AaXplbnBlLmNvbaSBkTCBjjFHMEUGA1UECgw+SVpFTlBFIFMuQS4gLSBDSUYgQTAxMzM3MjYwLVJNZXJjLlZpdG9yaWEtR2FzdGVpeiBUMTA1NSBGNjIgUzgxQzBBBgNVBAkMOkF2ZGEgZGVsIE1lZGl0ZXJyYW5lbyBFdG9yYmlkZWEgMTQgLSAwMTAxMCBWaXRvcmlhLUdhc3RlaXowDgYDVR0PAQH/BAQDAgXgMB8GA1UdJQQYMBYGCCsGAQUFBwMCBgorBgEEAYI3CgMMMB0GA1UdDgQWBBQRR3q3tcdVPr8U7NS+zkf7EBt32jAfBgNVHSMEGDAWgBRv//0N8gxjDyZxXRrgb2VkZjhrkzCCATQGA1UdIASCASswggEnMIIBDQYJKwYBBAHzOWYMMIH/MCUGCCsGAQUFBwIBFhlodHRwOi8vd3d3Lml6ZW5wZS5jb20vY3BzMIHVBggrBgEFBQcCAjCByAyBxUtvbnRzdWx0YSB3d3cuaXplbnBlLmNvbS1lbiBiYWxkaW50emFrIGV0YSBrb25kaXppb2FrIHppdXJ0YWdpcmlhbiBmaWRhdHUgZWRvIGVyYWJpbGkgYXVycmV0aWsgLSBDb25zdWx0ZSBlbiB3d3cuaXplbnBlLmNvbSBsb3MgdMOpcm1pbm9zIHkgY29uZGljaW9uZXMgYW50ZXMgZGUgdXRpbGl6YXIgbyBjb25maWFyIGVuIGVsIGNlcnRpZmljYWRvMAkGBwQAi+xAAQIwCQYHYIVUAQMFCDCBogYIKwYBBQUHAQEEgZUwgZIwJQYIKwYBBQUHMAGGGWh0dHA6Ly9vY3NwZGVzLml6ZW5wZS5jb20waQYIKwYBBQUHMAKGXWh0dHA6Ly93d3cuaXplbnBlLmNvbS9jb250ZW5pZG9zL2luZm9ybWFjaW9uL2Nhc19pemVucGUvZXNfY2FzL2FkanVudG9zL0NDRUVSX2NlcnRfc2hhMjU2LmNydDCB2wYIKwYBBQUHAQMEgc4wgcswCAYGBACORgEBMAgGBgQAjkYBBDALBgYEAI5GAQMCAQ8wfAYGBACORgEFMHIwJBYeaHR0cHM6Ly93d3cuaXplbnBlLmNvbS9wZHMvZW4vEwJlbjAkFh5odHRwczovL3d3dy5pemVucGUuY29tL3Bkcy9ldS8TAmV1MCQWHmh0dHBzOi8vd3d3Lml6ZW5wZS5jb20vcGRzL2VzLxMCZXMwEwYGBACORgEGMAkGBwQAjkYBBgEwFQYIKwYBBQUHCwIwCQYHBACL7EkBAjA2BgNVHR8ELzAtMCugKaAnhiVodHRwOi8vY3JsZGVzLml6ZW5wZS5jb20vY2dpLWJpbi9jcmwyMA0GCSqGSIb3DQEBCwUAA4ICAQCJaRL+xyX6HFu/6AX7N0j/r1ZB3OAY8t4S3KBvxQBs/PGeQmHFr8cnFXxb2cfkZ/5IzDDMElicChXq86BgaXn6xxtw4q30/qsuwz8iwF+mLKENFGIYTdxmaGCuSBwhENWrv03uUeskL4gIMQIu5fhpdZRj2aW4ccsb9QdfLCHRtjxrgZMoL7tpXRYQcpKgMKroAg3PuIhwdg3eLhVZvihtUJ0oNGtEBz+04eRCZjXx8dWVrmYxfTEqHFaYc8Nxu6AuQvPQdBAC2DoxYLUpihUBvKo8aUrU/QhUCue76Sq9hnzi6TXCofNeixMZBB+ODwvcInWTX0N/m7zC/9wRcQ1vE6gO6lbNd6JnwiLHclf+oLAsRLWwN9dEeDEER2IvtlmIapKhxDrPQ9zSAiibaVSAVxvWC5bal2CgfgijlamDQ8lPD+/Fv1O6s8hGTEfMiDNErCC7IWn3ckjg+Ipz11DQO2hRI/VmarFDFtreavVsSgwseVJIQxavgOzMJVFRx1TQCBZFvW9RnM32QDygq2vrs234fD3ak8DtdmKd0aPLNYSN3zaiaPOzfhK6Z5m36Zltqzhzjg0YkoPcbmPGUO5tq7X7SwFeb0Kx7gEPzZHavbcnNYtuPgqFJklNk2+3zztodccRgZGtLRQJay+xwSNh8YiU+NmIgx2ad24qugodzg==</ds:X509Certificate>
@@ -136,7 +139,6 @@
               <xades:SignaturePolicyId>
                 <xades:SigPolicyId>
                   <xades:Identifier>https://www.batuz.eus/fitxategiak/batuz/ticketbai/sinadura_elektronikoaren_zehaztapenak_especificaciones_de_la_firma_electronica_v1_0.pdf</xades:Identifier>
-                  <xades:Description></xades:Description>
                 </xades:SigPolicyId>
                 <xades:SigPolicyHash>
                   <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"></ds:DigestMethod>
@@ -152,13 +154,10 @@
           </xades:SignedSignatureProperties>
           <xades:SignedDataObjectProperties>
             <xades:DataObjectFormat ObjectReference="#Reference-0192fbd4-a54b-7d7a-be6e-258ea15f17a2">
-              <xades:Description></xades:Description>
               <xades:ObjectIdentifier>
                 <xades:Identifier Qualifier="OIDAsURN">urn:oid:1.2.840.10003.5.109.10</xades:Identifier>
-                <xades:Description></xades:Description>
               </xades:ObjectIdentifier>
               <xades:MimeType>text/xml</xades:MimeType>
-              <xades:Encoding></xades:Encoding>
             </xades:DataObjectFormat>
           </xades:SignedDataObjectProperties>
         </xades:SignedProperties>

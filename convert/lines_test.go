@@ -1,10 +1,10 @@
-package doc_test
+package convert_test
 
 import (
 	"testing"
 	"time"
 
-	"github.com/invopop/gobl.ticketbai/doc"
+	"github.com/invopop/gobl.ticketbai/convert"
 	"github.com/invopop/gobl.ticketbai/test"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/num"
@@ -17,7 +17,7 @@ import (
 func TestLines(t *testing.T) {
 	ts, err := time.Parse(time.RFC3339, "2022-02-01T04:00:00Z")
 	require.NoError(t, err)
-	role := doc.IssuerRoleThirdParty
+	role := convert.IssuerRoleThirdParty
 
 	t.Run("should show line info", func(t *testing.T) {
 		goblInvoice := test.LoadInvoice("sample-invoice.json")
@@ -29,7 +29,7 @@ func TestLines(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 		lines := invoice.Factura.DatosFactura.DetallesFactura.IDDetalleFactura
 		assert.Equal(t, 1, len(lines))
@@ -50,7 +50,7 @@ func TestLines(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 		line := invoice.Factura.DatosFactura.DetallesFactura.IDDetalleFactura[0]
 		assert.Equal(t, "100.00", line.Descuento)
@@ -70,7 +70,7 @@ func TestLines(t *testing.T) {
 		require.NoError(t, inv.Calculate())
 		require.NoError(t, inv.RemoveIncludedTaxes())
 
-		out, _ := doc.NewTicketBAI(inv, ts, role, doc.ZoneBI)
+		out, _ := convert.NewTicketBAI(inv, ts, role, convert.ZoneBI)
 
 		line := out.Factura.DatosFactura.DetallesFactura.IDDetalleFactura[0]
 		assert.Equal(t, "100.00", line.ImporteUnitario)
@@ -90,7 +90,7 @@ func TestLines(t *testing.T) {
 		}
 		require.NoError(t, inv.Calculate())
 
-		_, err := doc.NewTicketBAI(inv, ts, role, doc.ZoneSS)
+		_, err := convert.NewTicketBAI(inv, ts, role, convert.ZoneSS)
 
 		assert.ErrorContains(t, err, "line count over limit (1000) for tax locality")
 	})

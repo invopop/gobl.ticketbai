@@ -8,7 +8,7 @@ import (
 	"slices"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/invopop/gobl.ticketbai/doc"
+	"github.com/invopop/gobl.ticketbai/convert"
 	"github.com/invopop/gobl.ticketbai/internal/gateways/ebizkaia"
 	"github.com/invopop/xmldsig"
 	"golang.org/x/net/html/charset"
@@ -67,7 +67,7 @@ func newEbizkaia(env Environment, tlsConfig *tls.Config) *EBizkaiaConn {
 
 // Post sends the complete TicketBAI document to the remote end-point. We assume
 // the document has been signed and prepared.
-func (c *EBizkaiaConn) Post(ctx context.Context, doc *doc.TicketBAI) error {
+func (c *EBizkaiaConn) Post(ctx context.Context, doc *convert.TicketBAI) error {
 	payload, err := doc.Bytes()
 	if err != nil {
 		return fmt.Errorf("generating payload: %w", err)
@@ -102,7 +102,7 @@ func (c *EBizkaiaConn) Post(ctx context.Context, doc *doc.TicketBAI) error {
 // Fetch retrieves the TicketBAI from the remote end-point for the given
 // taxpayer and year. This is no longer used as it is only available in this
 // region.
-func (c *EBizkaiaConn) Fetch(ctx context.Context, nif, name, year string, page int, head *doc.CabeceraFactura) ([]*doc.TicketBAI, error) {
+func (c *EBizkaiaConn) Fetch(ctx context.Context, nif, name, year string, page int, head *convert.CabeceraFactura) ([]*convert.TicketBAI, error) {
 	sup := &ebizkaia.Supplier{
 		Year: year,
 		NIF:  nif,
@@ -119,7 +119,7 @@ func (c *EBizkaiaConn) Fetch(ctx context.Context, nif, name, year string, page i
 		return nil, fmt.Errorf("sending fetch request: %w", err)
 	}
 
-	tbais := make([]*doc.TicketBAI, len(resp.FacturasEmitidas.FacturaEmitida))
+	tbais := make([]*convert.TicketBAI, len(resp.FacturasEmitidas.FacturaEmitida))
 	for i, f := range resp.FacturasEmitidas.FacturaEmitida {
 		tbais[i] = buildTBAIDoc(f.TicketBai)
 	}
@@ -129,7 +129,7 @@ func (c *EBizkaiaConn) Fetch(ctx context.Context, nif, name, year string, page i
 
 // Cancel sends the cancellation request for the TickeBAI invoice to the remote
 // end-point.
-func (c *EBizkaiaConn) Cancel(ctx context.Context, doc *doc.AnulaTicketBAI) error {
+func (c *EBizkaiaConn) Cancel(ctx context.Context, doc *convert.AnulaTicketBAI) error {
 	payload, err := doc.Bytes()
 	if err != nil {
 		return fmt.Errorf("generating payload: %w", err)
@@ -195,8 +195,8 @@ func convertToUTF8(s string) string {
 }
 
 // buildTBAIDoc builds a doc.TicketBAI from a TicketBAIType.
-func buildTBAIDoc(f *ebizkaia.TicketBaiType) *doc.TicketBAI {
-	return &doc.TicketBAI{
+func buildTBAIDoc(f *ebizkaia.TicketBaiType) *convert.TicketBAI {
+	return &convert.TicketBAI{
 		Cabecera:   f.Cabecera,
 		Sujetos:    f.Sujetos,
 		Factura:    f.Factura,

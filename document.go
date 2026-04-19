@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/invopop/gobl"
-	"github.com/invopop/gobl.ticketbai/doc"
+	"github.com/invopop/gobl.ticketbai/convert"
 	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/head"
@@ -14,7 +14,7 @@ import (
 
 // Convert creates a new TicketBAI document from the provided GOBL Envelope.
 // The envelope must contain a valid Invoice.
-func (c *Client) Convert(env *gobl.Envelope) (*doc.TicketBAI, error) {
+func (c *Client) Convert(env *gobl.Envelope) (*convert.TicketBAI, error) {
 	// Extract the Invoice
 	inv, ok := env.Extract().(*bill.Invoice)
 	if !ok {
@@ -36,10 +36,10 @@ func (c *Client) Convert(env *gobl.Envelope) (*doc.TicketBAI, error) {
 		return nil, ErrValidation.withMessage("invalid zone")
 	}
 
-	out, err := doc.NewTicketBAI(inv, c.CurrentTime(), c.issuerRole, zone)
+	out, err := convert.NewTicketBAI(inv, c.CurrentTime(), c.issuerRole, zone)
 	if err != nil {
-		if _, ok := err.(*doc.ValidationError); ok {
-			return nil, ErrValidation.withMessage(err.Error()) //nolint:govet
+		if _, ok := err.(*convert.ValidationError); ok {
+			return nil, ErrValidation.withCause(err) //nolint:govet
 		}
 
 		return nil, err
@@ -73,7 +73,7 @@ func zoneFor(inv *bill.Invoice) l10n.Code {
 // data provided from the previous chain data. If there was no previous
 // document in the chain, the parameter should be nil. The document is updated
 // in place.
-func (c *Client) Fingerprint(d *doc.TicketBAI, prev *doc.ChainData) error {
+func (c *Client) Fingerprint(d *convert.TicketBAI, prev *convert.ChainData) error {
 	soft := c.buildSoftware()
 	return d.Fingerprint(soft, prev)
 }
@@ -81,7 +81,7 @@ func (c *Client) Fingerprint(d *doc.TicketBAI, prev *doc.ChainData) error {
 // Sign is used to generate the XML DSig components of the final XML document.
 // This method will also update the GOBL Envelope with the QR codes that are
 // generated.
-func (c *Client) Sign(d *doc.TicketBAI, env *gobl.Envelope) error {
+func (c *Client) Sign(d *convert.TicketBAI, env *gobl.Envelope) error {
 	zone := ZoneFor(env)
 	dID := env.Head.UUID.String()
 	if err := d.Sign(dID, c.cert, c.issuerRole, zone, xmldsig.WithCurrentTime(d.IssueTimestamp)); err != nil {

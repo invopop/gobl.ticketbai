@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/invopop/gobl"
-	"github.com/invopop/gobl.ticketbai/doc"
+	"github.com/invopop/gobl.ticketbai/convert"
 	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
@@ -15,7 +15,7 @@ import (
 
 // GenerateCancel creates a new AnulaTicketBAI document from the provided
 // GOBL Envelope.
-func (c *Client) GenerateCancel(env *gobl.Envelope) (*doc.AnulaTicketBAI, error) {
+func (c *Client) GenerateCancel(env *gobl.Envelope) (*convert.AnulaTicketBAI, error) {
 	// Extract the Invoice
 	inv, ok := env.Extract().(*bill.Invoice)
 	if !ok {
@@ -36,7 +36,7 @@ func (c *Client) GenerateCancel(env *gobl.Envelope) (*doc.AnulaTicketBAI, error)
 	}
 
 	// Create the document
-	cd, err := doc.NewAnulaTicketBAI(inv, ts)
+	cd, err := convert.NewAnulaTicketBAI(inv, ts)
 	if err != nil {
 		return nil, err
 	}
@@ -46,13 +46,13 @@ func (c *Client) GenerateCancel(env *gobl.Envelope) (*doc.AnulaTicketBAI, error)
 
 // FingerprintCancel generates a finger print for the TicketBAI document using the
 // data provided from the previous invoice data.
-func (c *Client) FingerprintCancel(cd *doc.AnulaTicketBAI) error {
+func (c *Client) FingerprintCancel(cd *convert.AnulaTicketBAI) error {
 	conf := c.buildSoftware()
 	return cd.Fingerprint(conf)
 }
 
 // SignCancel is used to generate the XML DSig components of the final XML document.
-func (c *Client) SignCancel(cd *doc.AnulaTicketBAI, env *gobl.Envelope) error {
+func (c *Client) SignCancel(cd *convert.AnulaTicketBAI, env *gobl.Envelope) error {
 	inv, ok := env.Extract().(*bill.Invoice)
 	if !ok {
 		return ErrValidation.withMessage("only invoices are supported")

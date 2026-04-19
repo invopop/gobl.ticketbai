@@ -1,10 +1,10 @@
-package doc_test
+package convert_test
 
 import (
 	"testing"
 	"time"
 
-	"github.com/invopop/gobl.ticketbai/doc"
+	"github.com/invopop/gobl.ticketbai/convert"
 	"github.com/invopop/gobl.ticketbai/test"
 	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
@@ -21,12 +21,12 @@ import (
 func TestDesgloseConversion(t *testing.T) {
 	ts, err := time.Parse(time.RFC3339, "2022-02-01T04:00:00Z")
 	require.NoError(t, err)
-	role := doc.IssuerRoleThirdParty
+	role := convert.IssuerRoleThirdParty
 
 	t.Run("should fill DesgloseFactura when customer is from Spain", func(t *testing.T) {
 		goblInvoice := invoiceFromCountry(l10n.ES.Tax())
 
-		invoice, err := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		invoice, err := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 		require.NoError(t, err)
 
 		factura := invoice.Factura
@@ -38,7 +38,7 @@ func TestDesgloseConversion(t *testing.T) {
 			goblInvoice := test.LoadInvoice("sample-invoice.json")
 			goblInvoice.Customer = nil
 
-			invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+			invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 			desglose := invoice.Factura.TipoDesglose
 			assert.NotNil(t, desglose.DesgloseFactura)
@@ -48,7 +48,7 @@ func TestDesgloseConversion(t *testing.T) {
 		func(t *testing.T) {
 			goblInvoice := invoiceFromCountry("GB")
 
-			invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+			invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 			desglose := invoice.Factura.TipoDesglose
 			assert.NotNil(t, desglose.DesgloseTipoOperacion)
@@ -60,7 +60,7 @@ func TestDesgloseConversion(t *testing.T) {
 			goblInvoice.Lines[0].Item.Key = "goods"
 			_ = goblInvoice.Calculate()
 
-			invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+			invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 			details := invoice.Factura.TipoDesglose.DesgloseTipoOperacion
 			assert.NotNil(t, details.Entrega)
@@ -72,7 +72,7 @@ func TestDesgloseConversion(t *testing.T) {
 			goblInvoice := invoiceFromCountry("GB")
 			goblInvoice.Lines[0].Item.Key = cbc.KeyEmpty
 
-			invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+			invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 			details := invoice.Factura.TipoDesglose.DesgloseTipoOperacion
 			assert.NotNil(t, details.PrestacionServicios)
@@ -131,7 +131,7 @@ func TestDesgloseConversion(t *testing.T) {
 		}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 		details := invoice.Factura.TipoDesglose.DesgloseTipoOperacion
 		if assert.NotNil(t, details.Entrega.NoSujeta) {
@@ -172,7 +172,7 @@ func TestDesgloseConversion(t *testing.T) {
 			}
 			_ = goblInvoice.Calculate()
 
-			invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+			invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 			details := invoice.Factura.TipoDesglose.DesgloseTipoOperacion
 			goodsDetails := details.Entrega.Sujeta.NoExenta.DetalleNoExenta[0]
@@ -203,7 +203,7 @@ func TestDesgloseConversion(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
 		assert.Equal(t, "900.00", desglose.NoSujeta.DetalleNoSujeta[0].Importe.String())
@@ -225,7 +225,7 @@ func TestDesgloseConversion(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
 		assert.Equal(t, "RL", desglose.NoSujeta.DetalleNoSujeta[0].Causa)
@@ -247,7 +247,7 @@ func TestDesgloseConversion(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseTipoOperacion
 		assert.Equal(t, "900.00", desglose.PrestacionServicios.NoSujeta.DetalleNoSujeta[0].Importe.String())
@@ -266,7 +266,7 @@ func TestDesgloseConversion(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
 		desgloseIVA := desglose.Sujeta.NoExenta.DetalleNoExenta[0].DesgloseIVA
@@ -290,7 +290,7 @@ func TestDesgloseConversion(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseTipoOperacion
 		desgloseIVA := desglose.PrestacionServicios.Sujeta.NoExenta.DetalleNoExenta[0].DesgloseIVA
@@ -311,7 +311,7 @@ func TestDesgloseConversion(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
 		desgloseIVA := desglose.Sujeta.NoExenta.DetalleNoExenta[0].DesgloseIVA
@@ -356,7 +356,7 @@ func TestDesgloseConversion(t *testing.T) {
 		}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
 		desgloseIVA := desglose.Sujeta.NoExenta.DetalleNoExenta[0].DesgloseIVA
@@ -382,7 +382,7 @@ func TestDesgloseConversion(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
 		assert.Equal(t, "1000.00", desglose.Sujeta.Exenta.DetalleExenta[0].BaseImponible)
@@ -422,7 +422,7 @@ func TestDesgloseConversion(t *testing.T) {
 		}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
 		e1 := findExemption(desglose.Sujeta.Exenta.DetalleExenta, "E1")
@@ -444,7 +444,7 @@ func TestDesgloseConversion(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
 		desgloseIVA := desglose.Sujeta.NoExenta.DetalleNoExenta[0].DesgloseIVA
@@ -462,7 +462,7 @@ func TestDesgloseConversion(t *testing.T) {
 		}}
 		_ = goblInvoice.Calculate()
 
-		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
 		assert.Equal(t, "S2", desglose.Sujeta.NoExenta.DetalleNoExenta[0].TipoNoExenta)
@@ -475,17 +475,17 @@ func invoiceFromCountry(countryCode l10n.TaxCountryCode) *bill.Invoice {
 	return goblInvoice
 }
 
-func detalleIVA(desgloseIVA *doc.DesgloseIVA, rate string) *doc.DetalleIVA {
+func detalleIVA(desgloseIVA *convert.DesgloseIVA, rate string) *convert.DetalleIVA {
 	for _, detail := range desgloseIVA.DetalleIVA {
 		if detail.TipoImpositivo == rate {
 			return detail
 		}
 	}
 
-	return &doc.DetalleIVA{}
+	return &convert.DetalleIVA{}
 }
 
-func findExemption(exemptions []*doc.DetalleExenta, cause string) *doc.DetalleExenta {
+func findExemption(exemptions []*convert.DetalleExenta, cause string) *convert.DetalleExenta {
 	for _, exemption := range exemptions {
 		if exemption.CausaExencion == cause {
 			return exemption
