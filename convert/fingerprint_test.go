@@ -1,23 +1,23 @@
-package doc_test
+package convert_test
 
 import (
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/invopop/gobl.ticketbai/doc"
+	"github.com/invopop/gobl.ticketbai/convert"
 	"github.com/invopop/gobl.ticketbai/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestFingerprintGeneration(t *testing.T) {
-	var conf *doc.Software
+	var conf *convert.Software
 
-	beforeEach := func(t *testing.T) *doc.TicketBAI {
+	beforeEach := func(t *testing.T) *convert.TicketBAI {
 		t.Helper()
 
-		conf = &doc.Software{
+		conf = &convert.Software{
 			License: "12345",
 			NIF:     "12345678A",
 			Name:    "My Software",
@@ -28,8 +28,8 @@ func TestFingerprintGeneration(t *testing.T) {
 
 		ts, err := time.Parse(time.RFC3339, "2022-02-01T04:00:00Z")
 		require.NoError(t, err)
-		role := doc.IssuerRoleThirdParty
-		invoice, err := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		role := convert.IssuerRoleThirdParty
+		invoice, err := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 		require.NoError(t, err)
 		invoice.Sujetos.Emisor.NIF = test.NIF
 
@@ -61,7 +61,7 @@ func TestFingerprintGeneration(t *testing.T) {
 	t.Run("should chain invoice with the previous one from the taxpayer", func(t *testing.T) {
 		testCase := beforeEach(t)
 
-		prev := &doc.ChainData{
+		prev := &convert.ChainData{
 			Series:    "A",
 			Code:      "1",
 			IssueDate: "01-01-2022",

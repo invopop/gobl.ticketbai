@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/invopop/gobl.ticketbai/doc"
+	"github.com/invopop/gobl.ticketbai/convert"
 )
 
 // Integration Guide for Araba region:
@@ -71,7 +71,7 @@ func newAraba(env Environment, tlsConfig *tls.Config) *ArabaConn {
 }
 
 // Post sends the complete TicketBAI document to the Araba API.
-func (c *ArabaConn) Post(ctx context.Context, doc *doc.TicketBAI) error {
+func (c *ArabaConn) Post(ctx context.Context, doc *convert.TicketBAI) error {
 	payload, err := doc.Bytes()
 	if err != nil {
 		return fmt.Errorf("generating payload: %w", err)
@@ -80,7 +80,7 @@ func (c *ArabaConn) Post(ctx context.Context, doc *doc.TicketBAI) error {
 }
 
 // Cancel will send a request to the Araba API to cancel a previously issued document.
-func (c *ArabaConn) Cancel(ctx context.Context, doc *doc.AnulaTicketBAI) error {
+func (c *ArabaConn) Cancel(ctx context.Context, doc *convert.AnulaTicketBAI) error {
 	payload, err := doc.Bytes()
 	if err != nil {
 		return fmt.Errorf("generating payload: %w", err)

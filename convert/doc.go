@@ -1,6 +1,5 @@
-// Package doc contains the TicketBAI document structures and methods to
-// generate it.
-package doc
+// Package convert contains the TicketBAI document structures and methods to generate it.
+package convert
 
 import (
 	"bytes"

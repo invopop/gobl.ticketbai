@@ -1,4 +1,4 @@
-package doc
+package convert
 
 import (
 	"strings"
@@ -239,7 +239,7 @@ func newDetalleIVA(taxInfo taxInfo, rate *tax.RateTotal) *DetalleIVA {
 func formatPercent(percent num.Percentage) string {
 	maybeNegative := percent.Amount().Rescale(2).String()
 	if strings.Contains(maybeNegative, "-") {
-		return strings.Replace(maybeNegative, "-", "", -1)
+		return strings.ReplaceAll(maybeNegative, "-", "")
 	}
 
 	return maybeNegative
