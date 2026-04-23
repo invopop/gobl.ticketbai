@@ -4,13 +4,18 @@
 		"uuid": "0192237d-498e-7273-bc95-6a1daf16cb37",
 		"dig": {
 			"alg": "sha256",
-			"val": "68b6594f9204664935f572e9fc537e84f680c86a4a325f61ddd646685ffcbde7"
+			"val": "6dd31d478c2ae747e58c464f407c93c9f33539b91808d85ed1411f0587825450"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "ES",
-		"$addons": ["es-tbai-v1"],
+		"$addons": [
+			"es-tbai-v1"
+		],
+		"$tags": [
+			"simplified"
+		],
 		"uuid": "328f20c8-a0ac-11ee-bb1d-e6a7901137ed",
 		"type": "standard",
 		"series": "INV",
@@ -45,8 +50,7 @@
 			]
 		},
 		"customer": {
-			"name": "Sample End-Consumer",
-			"email": "customer@example.com"
+			"name": "Sample End-Consumer"
 		},
 		"lines": [
 			{
@@ -71,6 +75,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "outside-scope",
 						"ext": {
 							"es-tbai-exemption": "RL",
 							"es-tbai-product": "services"
@@ -89,7 +94,7 @@
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "exempt",
+								"key": "outside-scope",
 								"ext": {
 									"es-tbai-exemption": "RL",
 									"es-tbai-product": "services"

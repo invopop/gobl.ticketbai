@@ -115,3 +115,7 @@ func partyTaxCountry(party *org.Party) l10n.TaxCountryCode {
 	}
 	return ""
 }
+
+func isForeignCustomer(party *org.Party) bool {
+	return party != nil && party.TaxID != nil && party.TaxID.Country != l10n.ES.Tax()
+}

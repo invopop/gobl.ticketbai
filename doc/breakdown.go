@@ -6,7 +6,6 @@ import (
 	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
-	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/gobl/tax"
@@ -105,7 +104,7 @@ func newTipoDesglose(gobl *bill.Invoice) *TipoDesglose {
 
 	desglose := &TipoDesglose{}
 
-	if gobl.Customer == nil || partyTaxCountry(gobl.Customer) == l10n.ES.Tax() {
+	if !isForeignCustomer(gobl.Customer) {
 		desglose.DesgloseFactura = newDesgloseFactura(taxInfo, catTotal.Rates)
 	} else {
 		goods, services := splitByTBAIProduct(catTotal.Rates)

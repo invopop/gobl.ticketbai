@@ -4,7 +4,7 @@
 		"uuid": "0192fbd4-a54b-7d7a-be6e-258ea15f17a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "3d0c71a198b2d0bcf3c07dede6e291c2c552577d7b20c13339fcbc3b77d38ab2"
+			"val": "8f8de421c82c5d7b3798f026a391b5d57353cbb9c8a4ea32d86221cd0e6abe61"
 		}
 	},
 	"doc": {
@@ -89,9 +89,13 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "standard+eqs",
+						"key": "standard",
+						"rate": "general+eqs",
 						"percent": "21.0%",
-						"surcharge": "5.2%"
+						"surcharge": "5.2%",
+						"ext": {
+							"es-tbai-product": "services"
+						}
 					},
 					{
 						"cat": "IRPF",
@@ -111,7 +115,10 @@
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "standard+eqs",
+								"key": "standard",
+								"ext": {
+									"es-tbai-product": "services"
+								},
 								"base": "900.00",
 								"percent": "21.0%",
 								"surcharge": {
@@ -129,7 +136,6 @@
 						"retained": true,
 						"rates": [
 							{
-								"key": "pro",
 								"base": "900.00",
 								"percent": "15.0%",
 								"amount": "135.00"
@@ -138,10 +144,12 @@
 						"amount": "135.00"
 					}
 				],
-				"sum": "100.80"
+				"sum": "235.80",
+				"retained": "135.00"
 			},
-			"tax": "100.80",
-			"total_with_tax": "1000.80",
+			"tax": "235.80",
+			"total_with_tax": "1135.80",
+			"retained_tax": "135.00",
 			"payable": "1000.80"
 		},
 		"notes": [

@@ -4,13 +4,15 @@
 		"uuid": "0192237d-4943-72a7-b1d0-51dca3e8bc71",
 		"dig": {
 			"alg": "sha256",
-			"val": "c703a148a9395e3a14882d582618fe6503ab4719007715449c752eaf5cc22831"
+			"val": "4503d6ce236efe326318ec02527631771385b2d6277d18e8e2447731c936cecf"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "ES",
-		"$addons": ["es-tbai-v1"],
+		"$addons": [
+			"es-tbai-v1"
+		],
 		"uuid": "01922336-8b5e-72a9-8282-0188c1cdaefa",
 		"type": "credit-note",
 		"series": "FR",
@@ -100,8 +102,12 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"rate": "general",
-						"percent": "21.0%"
+						"percent": "21.0%",
+						"ext": {
+							"es-tbai-product": "services"
+						}
 					}
 				],
 				"total": "1620.00"
@@ -126,8 +132,11 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "zero",
-						"percent": "0.0%"
+						"key": "zero",
+						"percent": "0.0%",
+						"ext": {
+							"es-tbai-product": "services"
+						}
 					}
 				],
 				"total": "5.00"
@@ -143,12 +152,18 @@
 						"rates": [
 							{
 								"key": "standard",
+								"ext": {
+									"es-tbai-product": "services"
+								},
 								"base": "1620.00",
 								"percent": "21.0%",
 								"amount": "340.20"
 							},
 							{
 								"key": "zero",
+								"ext": {
+									"es-tbai-product": "services"
+								},
 								"base": "5.00",
 								"percent": "0.0%",
 								"amount": "0.00"

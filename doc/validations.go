@@ -5,6 +5,7 @@ import (
 
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
+	"github.com/invopop/gobl/tax"
 )
 
 // ValidationError is a simple wrapper around validation errors
@@ -53,6 +54,10 @@ func validate(inv *bill.Invoice, zone l10n.Code) error {
 		if inv.Customer != nil && len(inv.Customer.Addresses) == 0 {
 			return validationErr("customer address required")
 		}
+	}
+
+	if inv.HasTags(tax.TagSimplified) && inv.Customer != nil && inv.Customer.TaxID != nil {
+		return validationErr("customer tax ID must not be set for simplified invoices")
 	}
 
 	for _, l := range inv.Lines {

@@ -122,6 +122,26 @@ func TestInvoiceConversion(t *testing.T) {
 		assert.Nil(t, invoice.Sujetos.Destinatarios)
 	})
 
+	t.Run("should reject simplified invoice with customer tax ID", func(t *testing.T) {
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
+		goblInvoice.SetTags(tax.TagSimplified)
+
+		_, err := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "customer tax ID must not be set for simplified invoices")
+	})
+
+	t.Run("should allow simplified invoice with customer without tax ID", func(t *testing.T) {
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
+		goblInvoice.SetTags(tax.TagSimplified)
+		goblInvoice.Customer.TaxID = nil
+
+		invoice, err := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+		require.NoError(t, err)
+		assert.Nil(t, invoice.Sujetos.Destinatarios)
+		assert.Equal(t, "S", invoice.Factura.CabeceraFactura.FacturaSimplificada)
+	})
+
 	t.Run("fail when charges are present since they aren't supported", func(t *testing.T) {
 		inv := test.LoadInvoice("sample-invoice.json")
 		inv.Lines[0].Charges = []*bill.LineCharge{{Amount: num.MakeAmount(100, 2)}}

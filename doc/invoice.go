@@ -149,7 +149,7 @@ func newRetencionSoportada(inv *bill.Invoice) string {
 func newClaves(inv *bill.Invoice) []IDClave {
 	claves := []IDClave{}
 
-	if inv.Customer != nil && partyTaxCountry(inv.Customer) != "ES" {
+	if isForeignCustomer(inv.Customer) {
 		claves = append(claves, IDClave{
 			ClaveRegimenIvaOpTrascendencia: "02",
 		})
