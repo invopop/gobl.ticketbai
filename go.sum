@@ -29,6 +29,8 @@ github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/invopop/gobl v0.401.0 h1:w7PhhQ5OOkxMtfPsobjYVQ38GS+fq/bE3R2o2QRL2jI=
 github.com/invopop/gobl v0.401.0/go.mod h1:oQ/GnjLbV6PXuC/p9nYwU5A68NoNDk4TWGBlhQsVmWs=
+github.com/invopop/gobl v0.401.1-0.20260428134015-57860e0b813d h1:s3ZgBQOJrC8AaJwAlf0UygTcfvJK1x/i0h3AMOx2nHY=
+github.com/invopop/gobl v0.401.1-0.20260428134015-57860e0b813d/go.mod h1:oQ/GnjLbV6PXuC/p9nYwU5A68NoNDk4TWGBlhQsVmWs=
 github.com/invopop/jsonschema v0.13.1-0.20260331224545-b36d455c19d3 h1:yRVzJeVpUcPX66WqE7SYKUWYFzakaw+8pj6vsoO7YOU=
 github.com/invopop/jsonschema v0.13.1-0.20260331224545-b36d455c19d3/go.mod h1:ffZ5Km5SWWRAIN6wbDXItl95euhFz2uON45H2qjYt+0=
 github.com/invopop/xmldsig v0.14.0 h1:ROwf32DZtX2EekrrOSjLLiY0s2kPEcqHZculITlZfAw=

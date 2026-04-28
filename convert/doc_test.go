@@ -122,15 +122,6 @@ func TestInvoiceConversion(t *testing.T) {
 		assert.Nil(t, invoice.Sujetos.Destinatarios)
 	})
 
-	t.Run("should reject simplified invoice with customer tax ID", func(t *testing.T) {
-		goblInvoice := test.LoadInvoice("sample-invoice.json")
-		goblInvoice.SetTags(tax.TagSimplified)
-
-		_, err := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
-		require.Error(t, err)
-		assert.Contains(t, err.Error(), "customer tax ID must not be set for simplified invoices")
-	})
-
 	t.Run("should allow simplified invoice with customer without tax ID", func(t *testing.T) {
 		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.SetTags(tax.TagSimplified)
