@@ -9,7 +9,7 @@ import (
 	"time"
 
 	ticketbai "github.com/invopop/gobl.ticketbai"
-	"github.com/invopop/gobl.ticketbai/doc"
+	"github.com/invopop/gobl.ticketbai/convert"
 	"github.com/invopop/gobl.ticketbai/internal/gateways"
 	"github.com/invopop/gobl.ticketbai/test"
 	"github.com/invopop/xmldsig"
@@ -139,7 +139,7 @@ func convertExample(tc *ticketbai.Client, example string) ([]byte, error) {
 		return nil, err
 	}
 
-	err = tc.Fingerprint(td, &doc.ChainData{
+	err = tc.Fingerprint(td, &convert.ChainData{
 		Series:    "AF",
 		Code:      "1234567890",
 		IssueDate: "01-01-2021",

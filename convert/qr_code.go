@@ -1,4 +1,4 @@
-package doc
+package convert
 
 import (
 	"fmt"

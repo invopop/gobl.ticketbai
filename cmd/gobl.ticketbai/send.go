@@ -8,7 +8,7 @@ import (
 
 	"github.com/invopop/gobl"
 	ticketbai "github.com/invopop/gobl.ticketbai"
-	"github.com/invopop/gobl.ticketbai/doc"
+	convert1 "github.com/invopop/gobl.ticketbai/convert"
 	"github.com/invopop/xmldsig"
 	"github.com/spf13/cobra"
 )
@@ -88,9 +88,9 @@ func (c *sendOpts) runE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	var prev *doc.ChainData
+	var prev *convert1.ChainData
 	if c.previous != "" {
-		prev = new(doc.ChainData)
+		prev = new(convert1.ChainData)
 		if err := json.Unmarshal([]byte(c.previous), prev); err != nil {
 			return err
 		}

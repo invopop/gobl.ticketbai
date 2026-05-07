@@ -4,13 +4,15 @@
 		"uuid": "0192fbbc-005b-7eea-8973-210ca4c0ffdc",
 		"dig": {
 			"alg": "sha256",
-			"val": "38e8aef5c956bd0ca7ab99d559bdb13174a3f6af82feab70e1e7242bfe10abe7"
+			"val": "03ff165b271681896e5b9bc1a2bbe0a8f73918a33671b386cbd0278285ee569e"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "ES",
-		"$addons": ["es-tbai-v1"],
+		"$addons": [
+			"es-tbai-v1"
+		],
 		"uuid": "01922336-8c24-771b-96bd-5086f8b3d3a1",
 		"type": "standard",
 		"series": "TEST",
@@ -85,8 +87,12 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"rate": "general",
-						"percent": "21.0%"
+						"percent": "21.0%",
+						"ext": {
+							"es-tbai-product": "services"
+						}
 					},
 					{
 						"cat": "IRPF",
@@ -107,6 +113,9 @@
 						"rates": [
 							{
 								"key": "standard",
+								"ext": {
+									"es-tbai-product": "services"
+								},
 								"base": "900.00",
 								"percent": "21.0%",
 								"amount": "189.00"
@@ -119,7 +128,6 @@
 						"retained": true,
 						"rates": [
 							{
-								"key": "pro",
 								"base": "900.00",
 								"percent": "15.0%",
 								"amount": "135.00"
@@ -128,10 +136,12 @@
 						"amount": "135.00"
 					}
 				],
-				"sum": "54.00"
+				"sum": "189.00",
+				"retained": "135.00"
 			},
-			"tax": "54.00",
-			"total_with_tax": "954.00",
+			"tax": "189.00",
+			"total_with_tax": "1089.00",
+			"retained_tax": "135.00",
 			"payable": "954.00"
 		},
 		"notes": [

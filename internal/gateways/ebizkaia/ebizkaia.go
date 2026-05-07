@@ -10,7 +10,7 @@ import (
 	"encoding/xml"
 	"fmt"
 
-	"github.com/invopop/gobl.ticketbai/doc"
+	"github.com/invopop/gobl.ticketbai/convert"
 )
 
 // Bizkaia has extra complications when sending documents, so we define all the additional
@@ -161,10 +161,10 @@ type FacturaEmitidaConSGConsultaRespuestaType struct {
 
 // TicketBaiType contains the details of a fetched invoice.
 type TicketBaiType struct {
-	Cabecera   *doc.Cabecera
-	Sujetos    *doc.Sujetos
-	Factura    *doc.Factura
-	HuellaTBAI *doc.HuellaTBAI
+	Cabecera   *convert.Cabecera
+	Sujetos    *convert.Sujetos
+	Factura    *convert.Factura
+	HuellaTBAI *convert.HuellaTBAI
 	Signature  string
 }
 
@@ -231,7 +231,7 @@ func NewCreateRequest(sup *Supplier, payload []byte) (*Request, error) {
 }
 
 // NewFetchRequest assembles a new Fetch request
-func NewFetchRequest(sup *Supplier, page int, head *doc.CabeceraFactura) (*Request, error) {
+func NewFetchRequest(sup *Supplier, page int, head *convert.CabeceraFactura) (*Request, error) {
 	body := &LROEPJ240FacturasEmitidasConSGConsultaPeticion{
 		LROENamespace: schemaLROE240ConSGConsulta,
 		Cabecera:      newCabecera240Type(sup, operacionEnumConsulta),

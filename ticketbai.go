@@ -6,7 +6,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/invopop/gobl.ticketbai/doc"
+	"github.com/invopop/gobl.ticketbai/convert"
 	"github.com/invopop/gobl.ticketbai/internal/gateways"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/xmldsig"
@@ -15,9 +15,9 @@ import (
 
 // Expose zone codes for external use.
 const (
-	ZoneBI l10n.Code = doc.ZoneBI // Bizkaia
-	ZoneSS l10n.Code = doc.ZoneSS // Gipuzkoa
-	ZoneVI l10n.Code = doc.ZoneVI // Araba
+	ZoneBI l10n.Code = convert.ZoneBI // Bizkaia
+	ZoneSS l10n.Code = convert.ZoneSS // Gipuzkoa
+	ZoneVI l10n.Code = convert.ZoneVI // Araba
 )
 
 // Client provides the main interface to the TicketBAI package.
@@ -26,7 +26,7 @@ type Client struct {
 	zone       l10n.Code
 	cert       *xmldsig.Certificate
 	env        gateways.Environment
-	issuerRole doc.IssuerRole
+	issuerRole convert.IssuerRole
 	curTime    time.Time
 	gw         gateways.Connection
 }
@@ -62,7 +62,7 @@ func WithConnection(conn gateways.Connection) Option {
 // invoice's supplier, using their own certificate, is issuing the document.
 func WithSupplierIssuer() Option {
 	return func(c *Client) {
-		c.issuerRole = doc.IssuerRoleSupplier
+		c.issuerRole = convert.IssuerRoleSupplier
 	}
 }
 
@@ -70,7 +70,7 @@ func WithSupplierIssuer() Option {
 // invoice's supplier, using their own certificate, is issuing the document.
 func WithCustomerIssuer() Option {
 	return func(c *Client) {
-		c.issuerRole = doc.IssuerRoleCustomer
+		c.issuerRole = convert.IssuerRoleCustomer
 	}
 }
 
@@ -79,7 +79,7 @@ func WithCustomerIssuer() Option {
 // document on behalf of the invoice's supplier.
 func WithThirdPartyIssuer() Option {
 	return func(c *Client) {
-		c.issuerRole = doc.IssuerRoleThirdParty
+		c.issuerRole = convert.IssuerRoleThirdParty
 	}
 }
 
@@ -120,7 +120,7 @@ func New(software *Software, zone l10n.Code, opts ...Option) (*Client, error) {
 
 	// Set default values that can be overwritten by the options
 	c.env = gateways.EnvironmentSandbox
-	c.issuerRole = doc.IssuerRoleSupplier
+	c.issuerRole = convert.IssuerRoleSupplier
 
 	for _, opt := range opts {
 		opt(c)
@@ -138,7 +138,7 @@ func New(software *Software, zone l10n.Code, opts ...Option) (*Client, error) {
 }
 
 // Post will send the document to the TicketBAI gateway.
-func (c *Client) Post(ctx context.Context, d *doc.TicketBAI) error {
+func (c *Client) Post(ctx context.Context, d *convert.TicketBAI) error {
 	if err := c.gw.Post(ctx, d); err != nil {
 		return newErrorFrom(err)
 	}
@@ -146,13 +146,13 @@ func (c *Client) Post(ctx context.Context, d *doc.TicketBAI) error {
 }
 
 // Cancel will send the cancel document in the TicketBAI gateway.
-func (c *Client) Cancel(ctx context.Context, d *doc.AnulaTicketBAI) error {
+func (c *Client) Cancel(ctx context.Context, d *convert.AnulaTicketBAI) error {
 	return c.gw.Cancel(ctx, d)
 }
 
 // ParseDocument will parse the XML data into a TicketBAI document.
-func ParseDocument(data []byte) (*doc.TicketBAI, error) {
-	d := new(doc.TicketBAI)
+func ParseDocument(data []byte) (*convert.TicketBAI, error) {
+	d := new(convert.TicketBAI)
 	if err := xml.Unmarshal(data, d); err != nil {
 		return nil, err
 	}
@@ -160,8 +160,8 @@ func ParseDocument(data []byte) (*doc.TicketBAI, error) {
 }
 
 // ParseCancelDocument will parse the XML data into a Cancel TicketBAI document.
-func ParseCancelDocument(data []byte) (*doc.AnulaTicketBAI, error) {
-	d := new(doc.AnulaTicketBAI)
+func ParseCancelDocument(data []byte) (*convert.AnulaTicketBAI, error) {
+	d := new(convert.AnulaTicketBAI)
 	if err := xml.Unmarshal(data, d); err != nil {
 		return nil, err
 	}
@@ -187,8 +187,8 @@ func (c *Client) Sandbox() bool {
 	return c.env == gateways.EnvironmentSandbox
 }
 
-func (c *Client) buildSoftware() *doc.Software {
-	return &doc.Software{
+func (c *Client) buildSoftware() *convert.Software {
+	return &convert.Software{
 		License: c.software.Licenses[c.env][c.zone],
 		NIF:     c.software.NIF,
 		Name:    c.software.Name,
