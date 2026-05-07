@@ -101,7 +101,7 @@ func TestInvoiceConversion(t *testing.T) {
 		goblInvoice.Customer.TaxID = nil
 		goblInvoice.Customer.Identities = []*org.Identity{
 			{
-				Key:  "passport",
+				Key:  org.IdentityKeyPassport,
 				Code: "PP123456S",
 			},
 		}
@@ -111,6 +111,35 @@ func TestInvoiceConversion(t *testing.T) {
 		assert.Equal(t, "03", dest.IDOtro.IDType)
 		assert.Equal(t, "PP123456S", dest.IDOtro.ID)
 		assert.Empty(t, dest.IDOtro.CodigoPais)
+	})
+
+	t.Run("should use identities when Spanish customer has tax ID without code", func(t *testing.T) {
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
+		goblInvoice.Customer.TaxID = &tax.Identity{Country: "ES"}
+		goblInvoice.Customer.Identities = []*org.Identity{
+			{Key: org.IdentityKeyPassport, Code: "PP123456S"},
+		}
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
+
+		dest := invoice.Sujetos.Destinatarios.IDDestinatario[0]
+		assert.Empty(t, dest.NIF)
+		assert.Equal(t, "03", dest.IDOtro.IDType)
+		assert.Equal(t, "PP123456S", dest.IDOtro.ID)
+		assert.Equal(t, "ES", dest.IDOtro.CodigoPais)
+	})
+
+	t.Run("should use identity country as CodigoPais when no tax ID", func(t *testing.T) {
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
+		goblInvoice.Customer.TaxID = nil
+		goblInvoice.Customer.Identities = []*org.Identity{
+			{Country: "ES", Key: org.IdentityKeyPassport, Code: "PP123456S"},
+		}
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
+
+		dest := invoice.Sujetos.Destinatarios.IDDestinatario[0]
+		assert.Equal(t, "03", dest.IDOtro.IDType)
+		assert.Equal(t, "PP123456S", dest.IDOtro.ID)
+		assert.Equal(t, "ES", dest.IDOtro.CodigoPais)
 	})
 
 	t.Run("should allow having no customer (useful for simplied invoices)", func(t *testing.T) {

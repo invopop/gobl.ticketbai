@@ -25,7 +25,7 @@ func TestLines(t *testing.T) {
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
 			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
-			Taxes:    tax.Set{&tax.Combo{Category: "VAT", Rate: "standard"}},
+			Taxes:    tax.Set{&tax.Combo{Category: tax.CategoryVAT, Rate: "standard"}},
 		}}
 		_ = goblInvoice.Calculate()
 
@@ -46,7 +46,7 @@ func TestLines(t *testing.T) {
 			Quantity:  num.MakeAmount(100, 0),
 			Item:      &org.Item{Name: "A", Price: num.NewAmount(11, 0)},
 			Discounts: []*bill.LineDiscount{DiscountOf(100)},
-			Taxes:     tax.Set{&tax.Combo{Category: "VAT", Rate: "standard"}},
+			Taxes:     tax.Set{&tax.Combo{Category: tax.CategoryVAT, Rate: "standard"}},
 		}}
 		_ = goblInvoice.Calculate()
 
@@ -65,7 +65,7 @@ func TestLines(t *testing.T) {
 			Index:    1,
 			Quantity: num.MakeAmount(10, 0),
 			Item:     &org.Item{Name: "A", Price: num.NewAmount(121, 0)},
-			Taxes:    tax.Set{&tax.Combo{Category: "VAT", Rate: "standard"}},
+			Taxes:    tax.Set{&tax.Combo{Category: tax.CategoryVAT, Rate: "standard"}},
 		}}
 		require.NoError(t, inv.Calculate())
 		require.NoError(t, inv.RemoveIncludedTaxes())
