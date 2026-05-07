@@ -9,6 +9,7 @@ import (
 
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
+	"github.com/invopop/gobl/tax"
 	"github.com/invopop/xmldsig"
 )
 
@@ -108,8 +109,8 @@ func NewTicketBAI(inv *bill.Invoice, ts time.Time, role IssuerRole, zone l10n.Co
 
 	doc.SetIssueTimestamp(ts)
 
-	// Add customers
-	if inv.Customer != nil {
+	// Add customers, except for simplified invoices where the customer is omitted.
+	if inv.Customer != nil && !inv.HasTags(tax.TagSimplified) {
 		// If the customer is still nil, implies that they didn't have enough
 		// fiscal information to include in the output.
 		if dest := newDestinatario(inv.Customer); dest != nil {

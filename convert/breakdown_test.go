@@ -57,7 +57,7 @@ func TestDesgloseConversion(t *testing.T) {
 	t.Run("should distinguish goods from services when customer from other country",
 		func(t *testing.T) {
 			goblInvoice := invoiceFromCountry("GB")
-			goblInvoice.Lines[0].Item.Key = "goods"
+			goblInvoice.Lines[0].Item.Key = org.ItemKeyGoods
 			_ = goblInvoice.Calculate()
 
 			invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
@@ -93,8 +93,8 @@ func TestDesgloseConversion(t *testing.T) {
 				},
 				Taxes: tax.Set{
 					&tax.Combo{
-						Category: "VAT",
-						Rate:     "standard",
+						Category: tax.CategoryVAT,
+						Rate:     tax.KeyStandard,
 					},
 				},
 			},
@@ -108,8 +108,8 @@ func TestDesgloseConversion(t *testing.T) {
 				},
 				Taxes: tax.Set{
 					&tax.Combo{
-						Category: "VAT",
-						Rate:     "standard",
+						Category: tax.CategoryVAT,
+						Rate:     tax.KeyStandard,
 					},
 				},
 			},
@@ -123,7 +123,7 @@ func TestDesgloseConversion(t *testing.T) {
 				},
 				Taxes: tax.Set{
 					&tax.Combo{
-						Category: "VAT",
+						Category: tax.CategoryVAT,
 						Rate:     "reduced",
 					},
 				},
@@ -152,7 +152,7 @@ func TestDesgloseConversion(t *testing.T) {
 					Index:    1,
 					Quantity: num.MakeAmount(1, 0),
 					Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
-					Taxes:    tax.Set{&tax.Combo{Category: "VAT", Rate: "standard"}},
+					Taxes:    tax.Set{&tax.Combo{Category: tax.CategoryVAT, Rate: tax.KeyStandard}},
 				},
 				{
 					Index:    2,
@@ -164,8 +164,8 @@ func TestDesgloseConversion(t *testing.T) {
 					},
 					Taxes: tax.Set{
 						&tax.Combo{
-							Category: "VAT",
-							Rate:     "standard",
+							Category: tax.CategoryVAT,
+							Rate:     tax.KeyStandard,
 						},
 					},
 				},
@@ -192,9 +192,9 @@ func TestDesgloseConversion(t *testing.T) {
 			},
 			Discounts: []*bill.LineDiscount{DiscountOf(100)},
 			Taxes: tax.Set{
-				&tax.Combo{Category: "IRPF", Rate: "pro"},
+				&tax.Combo{Category: es.TaxCategoryIRPF, Rate: es.TaxRatePro},
 				&tax.Combo{
-					Category: "VAT",
+					Category: tax.CategoryVAT,
 					Ext: tax.Extensions{
 						tbai.ExtKeyExempt: "OT",
 					},
@@ -218,7 +218,7 @@ func TestDesgloseConversion(t *testing.T) {
 			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 			Taxes: tax.Set{
 				&tax.Combo{
-					Category: "VAT",
+					Category: tax.CategoryVAT,
 					Ext:      tax.Extensions{tbai.ExtKeyExempt: "RL"},
 				},
 			},
@@ -240,7 +240,7 @@ func TestDesgloseConversion(t *testing.T) {
 			Discounts: []*bill.LineDiscount{DiscountOf(100)},
 			Taxes: tax.Set{
 				&tax.Combo{
-					Category: "VAT",
+					Category: tax.CategoryVAT,
 					Ext:      tax.Extensions{tbai.ExtKeyExempt: "RL"},
 				},
 			},
@@ -260,8 +260,8 @@ func TestDesgloseConversion(t *testing.T) {
 			Quantity: num.MakeAmount(100, 0),
 			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 			Taxes: tax.Set{
-				&tax.Combo{Category: "VAT", Rate: "standard"},
-				&tax.Combo{Category: "VAT", Rate: "reduced"},
+				&tax.Combo{Category: tax.CategoryVAT, Rate: tax.KeyStandard},
+				&tax.Combo{Category: tax.CategoryVAT, Rate: "reduced"},
 			},
 		}}
 		_ = goblInvoice.Calculate()
@@ -306,7 +306,7 @@ func TestDesgloseConversion(t *testing.T) {
 			Quantity: num.MakeAmount(100, 0),
 			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 			Taxes: tax.Set{
-				&tax.Combo{Category: "VAT", Rate: "standard+eqs"},
+				&tax.Combo{Category: tax.CategoryVAT, Rate: "standard+eqs"},
 			},
 		}}
 		_ = goblInvoice.Calculate()
@@ -332,8 +332,8 @@ func TestDesgloseConversion(t *testing.T) {
 				},
 				Taxes: tax.Set{
 					&tax.Combo{
-						Category: "VAT",
-						Rate:     "standard",
+						Category: tax.CategoryVAT,
+						Rate:     tax.KeyStandard,
 					},
 				},
 			},
@@ -341,14 +341,14 @@ func TestDesgloseConversion(t *testing.T) {
 				Index:    2,
 				Quantity: num.MakeAmount(100, 0),
 				Item: &org.Item{
-					Key:   "goods",
+					Key:   org.ItemKeyGoods,
 					Name:  "A",
 					Price: num.NewAmount(10, 0),
 				},
 				Taxes: tax.Set{
 					&tax.Combo{
-						Category: "VAT",
-						Rate:     "general",
+						Category: tax.CategoryVAT,
+						Rate:     tax.RateGeneral,
 						Ext:      tax.Extensions{tbai.ExtKeyProduct: "resale"},
 					},
 				},
@@ -440,7 +440,7 @@ func TestDesgloseConversion(t *testing.T) {
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
 			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
-			Taxes:    tax.Set{&tax.Combo{Category: "VAT", Rate: "standard"}},
+			Taxes:    tax.Set{&tax.Combo{Category: tax.CategoryVAT, Rate: tax.KeyStandard}},
 		}}
 		_ = goblInvoice.Calculate()
 
@@ -458,7 +458,7 @@ func TestDesgloseConversion(t *testing.T) {
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
 			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
-			Taxes:    tax.Set{&tax.Combo{Category: "VAT", Rate: "standard"}},
+			Taxes:    tax.Set{&tax.Combo{Category: tax.CategoryVAT, Rate: tax.KeyStandard}},
 		}}
 		_ = goblInvoice.Calculate()
 
