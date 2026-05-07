@@ -113,6 +113,24 @@ func TestInvoiceConversion(t *testing.T) {
 		assert.Empty(t, dest.IDOtro.CodigoPais)
 	})
 
+	t.Run("should map country from identity when provided", func(t *testing.T) {
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
+		goblInvoice.Customer.TaxID = nil
+		goblInvoice.Customer.Identities = []*org.Identity{
+			{
+				Key:     "passport",
+				Country: "PT",
+				Code:    "PAR887650",
+			},
+		}
+		invoice, _ := doc.NewTicketBAI(goblInvoice, ts, role, doc.ZoneBI)
+
+		dest := invoice.Sujetos.Destinatarios.IDDestinatario[0]
+		assert.Equal(t, "03", dest.IDOtro.IDType)
+		assert.Equal(t, "PAR887650", dest.IDOtro.ID)
+		assert.Equal(t, "PT", dest.IDOtro.CodigoPais)
+	})
+
 	t.Run("should allow having no customer (useful for simplied invoices)", func(t *testing.T) {
 		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Customer = nil

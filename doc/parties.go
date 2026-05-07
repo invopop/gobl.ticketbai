@@ -103,6 +103,9 @@ func otherIdentity(party *org.Party) *IDOtro {
 
 		oid.IDType = it
 		oid.ID = id.Code.String()
+		if id.Country != "" {
+			oid.CodigoPais = id.Country.String()
+		}
 		return oid
 	}
 
