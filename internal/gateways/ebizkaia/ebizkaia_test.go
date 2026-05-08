@@ -14,7 +14,11 @@ func gunzip(t *testing.T, data []byte) []byte {
 	if err != nil {
 		t.Fatalf("gzip reader: %v", err)
 	}
-	defer zr.Close()
+	defer func() {
+		if err := zr.Close(); err != nil {
+			t.Errorf("closing gzip reader: %v", err)
+		}
+	}()
 	out, err := io.ReadAll(zr)
 	if err != nil {
 		t.Fatalf("gzip read: %v", err)
