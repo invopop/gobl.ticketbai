@@ -10,6 +10,10 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/invopop/gobl.ticketbai/convert"
 	"github.com/invopop/gobl.ticketbai/internal/gateways/ebizkaia"
+	"github.com/invopop/gobl/addons/es/tbai"
+	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/regimes/es"
+	"github.com/invopop/gobl/tax"
 	"github.com/invopop/xmldsig"
 	"golang.org/x/net/html/charset"
 )
@@ -67,25 +71,36 @@ func newEbizkaia(env Environment, tlsConfig *tls.Config) *EBizkaiaConn {
 
 // Post sends the complete TicketBAI document to the remote end-point. We assume
 // the document has been signed and prepared.
-func (c *EBizkaiaConn) Post(ctx context.Context, doc *convert.TicketBAI) error {
+func (c *EBizkaiaConn) Post(ctx context.Context, inv *bill.Invoice, doc *convert.TicketBAI) error {
 	payload, err := doc.Bytes()
 	if err != nil {
 		return fmt.Errorf("generating payload: %w", err)
 	}
 
+	model := modelFor(inv.Supplier.TaxID)
 	sup := &ebizkaia.Supplier{
-		Year: doc.IssueYear(),
-		NIF:  doc.Sujetos.Emisor.NIF,
-		Name: doc.Sujetos.Emisor.ApellidosNombreRazonSocial,
+		Year:     doc.IssueYear(),
+		NIF:      doc.Sujetos.Emisor.NIF,
+		Name:     doc.Sujetos.Emisor.ApellidosNombreRazonSocial,
+		Model:    model,
+		Activity: inv.Supplier.Ext.Get(tbai.ExtKeyBIActivity).String(),
 	}
 	req, err := ebizkaia.NewCreateRequest(sup, payload)
 	if err != nil {
 		return fmt.Errorf("create request: %w", err)
 	}
 
-	resp := ebizkaia.LROEPJ240FacturasEmitidasConSGAltaRespuesta{}
+	var resp interface {
+		FirstErrorCode() string
+		FirstErrorDescription() string
+	}
+	if model == ebizkaia.Modelo140 {
+		resp = new(ebizkaia.LROEPF140IngresosConFacturaConSGAltaRespuesta)
+	} else {
+		resp = new(ebizkaia.LROEPJ240FacturasEmitidasConSGAltaRespuesta)
+	}
 
-	err = c.sendRequest(ctx, req, eBizkaiaExecutePath, &resp)
+	err = c.sendRequest(ctx, req, eBizkaiaExecutePath, resp)
 	if errors.Is(err, ErrValidation) {
 		if resp.FirstErrorCode() == eBizkaiaN3RespCodeDuplicated {
 			return ErrDuplicate
@@ -129,16 +144,17 @@ func (c *EBizkaiaConn) Fetch(ctx context.Context, nif, name, year string, page i
 
 // Cancel sends the cancellation request for the TickeBAI invoice to the remote
 // end-point.
-func (c *EBizkaiaConn) Cancel(ctx context.Context, doc *convert.AnulaTicketBAI) error {
+func (c *EBizkaiaConn) Cancel(ctx context.Context, inv *bill.Invoice, doc *convert.AnulaTicketBAI) error {
 	payload, err := doc.Bytes()
 	if err != nil {
 		return fmt.Errorf("generating payload: %w", err)
 	}
 
 	sup := &ebizkaia.Supplier{
-		Year: doc.IssueYear(),
-		NIF:  doc.IDFactura.Emisor.NIF,
-		Name: doc.IDFactura.Emisor.ApellidosNombreRazonSocial,
+		Year:  doc.IssueYear(),
+		NIF:   doc.IDFactura.Emisor.NIF,
+		Name:  doc.IDFactura.Emisor.ApellidosNombreRazonSocial,
+		Model: modelFor(inv.Supplier.TaxID),
 	}
 	req, err := ebizkaia.NewCancelRequest(sup, payload)
 	if err != nil {
@@ -192,6 +208,16 @@ func convertToUTF8(s string) string {
 	e, _, _ := charset.DetermineEncoding([]byte(s), "")
 	out, _ := e.NewDecoder().Bytes([]byte(s))
 	return string(out)
+}
+
+// modelFor returns the Bizkaia LROE model code ("140" or "240") for a
+// supplier's tax identity. Personas físicas (DNI/NIE/K-L-M) submit through
+// Modelo 140; organisations (NIF/CIF) through Modelo 240.
+func modelFor(tID *tax.Identity) string {
+	if es.TaxIdentityKey(tID) == es.TaxIdentityOrg {
+		return ebizkaia.Modelo240
+	}
+	return ebizkaia.Modelo140
 }
 
 // buildTBAIDoc builds a doc.TicketBAI from a TicketBAIType.

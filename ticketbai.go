@@ -6,8 +6,10 @@ import (
 	"context"
 	"time"
 
+	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.ticketbai/convert"
 	"github.com/invopop/gobl.ticketbai/internal/gateways"
+	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/xmldsig"
 	"github.com/nbio/xml"
@@ -138,16 +140,24 @@ func New(software *Software, zone l10n.Code, opts ...Option) (*Client, error) {
 }
 
 // Post will send the document to the TicketBAI gateway.
-func (c *Client) Post(ctx context.Context, d *convert.TicketBAI) error {
-	if err := c.gw.Post(ctx, d); err != nil {
+func (c *Client) Post(ctx context.Context, env *gobl.Envelope, d *convert.TicketBAI) error {
+	inv, ok := env.Extract().(*bill.Invoice)
+	if !ok {
+		return ErrValidation.withMessage("only invoices are supported")
+	}
+	if err := c.gw.Post(ctx, inv, d); err != nil {
 		return newErrorFrom(err)
 	}
 	return nil
 }
 
 // Cancel will send the cancel document in the TicketBAI gateway.
-func (c *Client) Cancel(ctx context.Context, d *convert.AnulaTicketBAI) error {
-	return c.gw.Cancel(ctx, d)
+func (c *Client) Cancel(ctx context.Context, env *gobl.Envelope, d *convert.AnulaTicketBAI) error {
+	inv, ok := env.Extract().(*bill.Invoice)
+	if !ok {
+		return ErrValidation.withMessage("only invoices are supported")
+	}
+	return c.gw.Cancel(ctx, inv, d)
 }
 
 // ParseDocument will parse the XML data into a TicketBAI document.

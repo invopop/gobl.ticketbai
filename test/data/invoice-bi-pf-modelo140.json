@@ -1,0 +1,134 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0192fbd4-aaaa-7000-bbbb-000000000140",
+		"dig": {
+			"alg": "sha256",
+			"val": "d735a154cef9bc224665d9773a41efd327a0a5abe0637fccb5d742b97f7c2668"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "ES",
+		"$addons": [
+			"es-tbai-v1"
+		],
+		"uuid": "01922336-aaaa-7000-bbbb-000000000140",
+		"type": "standard",
+		"series": "FREEL",
+		"code": "001",
+		"issue_date": "2024-03-15",
+		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"es-tbai-region": "BI"
+			}
+		},
+		"supplier": {
+			"name": "Ana Fernández García",
+			"tax_id": {
+				"country": "ES",
+				"code": "12345678Z"
+			},
+			"addresses": [
+				{
+					"num": "10",
+					"street": "Gran Vía",
+					"locality": "Bilbo",
+					"region": "Bizkaia",
+					"code": "48001",
+					"country": "ES"
+				}
+			],
+			"emails": [
+				{
+					"addr": "ana@example.com"
+				}
+			],
+			"ext": {
+				"es-tbai-bi-activity": "722300"
+			}
+		},
+		"customer": {
+			"name": "Cliente Consulting S.L.",
+			"tax_id": {
+				"country": "ES",
+				"code": "B64847106"
+			},
+			"addresses": [
+				{
+					"num": "5",
+					"street": "Calle Mayor",
+					"locality": "Madrid",
+					"region": "Madrid",
+					"code": "28013",
+					"country": "ES"
+				}
+			],
+			"emails": [
+				{
+					"addr": "cliente@example.com"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "8",
+				"item": {
+					"name": "Consulting services",
+					"price": "75.00",
+					"ext": {
+						"es-tbai-product": "services"
+					}
+				},
+				"sum": "600.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"rate": "general",
+						"percent": "21.0%",
+						"ext": {
+							"es-tbai-product": "services"
+						}
+					}
+				],
+				"total": "600.00"
+			}
+		],
+		"totals": {
+			"sum": "600.00",
+			"total": "600.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"es-tbai-product": "services"
+								},
+								"base": "600.00",
+								"percent": "21.0%",
+								"amount": "126.00"
+							}
+						],
+						"amount": "126.00"
+					}
+				],
+				"sum": "126.00"
+			},
+			"tax": "126.00",
+			"total_with_tax": "726.00",
+			"payable": "726.00"
+		},
+		"notes": [
+			{
+				"key": "general",
+				"text": "Consulting services rendered in March 2024"
+			}
+		]
+	}
+}

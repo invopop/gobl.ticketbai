@@ -13,6 +13,7 @@ import (
 
 	"github.com/invopop/gobl.ticketbai/ca"
 	"github.com/invopop/gobl.ticketbai/convert"
+	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/xmldsig"
 )
@@ -114,8 +115,8 @@ func (e *Error) Is(target error) bool {
 type Connection interface {
 	// Post sends the complete TicketBAI document to the remote end-point. We assume
 	// the document has been fully prepared and signed.
-	Post(ctx context.Context, doc *convert.TicketBAI) error
-	Cancel(ctx context.Context, doc *convert.AnulaTicketBAI) error
+	Post(ctx context.Context, inv *bill.Invoice, doc *convert.TicketBAI) error
+	Cancel(ctx context.Context, inv *bill.Invoice, doc *convert.AnulaTicketBAI) error
 }
 
 // New instantiates a new connection for the given zone and environment.

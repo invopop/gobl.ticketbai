@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/invopop/gobl.ticketbai/convert"
+	"github.com/invopop/gobl/bill"
 )
 
 //
@@ -72,7 +73,7 @@ func newGipuzkoa(env Environment, tlsConfig *tls.Config) *GipuzkoaConn {
 }
 
 // Post sends the complete TicketBAI document to the Gipuzkoa API.
-func (c *GipuzkoaConn) Post(ctx context.Context, doc *convert.TicketBAI) error {
+func (c *GipuzkoaConn) Post(ctx context.Context, _ *bill.Invoice, doc *convert.TicketBAI) error {
 	payload, err := doc.Bytes()
 	if err != nil {
 		return fmt.Errorf("generating payload: %w", err)
@@ -81,7 +82,7 @@ func (c *GipuzkoaConn) Post(ctx context.Context, doc *convert.TicketBAI) error {
 }
 
 // Cancel will send a request to the Gipuzkoa API to cancel a previously issued document.
-func (c *GipuzkoaConn) Cancel(ctx context.Context, doc *convert.AnulaTicketBAI) error {
+func (c *GipuzkoaConn) Cancel(ctx context.Context, _ *bill.Invoice, doc *convert.AnulaTicketBAI) error {
 	payload, err := doc.Bytes()
 	if err != nil {
 		return fmt.Errorf("generating payload: %w", err)

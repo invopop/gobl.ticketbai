@@ -21,10 +21,14 @@ const (
 	concepto                    = "LROE"
 	apartado1                   = "1"
 	apartado1_1                 = "1.1"
-	modelo240                   = "240"
+	Modelo240                   = "240"
+	Modelo140                   = "140"
 	schemaLROE240ConSGAlta      = "https://www.batuz.eus/fitxategiak/batuz/LROE/esquemas/LROE_PJ_240_1_1_FacturasEmitidas_ConSG_AltaPeticion_V1_0_2.xsd"
 	schemaLROE240ConSGConsulta  = "https://www.batuz.eus/fitxategiak/batuz/LROE/esquemas/LROE_PJ_240_1_1_FacturasEmitidas_ConSG_ConsultaPeticion_V1_0_0.xsd"
 	schemaLROE240ConSGAnulacion = "https://www.batuz.eus/fitxategiak/batuz/LROE/esquemas/LROE_PJ_240_1_1_FacturasEmitidas_ConSG_AnulacionPeticion_V1_0_0.xsd"
+	schemaLROE140ConSGAlta      = "https://www.batuz.eus/fitxategiak/batuz/LROE/esquemas/LROE_PF_140_1_1_Ingresos_ConfacturaConSG_AltaPeticion_V1_0_2.xsd"
+	schemaLROE140ConSGConsulta  = "https://www.batuz.eus/fitxategiak/batuz/LROE/esquemas/LROE_PF_140_1_1_Ingresos_ConfacturaConSG_ConsultaPeticion_V1_0_0.xsd"
+	schemaLROE140ConSGAnulacion = "https://www.batuz.eus/fitxategiak/batuz/LROE/esquemas/LROE_PF_140_1_1_Ingresos_ConfacturaConSG_AnulacionPeticion_V1_0_0.xsd"
 )
 
 const (
@@ -70,8 +74,8 @@ type N3DatosRelevantes struct {
 	Ejercicio string `json:"ejer"` // invoice issue year
 }
 
-// Cabecera240Type contains the operation headers
-type Cabecera240Type struct {
+// CabeceraType contains the operation headers.
+type CabeceraType struct {
 	Modelo             string
 	Capitulo           string // nolint:misspell
 	Subcapitulo        string `xml:",omitempty"`
@@ -88,7 +92,7 @@ type LROEPJ240FacturasEmitidasConSGAltaPeticion struct {
 	XMLName       xml.Name `xml:"lrpjfecsgap:LROEPJ240FacturasEmitidasConSGAltaPeticion"`
 	LROENamespace string   `xml:"xmlns:lrpjfecsgap,attr"`
 
-	Cabecera         *Cabecera240Type
+	Cabecera         *CabeceraType
 	FacturasEmitidas *FacturasEmitidasConSGCodificadoType
 }
 
@@ -120,7 +124,7 @@ type LROEPJ240FacturasEmitidasConSGConsultaPeticion struct {
 	XMLName       xml.Name `xml:"lrpjfecsgcp:LROEPJ240FacturasEmitidasConSGConsultaPeticion"`
 	LROENamespace string   `xml:"xmlns:lrpjfecsgcp,attr"`
 
-	Cabecera                            *Cabecera240Type
+	Cabecera                            *CabeceraType
 	FiltroConsultaFacturasEmitidasConSG *FiltroConsultaFacturasEmitidasType
 }
 
@@ -173,7 +177,7 @@ type LROEPJ240FacturasEmitidasConSGAnulacionPeticion struct {
 	XMLName       xml.Name `xml:"lrpjfecsgap:LROEPJ240FacturasEmitidasConSGAnulacionPeticion"`
 	LROENamespace string   `xml:"xmlns:lrpjfecsgap,attr"`
 
-	Cabecera         *Cabecera240Type
+	Cabecera         *CabeceraType
 	FacturasEmitidas *AnulacionesFacturasEmitidasConSGType
 }
 
@@ -198,6 +202,88 @@ type AnulacionFacturaConSGType struct {
 	AnulacionTicketBai string // base64 data
 }
 
+// LROEPF140IngresosConFacturaConSGAltaPeticion is used by individuals (persona física)
+// for uploading invoices under Modelo 140.
+type LROEPF140IngresosConFacturaConSGAltaPeticion struct {
+	XMLName       xml.Name `xml:"lrpficfcsgap:LROEPF140IngresosConFacturaConSGAltaPeticion"`
+	LROENamespace string   `xml:"xmlns:lrpficfcsgap,attr"`
+
+	Cabecera *CabeceraType
+	Ingresos *IngresosConSGCodificadoType
+}
+
+// LROEPF140IngresosConFacturaConSGAltaRespuesta represents the response from the server
+// when uploading invoices under Modelo 140.
+type LROEPF140IngresosConFacturaConSGAltaRespuesta struct {
+	Registros *RegistrosFacturaConSGType
+}
+
+// LROEPF140IngresosConFacturaConSGConsultaPeticion represents a request to fetch invoices
+// under Modelo 140.
+type LROEPF140IngresosConFacturaConSGConsultaPeticion struct {
+	XMLName       xml.Name `xml:"lrpficfcsgcp:LROEPF140IngresosConFacturaConSGConsultaPeticion"`
+	LROENamespace string   `xml:"xmlns:lrpficfcsgcp,attr"`
+
+	Cabecera                    *CabeceraType
+	FiltroConsultaIngresosConSG *FiltroConsultaFacturasEmitidasType
+}
+
+// LROEPF140IngresosConFacturaConSGConsultaRespuesta represents the response from the server
+// when fetching invoices under Modelo 140.
+type LROEPF140IngresosConFacturaConSGConsultaRespuesta struct {
+	FacturasEmitidas *FacturasEmitidasConSGConsultaRespuestaType
+}
+
+// LROEPF140IngresosConFacturaConSGAnulacionPeticion is used by individuals for cancelling
+// invoices under Modelo 140.
+type LROEPF140IngresosConFacturaConSGAnulacionPeticion struct {
+	XMLName       xml.Name `xml:"lrpficfcsgap:LROEPF140IngresosConFacturaConSGAnulacionPeticion"`
+	LROENamespace string   `xml:"xmlns:lrpficfcsgap,attr"`
+
+	Cabecera *CabeceraType
+	Ingresos *AnulacionesIngresosConSGType
+}
+
+// IngresosConSGCodificadoType holds an array of income records to send under Modelo 140.
+type IngresosConSGCodificadoType struct {
+	Ingreso []*IngresoConSGCodificadoType // max length 1000
+}
+
+// IngresoConSGCodificadoType contains a single income record under Modelo 140.
+type IngresoConSGCodificadoType struct {
+	TicketBai string // base64 data
+	Renta     *RentaIngresosType
+}
+
+// RentaIngresosType wraps the income detail breakdown for Modelo 140.
+type RentaIngresosType struct {
+	DetalleRenta []*DetalleRentaIngresosType // 1..10
+}
+
+// DetalleRentaIngresosType describes a single income detail entry. Only Epigrafe is
+// populated by the converter today; the remaining XSD fields are exposed for follow-up
+// wiring through GOBL extensions.
+type DetalleRentaIngresosType struct {
+	TerritorioAltaActividad                  string `xml:",omitempty"`
+	Epigrafe                                 string
+	NumeroFijoOReferenciaCatastral           string `xml:",omitempty"`
+	IngresoAComputarIRPFDiferenteBaseImpoIVA string `xml:",omitempty"`
+	CausaIngresoIRPFDiferenteBaseImpoIVA     string `xml:",omitempty"`
+	ImporteIngresoIRPF                       string `xml:",omitempty"`
+	CriterioCobrosYPagos                     string `xml:",omitempty"`
+}
+
+// AnulacionesIngresosConSGType holds an array of income records to cancel under Modelo 140.
+type AnulacionesIngresosConSGType struct {
+	Ingreso []*AnulacionIngresoConSGType
+}
+
+// AnulacionIngresoConSGType contains the income record to cancel under Modelo 140.
+// Cancellations carry only the TicketBai reference — no Renta block.
+type AnulacionIngresoConSGType struct {
+	AnulacionTicketBai string // base64 data
+}
+
 // NIFPersonaType contains the identification details of a taxable natural or
 // legal person.
 type NIFPersonaType struct {
@@ -208,16 +294,38 @@ type NIFPersonaType struct {
 // Supplier contains the details of the supplier who is making the
 // request.
 type Supplier struct {
-	Year string // invoice issue year
-	NIF  string // Tax code
-	Name string // Name of the company
+	Year     string // invoice issue year
+	NIF      string // Tax code
+	Name     string // Name of the company
+	Model    string // Modelo140 or Modelo240; empty defaults to Modelo240
+	Activity string // IAE Epigrafe; only used when Model == Modelo140
 }
 
 // NewCreateRequest assembles a new Create request
 func NewCreateRequest(sup *Supplier, payload []byte) (*Request, error) {
+	if sup.Model == Modelo140 {
+		body := &LROEPF140IngresosConFacturaConSGAltaPeticion{
+			LROENamespace: schemaLROE140ConSGAlta,
+			Cabecera:      newCabeceraType(sup, operacionEnumAlta),
+			Ingresos: &IngresosConSGCodificadoType{
+				Ingreso: []*IngresoConSGCodificadoType{
+					{
+						TicketBai: base64.StdEncoding.EncodeToString(payload),
+						Renta: &RentaIngresosType{
+							DetalleRenta: []*DetalleRentaIngresosType{
+								{Epigrafe: sup.Activity},
+							},
+						},
+					},
+				},
+			},
+		}
+		return newRequest(sup, body)
+	}
+
 	body := &LROEPJ240FacturasEmitidasConSGAltaPeticion{
 		LROENamespace: schemaLROE240ConSGAlta,
-		Cabecera:      newCabecera240Type(sup, operacionEnumAlta),
+		Cabecera:      newCabeceraType(sup, operacionEnumAlta),
 		FacturasEmitidas: &FacturasEmitidasConSGCodificadoType{
 			FacturaEmitida: []*DetalleEmitidaConSGCodificadoType{
 				{
@@ -232,16 +340,9 @@ func NewCreateRequest(sup *Supplier, payload []byte) (*Request, error) {
 
 // NewFetchRequest assembles a new Fetch request
 func NewFetchRequest(sup *Supplier, page int, head *convert.CabeceraFactura) (*Request, error) {
-	body := &LROEPJ240FacturasEmitidasConSGConsultaPeticion{
-		LROENamespace: schemaLROE240ConSGConsulta,
-		Cabecera:      newCabecera240Type(sup, operacionEnumConsulta),
-		FiltroConsultaFacturasEmitidasConSG: &FiltroConsultaFacturasEmitidasType{
-			NumPaginaConsulta: page,
-		},
-	}
-
+	var cabeceraFiltro *CabeceraFacturaConsultaType
 	if head != nil {
-		body.FiltroConsultaFacturasEmitidasConSG.CabeceraFactura = &CabeceraFacturaConsultaType{
+		cabeceraFiltro = &CabeceraFacturaConsultaType{
 			NumFactura:   head.NumFactura,
 			SerieFactura: head.SerieFactura,
 			FechaExpedicionFactura: &FechaDesdeHastaType{
@@ -251,14 +352,50 @@ func NewFetchRequest(sup *Supplier, page int, head *convert.CabeceraFactura) (*R
 		}
 	}
 
+	if sup.Model == Modelo140 {
+		body := &LROEPF140IngresosConFacturaConSGConsultaPeticion{
+			LROENamespace: schemaLROE140ConSGConsulta,
+			Cabecera:      newCabeceraType(sup, operacionEnumConsulta),
+			FiltroConsultaIngresosConSG: &FiltroConsultaFacturasEmitidasType{
+				CabeceraFactura:   cabeceraFiltro,
+				NumPaginaConsulta: page,
+			},
+		}
+		return newRequest(sup, body)
+	}
+
+	body := &LROEPJ240FacturasEmitidasConSGConsultaPeticion{
+		LROENamespace: schemaLROE240ConSGConsulta,
+		Cabecera:      newCabeceraType(sup, operacionEnumConsulta),
+		FiltroConsultaFacturasEmitidasConSG: &FiltroConsultaFacturasEmitidasType{
+			CabeceraFactura:   cabeceraFiltro,
+			NumPaginaConsulta: page,
+		},
+	}
+
 	return newRequest(sup, body)
 }
 
 // NewCancelRequest assembles a new Cancel request
 func NewCancelRequest(sup *Supplier, payload []byte) (*Request, error) {
+	if sup.Model == Modelo140 {
+		body := &LROEPF140IngresosConFacturaConSGAnulacionPeticion{
+			LROENamespace: schemaLROE140ConSGAnulacion,
+			Cabecera:      newCabeceraType(sup, operacionEnumAnulacion),
+			Ingresos: &AnulacionesIngresosConSGType{
+				Ingreso: []*AnulacionIngresoConSGType{
+					{
+						AnulacionTicketBai: base64.StdEncoding.EncodeToString(payload),
+					},
+				},
+			},
+		}
+		return newRequest(sup, body)
+	}
+
 	body := &LROEPJ240FacturasEmitidasConSGAnulacionPeticion{
 		LROENamespace: schemaLROE240ConSGAnulacion,
-		Cabecera:      newCabecera240Type(sup, operacionEnumAnulacion),
+		Cabecera:      newCabeceraType(sup, operacionEnumAnulacion),
 		FacturasEmitidas: &AnulacionesFacturasEmitidasConSGType{
 			FacturaEmitida: []*AnulacionFacturaConSGType{
 				{
@@ -271,9 +408,13 @@ func NewCancelRequest(sup *Supplier, payload []byte) (*Request, error) {
 	return newRequest(sup, body)
 }
 
-func newCabecera240Type(sup *Supplier, op string) *Cabecera240Type {
-	head := &Cabecera240Type{
-		Modelo:      modelo240,
+func newCabeceraType(sup *Supplier, op string) *CabeceraType {
+	model := sup.Model
+	if model == "" {
+		model = Modelo240
+	}
+	head := &CabeceraType{
+		Modelo:      model,
 		Capitulo:    apartado1, // nolint:misspell
 		Subcapitulo: apartado1_1,
 		Operacion:   op,
@@ -309,6 +450,10 @@ func newRequest(sup *Supplier, body any) (*Request, error) {
 }
 
 func newN3Header(sup *Supplier) *N3Header {
+	model := sup.Model
+	if model == "" {
+		model = Modelo240
+	}
 	// prepare the request data header
 	head := &N3Header{
 		Concepto: concepto,
@@ -318,7 +463,7 @@ func newN3Header(sup *Supplier) *N3Header {
 			Nombre: sup.Name,
 		},
 		DatosRelevantes: N3DatosRelevantes{
-			Modelo:    modelo240,
+			Modelo:    model,
 			Ejercicio: sup.Year,
 		},
 	}
@@ -351,6 +496,24 @@ func (r *LROEPJ240FacturasEmitidasConSGAltaRespuesta) FirstErrorCode() string {
 
 // FirstErrorDescription returns the first error description in the response.
 func (r *LROEPJ240FacturasEmitidasConSGAltaRespuesta) FirstErrorDescription() string {
+	if r.Registros == nil || len(r.Registros.Registro) == 0 {
+		return ""
+	}
+
+	return r.Registros.Registro[0].SituacionRegistro.DescripcionErrorRegistroES
+}
+
+// FirstErrorCode returns the first error code in the response.
+func (r *LROEPF140IngresosConFacturaConSGAltaRespuesta) FirstErrorCode() string {
+	if r.Registros == nil || len(r.Registros.Registro) == 0 {
+		return ""
+	}
+
+	return r.Registros.Registro[0].SituacionRegistro.CodigoErrorRegistro
+}
+
+// FirstErrorDescription returns the first error description in the response.
+func (r *LROEPF140IngresosConFacturaConSGAltaRespuesta) FirstErrorDescription() string {
 	if r.Registros == nil || len(r.Registros.Registro) == 0 {
 		return ""
 	}
