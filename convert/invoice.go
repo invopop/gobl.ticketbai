@@ -184,7 +184,7 @@ func newFacturaRectificativa(inv *bill.Invoice) *FacturaRectificativa {
 	p := inv.Preceding[0]
 
 	return &FacturaRectificativa{
-		Codigo: p.Ext[tbai.ExtKeyCorrection].String(),
+		Codigo: p.Ext.Get(tbai.ExtKeyCorrection).String(),
 		Tipo:   CorrectiveTypeDifferences, // Only differences are supported for now
 	}
 }
@@ -217,7 +217,7 @@ func hasSurchargedLines(inv *bill.Invoice) bool {
 	}
 
 	for _, rate := range vat.Rates {
-		if rate.Ext[tbai.ExtKeyProduct] == "resale" {
+		if rate.Ext.Get(tbai.ExtKeyProduct) == "resale" {
 			return true
 		}
 	}

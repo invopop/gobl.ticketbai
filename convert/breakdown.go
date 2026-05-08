@@ -140,7 +140,7 @@ func newDesgloseFactura(taxInfo taxInfo, rates []*tax.RateTotal) *DesgloseFactur
 			})
 		} else if taxInfo.isExenta(rate) {
 			df.Sujeta.Exenta.appendDetalle(&DetalleExenta{
-				CausaExencion: rate.Ext[tbai.ExtKeyExempt].String(),
+				CausaExencion: rate.Ext.Get(tbai.ExtKeyExempt).String(),
 				BaseImponible: rate.Base.Rescale(2).String(),
 			})
 		} else {
@@ -160,7 +160,7 @@ func newDesgloseFactura(taxInfo taxInfo, rates []*tax.RateTotal) *DesgloseFactur
 
 func splitByTBAIProduct(rates []*tax.RateTotal) (goods, services []*tax.RateTotal) {
 	for _, rate := range rates {
-		if rate.Ext[tbai.ExtKeyProduct] == "goods" {
+		if rate.Ext.Get(tbai.ExtKeyProduct) == "goods" {
 			goods = append(goods, rate)
 		} else {
 			services = append(services, rate)
@@ -230,7 +230,7 @@ func newDetalleIVA(taxInfo taxInfo, rate *tax.RateTotal) *DetalleIVA {
 		diva.CuotaRecargoEquivalencia = rate.Surcharge.Amount.Rescale(2).String()
 	}
 
-	if taxInfo.simplifiedRegime || rate.Ext[tbai.ExtKeyProduct] == "resale" {
+	if taxInfo.simplifiedRegime || rate.Ext.Get(tbai.ExtKeyProduct) == "resale" {
 		diva.OperacionEnRecargoDeEquivalenciaORegimenSimplificado = "S"
 	}
 
@@ -268,16 +268,16 @@ func (t taxInfo) isNoSujeta(r *tax.RateTotal) bool {
 	if t.customerRates {
 		return true
 	}
-	return r.Percent == nil && r.Ext[tbai.ExtKeyExempt].In(notSubjectExemptionCodes...)
+	return r.Percent == nil && r.Ext.Get(tbai.ExtKeyExempt).In(notSubjectExemptionCodes...)
 }
 
 func (t taxInfo) causaNoSujeta(r *tax.RateTotal) string {
 	if t.customerRates {
 		return "RL"
 	}
-	return r.Ext[tbai.ExtKeyExempt].String()
+	return r.Ext.Get(tbai.ExtKeyExempt).String()
 }
 
 func (taxInfo) isExenta(r *tax.RateTotal) bool {
-	return r.Percent == nil && !r.Ext[tbai.ExtKeyExempt].In(notSubjectExemptionCodes...)
+	return r.Percent == nil && !r.Ext.Get(tbai.ExtKeyExempt).In(notSubjectExemptionCodes...)
 }
