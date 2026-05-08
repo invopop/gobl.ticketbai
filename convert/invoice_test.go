@@ -92,7 +92,7 @@ func TestFacturaConversion(t *testing.T) {
 			Quantity:  num.MakeAmount(100, 0),
 			Item:      &org.Item{Name: "A", Price: num.NewAmount(11, 0)},
 			Discounts: []*bill.LineDiscount{DiscountOf(100)},
-			Taxes:     tax.Set{&tax.Combo{Category: "VAT", Rate: "standard"}},
+			Taxes:     tax.Set{&tax.Combo{Category: tax.CategoryVAT, Rate: "standard"}},
 		}}
 		_ = goblInvoice.Calculate()
 
@@ -109,8 +109,8 @@ func TestFacturaConversion(t *testing.T) {
 			Quantity: num.MakeAmount(100, 0),
 			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 			Taxes: tax.Set{
-				&tax.Combo{Category: "VAT", Rate: "standard"},
-				&tax.Combo{Category: "IRPF", Rate: "pro"},
+				&tax.Combo{Category: tax.CategoryVAT, Rate: "standard"},
+				&tax.Combo{Category: es.TaxCategoryIRPF, Rate: "pro"},
 			},
 		}}
 		_ = goblInvoice.Calculate()
@@ -128,8 +128,8 @@ func TestFacturaConversion(t *testing.T) {
 			Quantity: num.MakeAmount(100, 0),
 			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 			Taxes: tax.Set{
-				&tax.Combo{Category: "VAT", Rate: "standard"},
-				&tax.Combo{Category: "IRPF", Rate: "pro"},
+				&tax.Combo{Category: tax.CategoryVAT, Rate: "standard"},
+				&tax.Combo{Category: es.TaxCategoryIRPF, Rate: "pro"},
 			},
 		}}
 		_ = goblInvoice.Calculate()
@@ -147,7 +147,7 @@ func TestFacturaConversion(t *testing.T) {
 			Quantity: num.MakeAmount(100, 0),
 			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 			Taxes: tax.Set{
-				&tax.Combo{Category: "VAT", Rate: "standard"},
+				&tax.Combo{Category: tax.CategoryVAT, Rate: "standard"},
 			},
 		}}
 		_ = goblInvoice.Calculate()
@@ -174,13 +174,13 @@ func TestFacturaConversion(t *testing.T) {
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
 			Item: &org.Item{
-				Key:   "goods",
+				Key:   org.ItemKeyGoods,
 				Name:  "A",
 				Price: num.NewAmount(10, 0),
 			},
 			Taxes: tax.Set{
 				&tax.Combo{
-					Category: "VAT",
+					Category: tax.CategoryVAT,
 					Rate:     "standard",
 					Ext:      tax.Extensions{tbai.ExtKeyProduct: "resale"},
 				},

@@ -14,6 +14,8 @@ linters:
     - unparam
     - zerologlint
   settings:
+    goconst:
+      ignore-tests: true
     staticcheck:
       checks:
         - all
