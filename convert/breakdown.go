@@ -105,7 +105,7 @@ func newTipoDesglose(gobl *bill.Invoice) *TipoDesglose {
 
 	desglose := &TipoDesglose{}
 
-	if gobl.Customer == nil || partyTaxCountry(gobl.Customer) == l10n.ES.Tax() {
+	if gobl.Customer == nil || partyCountry(gobl.Customer) == l10n.ES.Tax() {
 		desglose.DesgloseFactura = newDesgloseFactura(taxInfo, catTotal.Rates)
 	} else {
 		goods, services := splitByTBAIProduct(catTotal.Rates)

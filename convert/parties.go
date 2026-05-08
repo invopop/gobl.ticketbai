@@ -65,7 +65,7 @@ func newDestinatario(party *org.Party) *IDDestinatario {
 		ApellidosNombreRazonSocial: party.Name,
 	}
 
-	if partyTaxCountry(party) == "ES" {
+	if party.TaxID != nil && party.TaxID.Country == "ES" && party.TaxID.Code != "" {
 		d.NIF = party.TaxID.Code.String()
 	} else {
 		d.IDOtro = otherIdentity(party)
@@ -96,6 +96,9 @@ func otherIdentity(party *org.Party) *IDOtro {
 	}
 
 	for _, id := range party.Identities {
+		if id == nil || id.Code == "" {
+			continue
+		}
 		it, ok := idTypeCodeMap[id.Key]
 		if !ok {
 			continue
@@ -103,15 +106,26 @@ func otherIdentity(party *org.Party) *IDOtro {
 
 		oid.IDType = it
 		oid.ID = id.Code.String()
+		if id.Country != "" {
+			oid.CodigoPais = id.Country.String()
+		}
 		return oid
 	}
 
 	return nil
 }
 
-func partyTaxCountry(party *org.Party) l10n.TaxCountryCode {
-	if party != nil && party.TaxID != nil {
+func partyCountry(party *org.Party) l10n.TaxCountryCode {
+	if party == nil {
+		return ""
+	}
+	if party.TaxID != nil && party.TaxID.Country != "" {
 		return party.TaxID.Country
+	}
+	for _, id := range party.Identities {
+		if id != nil && id.Country != "" {
+			return l10n.TaxCountryCode(id.Country)
+		}
 	}
 	return ""
 }
