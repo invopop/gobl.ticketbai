@@ -19,8 +19,6 @@ linters:
     staticcheck:
       checks:
         - all
-    goconst:
-      ignore-tests: true
   exclusions:
     generated: lax
     paths:
