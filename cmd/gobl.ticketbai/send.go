@@ -105,7 +105,7 @@ func (c *sendOpts) runE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	err = tc.Post(cmd.Context(), td)
+	err = tc.Post(cmd.Context(), env, td)
 	if err != nil {
 		return err
 	}

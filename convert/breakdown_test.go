@@ -195,9 +195,7 @@ func TestDesgloseConversion(t *testing.T) {
 				&tax.Combo{Category: es.TaxCategoryIRPF, Rate: "pro"},
 				&tax.Combo{
 					Category: tax.CategoryVAT,
-					Ext: tax.Extensions{
-						tbai.ExtKeyExempt: "OT",
-					},
+					Ext:      tax.MakeExtensions().Set(tbai.ExtKeyExempt, "OT"),
 				},
 			},
 		}}
@@ -219,7 +217,7 @@ func TestDesgloseConversion(t *testing.T) {
 			Taxes: tax.Set{
 				&tax.Combo{
 					Category: tax.CategoryVAT,
-					Ext:      tax.Extensions{tbai.ExtKeyExempt: "RL"},
+					Ext:      tax.MakeExtensions().Set(tbai.ExtKeyExempt, "RL"),
 				},
 			},
 		}}
@@ -241,7 +239,7 @@ func TestDesgloseConversion(t *testing.T) {
 			Taxes: tax.Set{
 				&tax.Combo{
 					Category: tax.CategoryVAT,
-					Ext:      tax.Extensions{tbai.ExtKeyExempt: "RL"},
+					Ext:      tax.MakeExtensions().Set(tbai.ExtKeyExempt, "RL"),
 				},
 			},
 		}}
@@ -349,7 +347,7 @@ func TestDesgloseConversion(t *testing.T) {
 					&tax.Combo{
 						Category: tax.CategoryVAT,
 						Rate:     "general",
-						Ext:      tax.Extensions{tbai.ExtKeyProduct: "resale"},
+						Ext:      tax.MakeExtensions().Set(tbai.ExtKeyProduct, "resale"),
 					},
 				},
 			},
@@ -376,7 +374,7 @@ func TestDesgloseConversion(t *testing.T) {
 				&tax.Combo{
 					Category: tax.CategoryVAT,
 					Key:      tax.KeyExempt,
-					Ext:      tax.Extensions{tbai.ExtKeyExempt: "E1"},
+					Ext:      tax.MakeExtensions().Set(tbai.ExtKeyExempt, "E1"),
 				},
 			},
 		}}

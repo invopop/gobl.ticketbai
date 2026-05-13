@@ -182,7 +182,7 @@ func TestFacturaConversion(t *testing.T) {
 				&tax.Combo{
 					Category: tax.CategoryVAT,
 					Rate:     "standard",
-					Ext:      tax.Extensions{tbai.ExtKeyProduct: "resale"},
+					Ext:      tax.MakeExtensions().Set(tbai.ExtKeyProduct, "resale"),
 				},
 			},
 		}}

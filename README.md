@@ -166,6 +166,30 @@ gobl.ticketbai send ./test/data/sample-invoice.json
 
 - GOBL's corrective invoices aren't supported at the moment. Only credit and debit notes are, and they are converted into "Facturas Rectificativas por Diferencias" with either positive or inverted quantities depending on whether it is a debit or a credit note.
 
+## Bizkaia: Modelo 140 vs Modelo 240
+
+Bizkaia's LROE / Batuz system uses two different registers depending on the type of issuer:
+
+- **Modelo 240** — for legal entities (_persona jurídica_, NIF/CIF starting with a letter, e.g. `B64847106`).
+- **Modelo 140** — for individuals (_persona física_, DNI / NIE / non-resident IDs, e.g. `12345678Z`).
+
+The library detects which model to use automatically from the supplier's tax identity, using GOBL's `es.TaxIdentityKey` helper. No configuration is required.
+
+When the supplier is an individual in Bizkaia, their IAE-style activity code (_Epígrafe_) must be set on the supplier's `ext` map under the `es-tbai-bi-activity` key. This value is published in the `<Renta>` block of the Modelo 140 LROE submission. Reference:
+
+- Activity codes (Epígrafes): https://www.batuz.eus/fitxategiak/batuz/lroe/batuz_lroe_lista_epigrafes_v1_0_4.xlsx
+- Modelo 140 specification: https://www.batuz.eus/fitxategiak/batuz/lroe/lroe_140_v_1_0.pdf
+
+```json
+"supplier": {
+  "name": "Ana Fernández García",
+  "tax_id": { "country": "ES", "code": "12345678Z" },
+  "ext": { "es-tbai-bi-activity": "722300" }
+}
+```
+
+Álava (`VI`) and Gipuzkoa (`SS`) are unaffected — their gateways do not expose model selection.
+
 ## Tags, Keys and Extensions
 
 In order to provide the supplier specific data required by TicketBAI, invoices need to include a bit of extra data. We've managed to simplify these into specific cases.

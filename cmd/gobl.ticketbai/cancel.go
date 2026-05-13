@@ -89,7 +89,7 @@ func (c *cancelOpts) runE(cmd *cobra.Command, args []string) error {
 		panic(err)
 	}
 
-	err = tc.Cancel(cmd.Context(), tcd)
+	err = tc.Cancel(cmd.Context(), env, tcd)
 	if err != nil {
 		panic(err)
 	}
