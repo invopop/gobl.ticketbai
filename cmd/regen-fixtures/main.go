@@ -14,10 +14,11 @@ import (
 	"path/filepath"
 
 	"github.com/invopop/gobl"
+	"github.com/invopop/gobl.ticketbai/test"
 )
 
 func main() {
-	dir := "test/data"
+	dir := test.Path("test", "data")
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "read dir:", err)

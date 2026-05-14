@@ -41,23 +41,20 @@ func TestXMLGeneration(t *testing.T) {
 			data, err := convertExample(tbai, example)
 			require.NoError(t, err)
 
+			// Always validate the generated XML against the
+			// TicketBAI XSD so CI catches schema regressions
+			// even without -update.
+			for _, e := range validateDoc(schema, data) {
+				assert.NoError(t, e)
+			}
+
 			outPath := test.Path("test", "data", "out",
 				strings.TrimSuffix(example, ".json")+".xml",
 			)
 
 			if *test.UpdateOut {
-				errs := validateDoc(schema, data)
-				for _, e := range errs {
-					assert.NoError(t, e)
-				}
-				if len(errs) > 0 {
-					assert.Fail(t, "Invalid XML:\n"+string(data))
-					return
-				}
-
 				err = os.WriteFile(outPath, data, 0644)
 				require.NoError(t, err)
-
 				return
 			}
 

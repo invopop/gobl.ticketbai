@@ -258,8 +258,10 @@ go run ./cmd/regen-fixtures
 go run ./cmd/regen-xmls
 ```
 
-CI still runs `go test -tags unit -update ./...` against a real libxml2,
-which is what enforces XSD validity on the generated XML.
+CI runs `go test -tags unit -race ./...` against a real libxml2, and
+`TestXMLGeneration` validates each generated XML against the TicketBAI
+XSD on every test run — the `-update` flag only controls whether the
+fixtures on disk are rewritten.
 
 ### Sending to the Bizkaia sandbox
 
