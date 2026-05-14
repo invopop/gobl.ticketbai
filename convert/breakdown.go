@@ -145,7 +145,7 @@ func newDesgloseFactura(taxInfo taxInfo, rates []*tax.RateTotal) *DesgloseFactur
 			})
 		} else {
 			dne := df.Sujeta.NoExenta.appendDetalle(&DetalleNoExenta{
-				TipoNoExenta: taxInfo.nonExemptedType(rate),
+				TipoNoExenta: taxInfo.nonExemptedType(),
 				DesgloseIVA:  &DesgloseIVA{},
 			})
 
@@ -219,13 +219,9 @@ func (di *DesgloseIVA) appendDetalle(d *DetalleIVA) *DetalleIVA {
 }
 
 func newDetalleIVA(taxInfo taxInfo, rate *tax.RateTotal) *DetalleIVA {
-	percent := num.PercentageZero // S2 reverse-charge rates have no percent
-	if rate.Percent != nil {
-		percent = *rate.Percent
-	}
 	diva := &DetalleIVA{
 		BaseImponible:  rate.Base.Rescale(2).String(),
-		TipoImpositivo: formatPercent(percent),
+		TipoImpositivo: formatPercent(*rate.Percent),
 		CuotaImpuesto:  rate.Amount.Rescale(2).String(),
 	}
 
@@ -258,27 +254,15 @@ func newTaxInfo(gobl *bill.Invoice) taxInfo {
 	}
 }
 
-// notSubjectExemptionCodes are the es-tbai-exemption values that the
-// es-tbai-v1 addon assigns to "outside-scope" tax combos; they map to
-// DetalleNoSujeta/Causa in the TicketBAI XML.
-var notSubjectExemptionCodes = []cbc.Code{"OT", "RL", "VT", "IE"}
-
-// reverseChargeExemptionCodes are the es-tbai-exemption values that map
-// to DetalleNoExenta/TipoNoExenta = S2 (subject to VAT with reverse
-// charge) in the TicketBAI XML.
-var reverseChargeExemptionCodes = []cbc.Code{"S2"}
-
-// nonExemptedType returns the TBAI TipoNoExenta value for a "subject and
-// non-exempt" tax rate. The new path consults the es-tbai-exemption
-// extension set by the es-tbai-v1 addon normalizer; the legacy fallback
-// relies on the invoice-wide reverse-charge tag for callers that have
-// not been normalized through the addon.
-func (t taxInfo) nonExemptedType(r *tax.RateTotal) string {
-	if t.reverseCharge || r.Ext.Get(tbai.ExtKeyExempt).In(reverseChargeExemptionCodes...) {
+func (t taxInfo) nonExemptedType() string {
+	if t.reverseCharge {
 		return "S2"
 	}
+
 	return "S1"
 }
+
+var notSubjectExemptionCodes = []cbc.Code{"OT", "RL"}
 
 func (t taxInfo) isNoSujeta(r *tax.RateTotal) bool {
 	if t.customerRates {
@@ -295,8 +279,5 @@ func (t taxInfo) causaNoSujeta(r *tax.RateTotal) string {
 }
 
 func (taxInfo) isExenta(r *tax.RateTotal) bool {
-	code := r.Ext.Get(tbai.ExtKeyExempt)
-	return r.Percent == nil &&
-		!code.In(notSubjectExemptionCodes...) &&
-		!code.In(reverseChargeExemptionCodes...)
+	return r.Percent == nil && !r.Ext.Get(tbai.ExtKeyExempt).In(notSubjectExemptionCodes...)
 }

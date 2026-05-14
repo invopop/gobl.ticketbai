@@ -195,9 +195,7 @@ func TestDesgloseConversion(t *testing.T) {
 				&tax.Combo{Category: es.TaxCategoryIRPF, Rate: "pro"},
 				&tax.Combo{
 					Category: tax.CategoryVAT,
-					Ext: tax.ExtensionsOf(cbc.CodeMap{
-						tbai.ExtKeyExempt: "OT",
-					}),
+					Ext:      tax.MakeExtensions().Set(tbai.ExtKeyExempt, "OT"),
 				},
 			},
 		}}
@@ -219,7 +217,7 @@ func TestDesgloseConversion(t *testing.T) {
 			Taxes: tax.Set{
 				&tax.Combo{
 					Category: tax.CategoryVAT,
-					Ext:      tax.ExtensionsOf(cbc.CodeMap{tbai.ExtKeyExempt: "RL"}),
+					Ext:      tax.MakeExtensions().Set(tbai.ExtKeyExempt, "RL"),
 				},
 			},
 		}}
@@ -241,7 +239,7 @@ func TestDesgloseConversion(t *testing.T) {
 			Taxes: tax.Set{
 				&tax.Combo{
 					Category: tax.CategoryVAT,
-					Ext:      tax.ExtensionsOf(cbc.CodeMap{tbai.ExtKeyExempt: "RL"}),
+					Ext:      tax.MakeExtensions().Set(tbai.ExtKeyExempt, "RL"),
 				},
 			},
 		}}
@@ -349,7 +347,7 @@ func TestDesgloseConversion(t *testing.T) {
 					&tax.Combo{
 						Category: tax.CategoryVAT,
 						Rate:     "general",
-						Ext:      tax.ExtensionsOf(cbc.CodeMap{tbai.ExtKeyProduct: "resale"}),
+						Ext:      tax.MakeExtensions().Set(tbai.ExtKeyProduct, "resale"),
 					},
 				},
 			},
@@ -376,7 +374,7 @@ func TestDesgloseConversion(t *testing.T) {
 				&tax.Combo{
 					Category: tax.CategoryVAT,
 					Key:      tax.KeyExempt,
-					Ext:      tax.ExtensionsOf(cbc.CodeMap{tbai.ExtKeyExempt: "E1"}),
+					Ext:      tax.MakeExtensions().Set(tbai.ExtKeyExempt, "E1"),
 				},
 			},
 		}}
@@ -466,92 +464,6 @@ func TestDesgloseConversion(t *testing.T) {
 
 		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
 		assert.Equal(t, "S2", desglose.Sujeta.NoExenta.DetalleNoExenta[0].TipoNoExenta)
-	})
-
-	t.Run("should route es-tbai-exemption=S2 to Sujeta.NoExenta with TipoNoExenta=S2", func(t *testing.T) {
-		goblInvoice := invoiceFromCountry("ES")
-		goblInvoice.Lines = []*bill.Line{{
-			Index:    1,
-			Quantity: num.MakeAmount(100, 0),
-			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
-			Taxes: tax.Set{
-				&tax.Combo{
-					Category: tax.CategoryVAT,
-					Key:      tax.KeyReverseCharge,
-				},
-			},
-		}}
-		_ = goblInvoice.Calculate()
-
-		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
-
-		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
-		require.NotNil(t, desglose.Sujeta)
-		require.NotNil(t, desglose.Sujeta.NoExenta)
-		require.Len(t, desglose.Sujeta.NoExenta.DetalleNoExenta, 1)
-		detalle := desglose.Sujeta.NoExenta.DetalleNoExenta[0]
-		assert.Equal(t, "S2", detalle.TipoNoExenta)
-		require.Len(t, detalle.DesgloseIVA.DetalleIVA, 1)
-		diva := detalle.DesgloseIVA.DetalleIVA[0]
-		assert.Equal(t, "1000.00", diva.BaseImponible)
-		assert.Equal(t, "0.00", diva.TipoImpositivo)
-		assert.Equal(t, "0.00", diva.CuotaImpuesto)
-		assert.Nil(t, desglose.Sujeta.Exenta, "S2 must not appear under Sujeta.Exenta")
-		assert.Nil(t, desglose.NoSujeta, "S2 must not appear under NoSujeta")
-	})
-
-	t.Run("should route es-tbai-exemption=S2 set via extension only to Sujeta.NoExenta", func(t *testing.T) {
-		// Caller sets the exemption code directly via the extension;
-		// the es-tbai-v1 addon normalizer maps it back to KeyReverseCharge.
-		goblInvoice := invoiceFromCountry("ES")
-		goblInvoice.Lines = []*bill.Line{{
-			Index:    1,
-			Quantity: num.MakeAmount(100, 0),
-			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
-			Taxes: tax.Set{
-				&tax.Combo{
-					Category: tax.CategoryVAT,
-					Ext:      tax.MakeExtensions().Set(tbai.ExtKeyExempt, "S2"),
-				},
-			},
-		}}
-		_ = goblInvoice.Calculate()
-
-		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
-
-		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
-		require.NotNil(t, desglose.Sujeta)
-		require.NotNil(t, desglose.Sujeta.NoExenta)
-		assert.Equal(t, "S2", desglose.Sujeta.NoExenta.DetalleNoExenta[0].TipoNoExenta)
-	})
-
-	t.Run("should route es-tbai-exemption=VT and IE to NoSujeta", func(t *testing.T) {
-		for _, code := range []cbc.Code{"VT", "IE"} {
-			t.Run(string(code), func(t *testing.T) {
-				goblInvoice := invoiceFromCountry("ES")
-				goblInvoice.Lines = []*bill.Line{{
-					Index:    1,
-					Quantity: num.MakeAmount(100, 0),
-					Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
-					Taxes: tax.Set{
-						&tax.Combo{
-							Category: tax.CategoryVAT,
-							Key:      tax.KeyOutsideScope,
-							Ext:      tax.MakeExtensions().Set(tbai.ExtKeyExempt, code),
-						},
-					},
-				}}
-				_ = goblInvoice.Calculate()
-
-				invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
-
-				desglose := invoice.Factura.TipoDesglose.DesgloseFactura
-				require.NotNil(t, desglose.NoSujeta)
-				require.Len(t, desglose.NoSujeta.DetalleNoSujeta, 1)
-				assert.Equal(t, string(code), desglose.NoSujeta.DetalleNoSujeta[0].Causa)
-				assert.Nil(t, desglose.Sujeta, "%s must not appear under Sujeta", code)
-			})
-		}
 	})
 }
 
