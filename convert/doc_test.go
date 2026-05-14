@@ -9,7 +9,9 @@ import (
 
 	"github.com/invopop/gobl.ticketbai/convert"
 	"github.com/invopop/gobl.ticketbai/test"
+	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
@@ -156,6 +158,115 @@ func TestInvoiceConversion(t *testing.T) {
 		assert.Equal(t, "03", dest.IDOtro.IDType)
 		assert.Equal(t, "PP123456S", dest.IDOtro.ID)
 		assert.Equal(t, "ES", dest.IDOtro.CodigoPais)
+	})
+
+	t.Run("es-tbai-identity-type extension is preferred over key fallback", func(t *testing.T) {
+		// When both an addon-set extension and a legacy key are present
+		// on an identity, the extension code wins. Mirrors what the addon
+		// normalizer does: Merge overwrites identity.Key-derived codes
+		// with whatever the addon decided, and the converter then reads
+		// that ext directly without re-running the key map.
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
+		goblInvoice.Customer.TaxID = nil
+		goblInvoice.Customer.Identities = []*org.Identity{
+			{
+				Key:     org.IdentityKeyOther, // legacy map → "06"
+				Country: "FR",
+				Code:    "FR-ID-99",
+				Ext: tax.ExtensionsOf(cbc.CodeMap{
+					tbai.ExtKeyIdentityType: "05", // ext wins
+				}),
+			},
+		}
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
+
+		dest := invoice.Sujetos.Destinatarios.IDDestinatario[0]
+		assert.Equal(t, "05", dest.IDOtro.IDType)
+		assert.Equal(t, "FR-ID-99", dest.IDOtro.ID)
+		assert.Equal(t, "FR", dest.IDOtro.CodigoPais)
+	})
+
+	t.Run("es-tbai-identity-type extension works without an identity key", func(t *testing.T) {
+		// The main use case for setting the extension explicitly: an
+		// identity without a recognised key (so the legacy idTypeCodeMap
+		// would skip it) but with an L7 code provided via the extension.
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
+		goblInvoice.Customer.TaxID = nil
+		goblInvoice.Customer.Identities = []*org.Identity{
+			{
+				Country: "CH",
+				Code:    "CH-XYZ-001",
+				Ext: tax.ExtensionsOf(cbc.CodeMap{
+					tbai.ExtKeyIdentityType: "06",
+				}),
+			},
+		}
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
+
+		dest := invoice.Sujetos.Destinatarios.IDDestinatario[0]
+		assert.Equal(t, "06", dest.IDOtro.IDType)
+		assert.Equal(t, "CH-XYZ-001", dest.IDOtro.ID)
+		assert.Equal(t, "CH", dest.IDOtro.CodigoPais)
+	})
+
+	t.Run("es-tbai-identity-type extension honours each L7 code", func(t *testing.T) {
+		// Round-trip every L7 code the addon defines (02 NIF-VAT,
+		// 03 passport, 04 foreign, 05 resident, 06 other) through the
+		// converter via the extension path.
+		for _, code := range []cbc.Code{"02", "03", "04", "05", "06"} {
+			t.Run("code "+code.String(), func(t *testing.T) {
+				goblInvoice := test.LoadInvoice("sample-invoice.json")
+				goblInvoice.Customer.TaxID = nil
+				goblInvoice.Customer.Identities = []*org.Identity{
+					{
+						Country: "FR",
+						Code:    cbc.Code("ID-" + code.String()),
+						Ext: tax.ExtensionsOf(cbc.CodeMap{
+							tbai.ExtKeyIdentityType: code,
+						}),
+					},
+				}
+				invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
+
+				dest := invoice.Sujetos.Destinatarios.IDDestinatario[0]
+				assert.Equal(t, code.String(), dest.IDOtro.IDType)
+				assert.Equal(t, "ID-"+code.String(), dest.IDOtro.ID)
+				assert.Equal(t, "FR", dest.IDOtro.CodigoPais)
+			})
+		}
+	})
+
+	t.Run("invoice-es-ch-tbai-other-identity fixture emits IDType=06", func(t *testing.T) {
+		// End-to-end fixture exercising the canonical use case for the
+		// extension: an identity with no key and an explicit
+		// es-tbai-identity-type=06 ("other"). The corresponding XML
+		// golden lives at test/data/out/invoice-es-ch-tbai-other-identity.xml.
+		goblInvoice := test.LoadInvoice("invoice-es-ch-tbai-other-identity.json")
+		invoice, err := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
+		require.NoError(t, err)
+
+		dest := invoice.Sujetos.Destinatarios.IDDestinatario[0]
+		assert.Empty(t, dest.NIF)
+		require.NotNil(t, dest.IDOtro)
+		assert.Equal(t, "CH", dest.IDOtro.CodigoPais)
+		assert.Equal(t, "06", dest.IDOtro.IDType)
+		assert.Equal(t, "CH-OTHER-9001", dest.IDOtro.ID)
+	})
+
+	t.Run("identity with unknown key and no extension is skipped", func(t *testing.T) {
+		// Fallback path: no extension, key not in legacy map → identity
+		// is ignored and the customer block is left empty (B2C).
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
+		goblInvoice.Customer.TaxID = nil
+		goblInvoice.Customer.Identities = []*org.Identity{
+			{
+				Key:  cbc.Key("unrecognised"),
+				Code: "X-001",
+			},
+		}
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
+
+		assert.Nil(t, invoice.Sujetos.Destinatarios)
 	})
 
 	t.Run("should allow having no customer (useful for simplied invoices)", func(t *testing.T) {

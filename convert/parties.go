@@ -7,16 +7,11 @@ import (
 	"github.com/invopop/gobl/org"
 )
 
-const (
-	idTypeCodeTaxID   = "02" // NIF-VAT (VIES)
-	idTypeCodeForeign = "04" // Foreign identity document
-)
-
 var idTypeCodeMap = map[cbc.Key]string{
-	org.IdentityKeyPassport: "03",
-	org.IdentityKeyForeign:  idTypeCodeForeign,
-	org.IdentityKeyResident: "05",
-	org.IdentityKeyOther:    "06",
+	org.IdentityKeyPassport: tbai.ExtCodeIdentityTypePassport.String(),
+	org.IdentityKeyForeign:  tbai.ExtCodeIdentityTypeForeign.String(),
+	org.IdentityKeyResident: tbai.ExtCodeIdentityTypeResident.String(),
+	org.IdentityKeyOther:    tbai.ExtCodeIdentityTypeOther.String(),
 }
 
 // Sujetos contains invoice parties info
@@ -97,9 +92,9 @@ func otherIdentity(party *org.Party) *IDOtro {
 		// foreign identity documents (IDType=04). The TicketBAI gateway
 		// rejects a non-EU tax ID submitted as NIF-VAT with B4_2000013.
 		if l10n.Union(l10n.EU).HasMember(party.TaxID.Country.Code()) {
-			oid.IDType = idTypeCodeTaxID
+			oid.IDType = tbai.ExtCodeIdentityTypeVAT.String()
 		} else {
-			oid.IDType = idTypeCodeForeign
+			oid.IDType = tbai.ExtCodeIdentityTypeForeign.String()
 		}
 		oid.ID = party.TaxID.Code.String()
 		return oid

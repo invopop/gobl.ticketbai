@@ -1,0 +1,126 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "01963e5f-7000-7000-bbbb-000000000006",
+		"dig": {
+			"alg": "sha256",
+			"val": "8e03fca1ff287b04d001e42dea60613c631d5daed2714f4e11091a1850a866fc"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "ES",
+		"$addons": [
+			"es-tbai-v1"
+		],
+		"uuid": "01963e5f-7000-7000-cccc-000000000006",
+		"type": "standard",
+		"series": "EXPORT-X",
+		"code": "0006",
+		"issue_date": "2026-05-14",
+		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"es-tbai-region": "BI"
+			}
+		},
+		"supplier": {
+			"name": "ZIURTAPEN ZERBITZU ENPRESA-EMPRESA CERTIFICACION Y SERVICIOS IZENPE SA",
+			"tax_id": {
+				"country": "ES",
+				"code": "S7836107H"
+			},
+			"addresses": [
+				{
+					"num": "42",
+					"street": "San Frantzisko",
+					"locality": "Bilbo",
+					"region": "Bizkaia",
+					"code": "48003",
+					"country": "ES"
+				}
+			],
+			"emails": [
+				{
+					"addr": "billing@example.com"
+				}
+			]
+		},
+		"customer": {
+			"name": "Sample Swiss Customer",
+			"tax_id": {
+				"country": "CH"
+			},
+			"identities": [
+				{
+					"country": "CH",
+					"code": "CH-OTHER-9001",
+					"ext": {
+						"es-tbai-identity-type": "06"
+					}
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"name": "Consulting hour",
+					"price": "100.00",
+					"unit": "h",
+					"ext": {
+						"es-tbai-product": "services"
+					}
+				},
+				"sum": "100.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "outside-scope",
+						"ext": {
+							"es-tbai-exemption": "RL",
+							"es-tbai-product": "services",
+							"es-tbai-regime": "01"
+						}
+					}
+				],
+				"total": "100.00"
+			}
+		],
+		"totals": {
+			"sum": "100.00",
+			"total": "100.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "outside-scope",
+								"ext": {
+									"es-tbai-exemption": "RL",
+									"es-tbai-product": "services",
+									"es-tbai-regime": "01"
+								},
+								"base": "100.00",
+								"amount": "0.00"
+							}
+						],
+						"amount": "0.00"
+					}
+				],
+				"sum": "0.00"
+			},
+			"tax": "0.00",
+			"total_with_tax": "100.00",
+			"payable": "100.00"
+		},
+		"notes": [
+			{
+				"key": "general",
+				"text": "Customer identified via explicit es-tbai-identity-type=06 (Other) on an unkeyed identity."
+			}
+		]
+	}
+}
