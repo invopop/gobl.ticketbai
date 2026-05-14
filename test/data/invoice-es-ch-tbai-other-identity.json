@@ -4,7 +4,7 @@
 		"uuid": "01963e5f-7000-7000-bbbb-000000000006",
 		"dig": {
 			"alg": "sha256",
-			"val": "8e03fca1ff287b04d001e42dea60613c631d5daed2714f4e11091a1850a866fc"
+			"val": "aa0aeecc26aff8df921ad5e036298720bebbf3f9cc9f272c728e354280fb0347"
 		}
 	},
 	"doc": {
@@ -48,9 +48,6 @@
 		},
 		"customer": {
 			"name": "Sample Swiss Customer",
-			"tax_id": {
-				"country": "CH"
-			},
 			"identities": [
 				{
 					"country": "CH",

@@ -31,6 +31,8 @@ github.com/invopop/gobl v0.403.1-0.20260514134620-68b7a5c48776 h1:h5WTGDwaCxZ4hx
 github.com/invopop/gobl v0.403.1-0.20260514134620-68b7a5c48776/go.mod h1:6jYbcNFgUcBXIsS3PIeZc99rrMLBaGzPsFEg7y2DyrQ=
 github.com/invopop/gobl v0.403.1-0.20260514140623-4e0169aa8fd3 h1:XeV2HDjvgZ4zuwLtMbE3Ybb6ajXSdmnn3NFIDWz0Aww=
 github.com/invopop/gobl v0.403.1-0.20260514140623-4e0169aa8fd3/go.mod h1:6jYbcNFgUcBXIsS3PIeZc99rrMLBaGzPsFEg7y2DyrQ=
+github.com/invopop/gobl v0.403.1-0.20260514150613-46ade878efd2 h1:wFm3i9PBfm5GjIKNbVhnxFoQUIZGlLxF5nsgw2OXi+8=
+github.com/invopop/gobl v0.403.1-0.20260514150613-46ade878efd2/go.mod h1:6jYbcNFgUcBXIsS3PIeZc99rrMLBaGzPsFEg7y2DyrQ=
 github.com/invopop/jsonschema v0.14.0 h1:MHQqLhvpNUZfw+hM3AZDYK7jxO8FZoQeQM77g8iyZjg=
 github.com/invopop/jsonschema v0.14.0/go.mod h1:ygm6C2EaVNMBDPpaPlnOA2pFAxBnxGjFlMZABxm9n2I=
 github.com/invopop/xmldsig v0.14.0 h1:ROwf32DZtX2EekrrOSjLLiY0s2kPEcqHZculITlZfAw=
