@@ -4,7 +4,7 @@
 		"uuid": "0192fbd4-aaaa-7000-bbbb-000000000140",
 		"dig": {
 			"alg": "sha256",
-			"val": "42f84bd2d6f690e130547a56a5e5f90934f63333ad8207703a330210e2e125bb"
+			"val": "fb5b0643e9315f79da693d9fccb66a0576689066ae6c4452614e12027db44e6c"
 		}
 	},
 	"doc": {
@@ -77,10 +77,7 @@
 				"quantity": "8",
 				"item": {
 					"name": "Consulting services",
-					"price": "75.00",
-					"ext": {
-						"es-tbai-product": "services"
-					}
+					"price": "75.00"
 				},
 				"sum": "600.00",
 				"taxes": [

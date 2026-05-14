@@ -4,7 +4,7 @@
 		"uuid": "01963e5f-7000-7000-bbbb-000000000006",
 		"dig": {
 			"alg": "sha256",
-			"val": "aa0aeecc26aff8df921ad5e036298720bebbf3f9cc9f272c728e354280fb0347"
+			"val": "e3aef09262333c11e95a66be417afd28a35700b88f26519c795104d86019d330"
 		}
 	},
 	"doc": {
@@ -65,10 +65,7 @@
 				"item": {
 					"name": "Consulting hour",
 					"price": "100.00",
-					"unit": "h",
-					"ext": {
-						"es-tbai-product": "services"
-					}
+					"unit": "h"
 				},
 				"sum": "100.00",
 				"taxes": [
