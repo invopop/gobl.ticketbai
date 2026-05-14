@@ -10,37 +10,33 @@
     </Emisor>
     <Destinatarios>
       <IDDestinatario>
-        <IDOtro>
-          <CodigoPais>NL</CodigoPais>
-          <IDType>02</IDType>
-          <ID>000099995B57</ID>
-        </IDOtro>
-        <ApellidosNombreRazonSocial>Sample Consumer</ApellidosNombreRazonSocial>
+        <NIF>54387763P</NIF>
+        <ApellidosNombreRazonSocial>Sample Customer</ApellidosNombreRazonSocial>
       </IDDestinatario>
     </Destinatarios>
     <EmitidaPorTercerosODestinatario>T</EmitidaPorTercerosODestinatario>
   </Sujetos>
   <Factura>
     <CabeceraFactura>
-      <SerieFactura>EXPORT</SerieFactura>
-      <NumFactura>0002</NumFactura>
+      <SerieFactura>RC</SerieFactura>
+      <NumFactura>0001</NumFactura>
       <FechaExpedicionFactura>01-02-2022</FechaExpedicionFactura>
       <HoraExpedicionFactura>05:00:00</HoraExpedicionFactura>
       <FacturaSimplificada>N</FacturaSimplificada>
     </CabeceraFactura>
     <DatosFactura>
       <FechaOperacion>01-02-2022</FechaOperacion>
-      <DescripcionFactura>Some random description</DescripcionFactura>
+      <DescripcionFactura>Reverse-charge construction services (Art. 84.1.2.f LIVA).</DescripcionFactura>
       <DetallesFactura>
         <IDDetalleFactura>
-          <DescripcionDetalle>Development services</DescripcionDetalle>
+          <DescripcionDetalle>Construction services subject to reverse charge</DescripcionDetalle>
           <Cantidad>20</Cantidad>
           <ImporteUnitario>90.00</ImporteUnitario>
-          <Descuento>180.00</Descuento>
-          <ImporteTotal>1620.00</ImporteTotal>
+          <Descuento>0.00</Descuento>
+          <ImporteTotal>1800.00</ImporteTotal>
         </IDDetalleFactura>
       </DetallesFactura>
-      <ImporteTotalFactura>1620.00</ImporteTotalFactura>
+      <ImporteTotalFactura>1800.00</ImporteTotalFactura>
       <RetencionSoportada>0.00</RetencionSoportada>
       <Claves>
         <IDClave>
@@ -49,18 +45,22 @@
       </Claves>
     </DatosFactura>
     <TipoDesglose>
-      <DesgloseTipoOperacion>
-        <PrestacionServicios>
-          <Sujeta>
-            <Exenta>
-              <DetalleExenta>
-                <CausaExencion>E1</CausaExencion>
-                <BaseImponible>1620.00</BaseImponible>
-              </DetalleExenta>
-            </Exenta>
-          </Sujeta>
-        </PrestacionServicios>
-      </DesgloseTipoOperacion>
+      <DesgloseFactura>
+        <Sujeta>
+          <NoExenta>
+            <DetalleNoExenta>
+              <TipoNoExenta>S2</TipoNoExenta>
+              <DesgloseIVA>
+                <DetalleIVA>
+                  <BaseImponible>1800.00</BaseImponible>
+                  <TipoImpositivo>0.00</TipoImpositivo>
+                  <CuotaImpuesto>0.00</CuotaImpuesto>
+                </DetalleIVA>
+              </DesgloseIVA>
+            </DetalleNoExenta>
+          </NoExenta>
+        </Sujeta>
+      </DesgloseFactura>
     </TipoDesglose>
   </Factura>
   <HuellaTBAI>
@@ -79,31 +79,31 @@
       <Version>1.0</Version>
     </Software>
   </HuellaTBAI>
-  <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Id="Signature-0192237d-49c2-79a7-8249-4280119d8ade-Signature">
+  <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Id="Signature-0192237d-49c2-79a7-8249-4280119d8adf-Signature">
     <ds:SignedInfo>
       <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"></ds:CanonicalizationMethod>
       <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"></ds:SignatureMethod>
-      <ds:Reference Id="Reference-0192237d-49c2-79a7-8249-4280119d8ade" Type="http://www.w3.org/2000/09/xmldsig#Object" URI="">
+      <ds:Reference Id="Reference-0192237d-49c2-79a7-8249-4280119d8adf" Type="http://www.w3.org/2000/09/xmldsig#Object" URI="">
         <ds:Transforms>
           <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"></ds:Transform>
         </ds:Transforms>
         <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></ds:DigestMethod>
-        <ds:DigestValue>ituSZPfLBLu6Fc1akJnDeuCG9js+Xxc3JBCStq058j3OpOUPo5ioUaVnAvg6G8ijX7FXfrcFtXP8iDoSb480hQ==</ds:DigestValue>
+        <ds:DigestValue>e+52IzVqxhaDlzMOO5TgZr5yZRf3zx9abqb1tO5hXX7F3XT/KEADKLUuaTvabwBrs09flGAUHfxzJdyo0DikYg==</ds:DigestValue>
       </ds:Reference>
-      <ds:Reference URI="#Certificate-0192237d-49c2-79a7-8249-4280119d8ade">
+      <ds:Reference URI="#Certificate-0192237d-49c2-79a7-8249-4280119d8adf">
         <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></ds:DigestMethod>
-        <ds:DigestValue>fq1YDtdpUH+IBPek4q2LJXQ//zAjMt/LTjuLi4bNQKGbjvrjnecbnB43iNij1c87/cC9BadSzY7p1mKaVcAp4g==</ds:DigestValue>
+        <ds:DigestValue>76tigTv7TSAiybwHiWQf7+2Lv5/uzseEo0GAVQtgpk9XJzopay0jJbE7tsVIkmBC9g07Lk4Enqlngm8WS9UFqA==</ds:DigestValue>
       </ds:Reference>
-      <ds:Reference Type="http://uri.etsi.org/01903#SignedProperties" URI="#Signature-0192237d-49c2-79a7-8249-4280119d8ade-SignedProperties">
+      <ds:Reference Type="http://uri.etsi.org/01903#SignedProperties" URI="#Signature-0192237d-49c2-79a7-8249-4280119d8adf-SignedProperties">
         <ds:Transforms>
           <ds:Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"></ds:Transform>
         </ds:Transforms>
         <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></ds:DigestMethod>
-        <ds:DigestValue>LATTsIYBpvIkR8XSPj5MazaOkWTJzNwEbTg7t0SGsGapeQYNWufmRrSIso+8WcCWOR6H1dOOP35d+YHiwdPQkQ==</ds:DigestValue>
+        <ds:DigestValue>RNiYMmTpu50Ko0CloGt2cJsJ2jv3br1cQufihbjsUb79uBbjIp0kHGl2B3BnWIJiLxkdORNiF1uSnGlrveaZ6w==</ds:DigestValue>
       </ds:Reference>
     </ds:SignedInfo>
-    <ds:SignatureValue Id="Signature-0192237d-49c2-79a7-8249-4280119d8ade-SignatureValue">XSpXRIfsw6HYTM4c9XAowvJ8Bcb/yTVhG4Rw4Pewvj32AyN7VMDhpXh/UALPgfVO/XJ/G1K0nf5rSZXzy03D4o6efktZ1riNgmQz2aINebR6oYj2wh1c+KJwacsTlZVopuTMm725+PxT1tOf9h8EvaNXGaDZHE9A95/ujocBv/2GW3dl6nGEoVBD8ykdFwWSqRcpHPP/nKOEXax5gQJfOVgPHUjk8XdAMH6X5R44FutYeIecT582tuOVmnpmcFz+LXlbQSrOj1QNMf9lWfRD3E4cXvxTT42BSrKmOLG3ZWQlf1Rtf4F0dWQWr0XmRD4xQllL+aQJJNwXbqj7cC7Ntg==</ds:SignatureValue>
-    <ds:KeyInfo Id="Certificate-0192237d-49c2-79a7-8249-4280119d8ade">
+    <ds:SignatureValue Id="Signature-0192237d-49c2-79a7-8249-4280119d8adf-SignatureValue">d8m3Qq1h267OjaGgQ5FdcIh83WTeIyQA1g24HiKTPwOr5MVo+oYwPQk+jhC07heLTbvi8CakWPm8SMzpAHxld61egu4HMivR8gLBLfP6z4Hhwlq+AblvEa530boTooP9BXSj6k+EXuz/ahDfaSiYd9YWFLTNdFwU9OoLhsPGSeE3omXTrlMK8b8ZQHlpEVksctdtRS9fLLf0PBIKhY5skQ5Gc5D/Rkah3ZKAmXSsgLzGHg1UU3KVMbEhFb3nc0QDQCaeAO/M0ICblyH4FH0wTfQbCxdhlPaFn1bTnQk6P99pdkJXUBlcuEtOrtEhOAeRcatUaSgzOKQ0baTubmMR6w==</ds:SignatureValue>
+    <ds:KeyInfo Id="Certificate-0192237d-49c2-79a7-8249-4280119d8adf">
       <ds:X509Data>
         <ds:X509Certificate>MIIJtzCCB5+gAwIBAgICJ4swDQYJKoZIhvcNAQELBQAwgZcxCzAJBgNVBAYTAkVTMRQwEgYDVQQKDAtJWkVOUEUgUy5BLjE6MDgGA1UECwwxTlpaIFppdXJ0YWdpcmkgcHVibGlrb2EgLSBDZXJ0aWZpY2FkbyBwdWJsaWNvIFNDSTE2MDQGA1UEAwwtQ0EgZGUgQ2l1ZGFkYW5vcyB5IEVudGlkYWRlcyAoNCkgLSBERVNBUlJPTExPMB4XDTI1MDEyMjE0MjA1OVoXDTI5MDEyMjE0MjA1OVowggFtMQswCQYDVQQGEwJFUzFvMG0GA1UEDQxmUmVnOkdhc3RlaXogL0hvamE6Qi0xNjY0NzIgL1RvbW86MzczOTMgL1NlY2Npb246OCAvTGlicm86MSAvRm9saW86MjAgL0ZlY2hhOjEwLTAyLTE5NzQgL0luc2NyaXBjacOzbjoxMRgwFgYDVQRhDA9WQVRFUy1TNzgzNjEwN0gxPTA7BgNVBAsMNE9yZGV6a2FyaSB6aXVydGFnaXJpYSAtIENlcnRpZmljYWRvIGRlIHJlcHJlc2VudGFudGUxFDASBgNVBAoMC0laRU5QRSBTLkEuMRIwEAYDVQQFEwk5OTk5OTk3M0sxGDAWBgNVBAQMD0ZJQ1RJQ0lPIEFDVElWTzEWMBQGA1UEKgwNUkVQUkVTRU5UQU5URTE4MDYGA1UEAwwvOTk5OTk5NzNLIFJFUFJFU0VOVEFOVEUgRklDVElDSU8gKFI6IFM3ODM2MTA3SCkwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCnd2UlkzcBw5nGaSIOEq02rd65u94gg+zU6PYJ4dpgGMjIxf7bW3jFL/WJPmXetwGNz9HeDAFBnNhZgk+tOVOi/19nXmpOez8cFKWo1ZI3RCGyGuCwdXmUgatsAS1LoQzJ9JF5QWvE4JbYohsdvBHac+PL09nN27hZJkI8vNpu4YPVfZUGntGhArbaionMo2XynJ6gZjGJjZKOe/P4UvJJBdHGJ8nPPH4IWS8p2TsuitzRRzR0347Ymr5Wkwx3fAHb5VDKXwD3QKyd8TYvD9WQt5+wfcLqlED4J4uN5YZ5c75j+p5VglbBAqz6o7/8EOP7rgO1zKk6Lva3d1hTAC3jAgMBAAGjggQyMIIELjCBxwYDVR0SBIG/MIG8hhVodHRwOi8vd3d3Lml6ZW5wZS5jb22BD2luZm9AaXplbnBlLmNvbaSBkTCBjjFHMEUGA1UECgw+SVpFTlBFIFMuQS4gLSBDSUYgQTAxMzM3MjYwLVJNZXJjLlZpdG9yaWEtR2FzdGVpeiBUMTA1NSBGNjIgUzgxQzBBBgNVBAkMOkF2ZGEgZGVsIE1lZGl0ZXJyYW5lbyBFdG9yYmlkZWEgMTQgLSAwMTAxMCBWaXRvcmlhLUdhc3RlaXowDgYDVR0PAQH/BAQDAgXgMB8GA1UdJQQYMBYGCCsGAQUFBwMCBgorBgEEAYI3CgMMMB0GA1UdDgQWBBSGc4Y4snKOOnJlQ/HgfuPI/aOHIjAfBgNVHSMEGDAWgBRv//0N8gxjDyZxXRrgb2VkZjhrkzCCATQGA1UdIASCASswggEnMIIBDQYJKwYBBAHzOWYMMIH/MCUGCCsGAQUFBwIBFhlodHRwOi8vd3d3Lml6ZW5wZS5jb20vY3BzMIHVBggrBgEFBQcCAjCByAyBxUtvbnRzdWx0YSB3d3cuaXplbnBlLmNvbS1lbiBiYWxkaW50emFrIGV0YSBrb25kaXppb2FrIHppdXJ0YWdpcmlhbiBmaWRhdHUgZWRvIGVyYWJpbGkgYXVycmV0aWsgLSBDb25zdWx0ZSBlbiB3d3cuaXplbnBlLmNvbSBsb3MgdMOpcm1pbm9zIHkgY29uZGljaW9uZXMgYW50ZXMgZGUgdXRpbGl6YXIgbyBjb25maWFyIGVuIGVsIGNlcnRpZmljYWRvMAkGBwQAi+xAAQIwCQYHYIVUAQMFCDCBogYIKwYBBQUHAQEEgZUwgZIwJQYIKwYBBQUHMAGGGWh0dHA6Ly9vY3NwZGVzLml6ZW5wZS5jb20waQYIKwYBBQUHMAKGXWh0dHA6Ly93d3cuaXplbnBlLmNvbS9jb250ZW5pZG9zL2luZm9ybWFjaW9uL2Nhc19pemVucGUvZXNfY2FzL2FkanVudG9zL0NDRUVSX2NlcnRfc2hhMjU2LmNydDCB2wYIKwYBBQUHAQMEgc4wgcswCAYGBACORgEBMAgGBgQAjkYBBDALBgYEAI5GAQMCAQ8wfAYGBACORgEFMHIwJBYeaHR0cHM6Ly93d3cuaXplbnBlLmNvbS9wZHMvZW4vEwJlbjAkFh5odHRwczovL3d3dy5pemVucGUuY29tL3Bkcy9ldS8TAmV1MCQWHmh0dHBzOi8vd3d3Lml6ZW5wZS5jb20vcGRzL2VzLxMCZXMwEwYGBACORgEGMAkGBwQAjkYBBgEwFQYIKwYBBQUHCwIwCQYHBACL7EkBAjA2BgNVHR8ELzAtMCugKaAnhiVodHRwOi8vY3JsZGVzLml6ZW5wZS5jb20vY2dpLWJpbi9jcmwyMA0GCSqGSIb3DQEBCwUAA4ICAQCBkGre0XKtJ6DsKSFFXok7soIIRJ8XcBmAwPpqgi7apLaIgM8iknRwISxsbgIvmeYf42yHBzUt6UH/dFwa3K67IaVwd2xYpOlGAcd9GXY0PHL1e9Bv1CuRw8CtvnZRjNyga9JglZJvojveKyK79gCWLagz/Zz/d++t343dEGYGPetRExPzZKDaKn40jlbL+TANMgay/Gu+gLatDtmV8PDz69e/zpyM7jnOa8CHKagM/jnEmggIuJkzYmlHpCyznw0Cbb60y4y2jZgSSNBmIkUbtpOdOuUvy8uzWoovkyptz2TCFmBx9nylHP2zykrKmS4VSGSEn2a8B6IMKUA2SIHRVaAGSMtN7dV9PrWu4YnklJyX46HR3TlhGCynTyvFfCf3JKCwlagnzGqRlVUKQI6sZMHdMIRuwduqVUn996tmeJaz257iV7UTN6rkrBnp0PegtkVRFXQAR/3o1ldSZlzr8RpPccvUwtvILz5Squh/CoCPGQLBSXzPm59q1N8m7yb+hJUl3ovsXzZKmos1MeHoqQ1MBE3Zr56dh+mTNBNEJMs2CrO1pbbSAFdRf63PXoY7cek2Cy0Y7qPCeaLGzyeHa9AMfeA2Fj5dgPNtLz6050r9xAhnVgkZ7J7NDMCCZUVZcnInRh0l+wHoCMtT0nnfl7rlnuPsh4wjTQgAcOoGHA==</ds:X509Certificate>
       </ds:X509Data>
@@ -115,8 +115,8 @@
       </ds:KeyValue>
     </ds:KeyInfo>
     <ds:Object>
-      <xades:QualifyingProperties xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Id="Signature-0192237d-49c2-79a7-8249-4280119d8ade-QualifyingProperties" Target="#Signature-0192237d-49c2-79a7-8249-4280119d8ade-Signature">
-        <xades:SignedProperties Id="Signature-0192237d-49c2-79a7-8249-4280119d8ade-SignedProperties">
+      <xades:QualifyingProperties xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Id="Signature-0192237d-49c2-79a7-8249-4280119d8adf-QualifyingProperties" Target="#Signature-0192237d-49c2-79a7-8249-4280119d8adf-Signature">
+        <xades:SignedProperties Id="Signature-0192237d-49c2-79a7-8249-4280119d8adf-SignedProperties">
           <xades:SignedSignatureProperties>
             <xades:SigningTime>2022-02-01T04:00:00+00:00</xades:SigningTime>
             <xades:SigningCertificate>
@@ -149,7 +149,7 @@
             </xades:SignerRole>
           </xades:SignedSignatureProperties>
           <xades:SignedDataObjectProperties>
-            <xades:DataObjectFormat ObjectReference="#Reference-0192237d-49c2-79a7-8249-4280119d8ade">
+            <xades:DataObjectFormat ObjectReference="#Reference-0192237d-49c2-79a7-8249-4280119d8adf">
               <xades:ObjectIdentifier>
                 <xades:Identifier Qualifier="OIDAsURN">urn:oid:1.2.840.10003.5.109.10</xades:Identifier>
               </xades:ObjectIdentifier>

@@ -4,7 +4,7 @@
 		"uuid": "0192237d-498e-7273-bc95-6a1daf16cb37",
 		"dig": {
 			"alg": "sha256",
-			"val": "17ebc6a92e6765d5314388c36ce3c0fa863ba65f4d9af3ad58510e5ad4776223"
+			"val": "1a02a63885f2871f2d41cba2cb8dd5b0a1d859535de57da4338f60f6dddb4170"
 		}
 	},
 	"doc": {
@@ -54,7 +54,10 @@
 			"identities": [
 				{
 					"key": "passport",
-					"code": "123456789"
+					"code": "123456789",
+					"ext": {
+						"es-tbai-identity-type": "03"
+					}
 				}
 			]
 		},
@@ -84,7 +87,8 @@
 						"key": "outside-scope",
 						"ext": {
 							"es-tbai-exemption": "RL",
-							"es-tbai-product": "services"
+							"es-tbai-product": "services",
+							"es-tbai-regime": "01"
 						}
 					}
 				],
@@ -103,7 +107,8 @@
 								"key": "outside-scope",
 								"ext": {
 									"es-tbai-exemption": "RL",
-									"es-tbai-product": "services"
+									"es-tbai-product": "services",
+									"es-tbai-regime": "01"
 								},
 								"base": "1620.00",
 								"amount": "0.00"

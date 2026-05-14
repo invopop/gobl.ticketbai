@@ -147,6 +147,51 @@ func newRetencionSoportada(inv *bill.Invoice) string {
 }
 
 func newClaves(inv *bill.Invoice) []IDClave {
+	// Preferred: collect unique codes from the es-tbai-regime extension
+	// set per VAT tax combo by the es-tbai-v1 addon normalizer. This is
+	// the path that respects an explicit ClaveRegimenIvaOpTrascendencia
+	// the caller may have set.
+	if codes := collectRegimeCodes(inv); len(codes) > 0 {
+		claves := make([]IDClave, 0, len(codes))
+		for _, c := range codes {
+			claves = append(claves, IDClave{ClaveRegimenIvaOpTrascendencia: c})
+		}
+		return claves
+	}
+
+	return legacyClaves(inv)
+}
+
+// collectRegimeCodes returns the distinct ClaveRegimenIvaOpTrascendencia
+// codes carried by the invoice's VAT rate totals via the es-tbai-regime
+// extension, preserving the order of first appearance.
+func collectRegimeCodes(inv *bill.Invoice) []string {
+	if inv.Totals == nil || inv.Totals.Taxes == nil {
+		return nil
+	}
+	vat := inv.Totals.Taxes.Category(tax.CategoryVAT)
+	if vat == nil {
+		return nil
+	}
+	seen := make(map[string]bool, len(vat.Rates))
+	codes := make([]string, 0, len(vat.Rates))
+	for _, rate := range vat.Rates {
+		c := rate.Ext.Get(tbai.ExtKeyRegime).String()
+		if c == "" || seen[c] {
+			continue
+		}
+		seen[c] = true
+		codes = append(codes, c)
+	}
+	return codes
+}
+
+// legacyClaves is the original invoice-level inference of
+// ClaveRegimenIvaOpTrascendencia, kept as a fallback for callers that
+// build TicketBAI documents from GOBL invoices that have not been
+// normalized by the es-tbai-v1 addon. New code should rely on the
+// es-tbai-regime extension instead.
+func legacyClaves(inv *bill.Invoice) []IDClave {
 	claves := []IDClave{}
 
 	if inv.Customer != nil && partyCountry(inv.Customer) != "ES" {
@@ -207,6 +252,9 @@ func newFacturasRectificadasSustituidas(inv *bill.Invoice) *FacturasRectificadas
 	}
 }
 
+// hasSurchargedLines is part of the legacy ClaveRegimenIvaOpTrascendencia
+// inference. Detection now happens at addon-normalization time and is
+// reflected in the es-tbai-regime extension; see legacyClaves.
 func hasSurchargedLines(inv *bill.Invoice) bool {
 	if inv.Totals == nil || inv.Totals.Taxes == nil {
 		return false
@@ -225,6 +273,8 @@ func hasSurchargedLines(inv *bill.Invoice) bool {
 	return false
 }
 
+// underSimplifiedRegime is part of the legacy regime inference; see
+// legacyClaves.
 func underSimplifiedRegime(inv *bill.Invoice) bool {
 	return inv.HasTags(es.TagSimplifiedScheme)
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/regimes/es"
@@ -158,9 +159,18 @@ func TestFacturaConversion(t *testing.T) {
 		assert.Equal(t, "01", claves.IDClave[0].ClaveRegimenIvaOpTrascendencia)
 	})
 
-	t.Run("should add export (02) if the client is foreign", func(t *testing.T) {
+	t.Run("should add export (02) when tax key is export", func(t *testing.T) {
 		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Customer.TaxID.Country = "GB"
+		goblInvoice.Lines = []*bill.Line{{
+			Index:    1,
+			Quantity: num.MakeAmount(100, 0),
+			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
+			Taxes: tax.Set{
+				&tax.Combo{Category: tax.CategoryVAT, Key: tax.KeyExport},
+			},
+		}}
+		require.NoError(t, goblInvoice.Calculate())
 
 		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
@@ -168,25 +178,19 @@ func TestFacturaConversion(t *testing.T) {
 		assert.Equal(t, "02", claves.IDClave[0].ClaveRegimenIvaOpTrascendencia)
 	})
 
-	t.Run("should add surcharge key (51) if any line is surcharged", func(t *testing.T) {
+	t.Run("should add surcharge key (51) for equivalence-surcharge rates", func(t *testing.T) {
+		// Reproduces the customer's reported bug: with the standard
+		// equivalence-surcharge rate the regime should land on 51.
 		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Lines = []*bill.Line{{
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
-			Item: &org.Item{
-				Key:   org.ItemKeyGoods,
-				Name:  "A",
-				Price: num.NewAmount(10, 0),
-			},
+			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 			Taxes: tax.Set{
-				&tax.Combo{
-					Category: tax.CategoryVAT,
-					Rate:     "standard",
-					Ext:      tax.MakeExtensions().Set(tbai.ExtKeyProduct, "resale"),
-				},
+				&tax.Combo{Category: tax.CategoryVAT, Rate: "standard+eqs"},
 			},
 		}}
-		_ = goblInvoice.Calculate()
+		require.NoError(t, goblInvoice.Calculate())
 
 		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
@@ -194,16 +198,76 @@ func TestFacturaConversion(t *testing.T) {
 		assert.Equal(t, "51", claves.IDClave[0].ClaveRegimenIvaOpTrascendencia)
 	})
 
-	t.Run("should add simplified tax regime (52) is the issuer works this way",
+	t.Run("should add simplified tax regime (52) when invoice carries simplified-scheme tag",
 		func(t *testing.T) {
 			goblInvoice := test.LoadInvoice("sample-invoice.json")
+			goblInvoice.Lines = []*bill.Line{{
+				Index:    1,
+				Quantity: num.MakeAmount(100, 0),
+				Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
+				Taxes: tax.Set{
+					&tax.Combo{Category: tax.CategoryVAT, Rate: "standard"},
+				},
+			}}
 			goblInvoice.SetTags(es.TagSimplifiedScheme)
+			require.NoError(t, goblInvoice.Calculate())
 
 			invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 			claves := invoice.Factura.DatosFactura.Claves
 			assert.Equal(t, "52", claves.IDClave[0].ClaveRegimenIvaOpTrascendencia)
 		})
+
+	t.Run("should honour an explicit es-tbai-regime override", func(t *testing.T) {
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
+		goblInvoice.Lines = []*bill.Line{{
+			Index:    1,
+			Quantity: num.MakeAmount(100, 0),
+			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
+			Taxes: tax.Set{
+				&tax.Combo{
+					Category: tax.CategoryVAT,
+					Rate:     "standard",
+					Ext:      tax.ExtensionsOf(cbc.CodeMap{tbai.ExtKeyRegime: "07"}),
+				},
+			},
+		}}
+		require.NoError(t, goblInvoice.Calculate())
+
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
+
+		claves := invoice.Factura.DatosFactura.Claves
+		assert.Equal(t, "07", claves.IDClave[0].ClaveRegimenIvaOpTrascendencia)
+	})
+
+	t.Run("should fall back to legacy inference when no extension is set", func(t *testing.T) {
+		// Simulates an invoice that hasn't been normalized by the
+		// es-tbai-v1 addon — the legacy invoice-level rules still apply.
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
+		goblInvoice.Customer.TaxID.Country = "GB"
+		require.NoError(t, goblInvoice.Calculate())
+		stripRegimeExt(goblInvoice)
+
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
+
+		claves := invoice.Factura.DatosFactura.Claves
+		assert.Equal(t, "02", claves.IDClave[0].ClaveRegimenIvaOpTrascendencia)
+	})
+}
+
+func stripRegimeExt(inv *bill.Invoice) {
+	for _, line := range inv.Lines {
+		for _, c := range line.Taxes {
+			c.Ext = c.Ext.Delete(tbai.ExtKeyRegime)
+		}
+	}
+	if inv.Totals != nil && inv.Totals.Taxes != nil {
+		for _, cat := range inv.Totals.Taxes.Categories {
+			for _, r := range cat.Rates {
+				r.Ext = r.Ext.Delete(tbai.ExtKeyRegime)
+			}
+		}
+	}
 }
 
 func DiscountOf(amount int) *bill.LineDiscount {

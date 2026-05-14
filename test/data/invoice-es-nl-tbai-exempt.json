@@ -4,7 +4,7 @@
 		"uuid": "0192237d-49c2-79a7-8249-4280119d8ade",
 		"dig": {
 			"alg": "sha256",
-			"val": "ab22673486e9e0a103ee056f350d49e17c3d9ba1820a1f7aa317639e10b02721"
+			"val": "788259d517084ea1d4745a43a7534643a5c1cbab690da0408c20bf5514ea2b02"
 		}
 	},
 	"doc": {
@@ -79,7 +79,8 @@
 						"key": "exempt",
 						"ext": {
 							"es-tbai-exemption": "E1",
-							"es-tbai-product": "services"
+							"es-tbai-product": "services",
+							"es-tbai-regime": "01"
 						}
 					}
 				],
@@ -98,7 +99,8 @@
 								"key": "exempt",
 								"ext": {
 									"es-tbai-exemption": "E1",
-									"es-tbai-product": "services"
+									"es-tbai-product": "services",
+									"es-tbai-regime": "01"
 								},
 								"base": "1620.00",
 								"amount": "0.00"

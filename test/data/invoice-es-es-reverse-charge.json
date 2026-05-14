@@ -1,10 +1,10 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0192fbd5-3b54-7735-a8de-2e4f13219f68",
+		"uuid": "0192237d-49c2-79a7-8249-4280119d8adf",
 		"dig": {
 			"alg": "sha256",
-			"val": "ef05d8b1f919e124fc3f46523dec7f3bfd935fe717831edcbad7b58dfb97fb8b"
+			"val": "fba8e96bb4b8f0cb88cc2c3d5eee737816bdde9afeeb2e96218c4a141624b78a"
 		}
 	},
 	"doc": {
@@ -13,11 +13,11 @@
 		"$addons": [
 			"es-tbai-v1"
 		],
-		"uuid": "01922336-8c6b-70df-9f8f-87c5d58e9582",
+		"uuid": "3b445a46-a0ac-11ee-a4ee-e6a7901137ee",
 		"type": "standard",
-		"series": "SAMPLE",
-		"code": "002",
-		"issue_date": "2022-02-02",
+		"series": "RC",
+		"code": "0001",
+		"issue_date": "2022-02-01",
 		"currency": "EUR",
 		"tax": {
 			"ext": {
@@ -47,92 +47,71 @@
 			]
 		},
 		"customer": {
-			"name": "Pere Sancho Latorre",
+			"name": "Sample Customer",
 			"tax_id": {
 				"country": "ES",
-				"code": "93542762Z"
-			},
-			"addresses": [
-				{
-					"num": "58",
-					"street": "Praza Real",
-					"locality": "Caudete de las Fuentes",
-					"region": "Valencia",
-					"code": "46701",
-					"country": "ES"
-				}
-			],
-			"emails": [
-				{
-					"addr": "mzkrme5v@blu.it"
-				}
-			]
+				"code": "54387763P"
+			}
 		},
 		"lines": [
 			{
 				"i": 1,
-				"quantity": "15",
+				"quantity": "20",
 				"item": {
-					"name": "Item being purchased",
+					"name": "Construction services subject to reverse charge",
 					"price": "90.00",
+					"unit": "h",
 					"ext": {
 						"es-tbai-product": "services"
 					}
 				},
-				"sum": "1350.00",
-				"discounts": [
-					{
-						"percent": "10%",
-						"amount": "135.00"
-					}
-				],
+				"sum": "1800.00",
 				"taxes": [
 					{
 						"cat": "VAT",
-						"key": "standard",
-						"rate": "general",
-						"percent": "21.0%",
+						"key": "reverse-charge",
 						"ext": {
+							"es-tbai-exemption": "S2",
 							"es-tbai-product": "services",
 							"es-tbai-regime": "01"
 						}
 					}
 				],
-				"total": "1215.00"
+				"total": "1800.00"
 			}
 		],
 		"totals": {
-			"sum": "1215.00",
-			"total": "1215.00",
+			"sum": "1800.00",
+			"total": "1800.00",
 			"taxes": {
 				"categories": [
 					{
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "standard",
+								"key": "reverse-charge",
 								"ext": {
+									"es-tbai-exemption": "S2",
 									"es-tbai-product": "services",
 									"es-tbai-regime": "01"
 								},
-								"base": "1215.00",
-								"percent": "21.0%",
-								"amount": "255.15"
+								"base": "1800.00",
+								"amount": "0.00"
 							}
 						],
-						"amount": "255.15"
+						"amount": "0.00"
 					}
 				],
-				"sum": "255.15"
+				"sum": "0.00"
 			},
-			"tax": "255.15",
-			"total_with_tax": "1470.15",
-			"payable": "1470.15"
+			"tax": "0.00",
+			"total_with_tax": "1800.00",
+			"payable": "1800.00"
 		},
 		"notes": [
 			{
 				"key": "general",
-				"text": "Some random description"
+				"text": "Reverse-charge construction services (Art. 84.1.2.f LIVA)."
 			}
 		]
 	}

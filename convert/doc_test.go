@@ -73,16 +73,32 @@ func TestInvoiceConversion(t *testing.T) {
 		assert.Contains(t, invoice.Sujetos.Destinatarios.IDDestinatario[0].Direccion, "PO-745")
 	})
 
-	t.Run("should contain the right id for abroad customers", func(t *testing.T) {
+	t.Run("EU customer tax ID is emitted as NIF-VAT (IDType 02)", func(t *testing.T) {
 		goblInvoice := test.LoadInvoice("sample-invoice.json")
-		goblInvoice.Customer.TaxID = &tax.Identity{Country: "GB", Code: "PP-123456-S"}
+		goblInvoice.Customer.TaxID = &tax.Identity{Country: "DE", Code: "DE123456789"}
+		goblInvoice.Customer.Name = "EU Co GmbH"
+
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
+
+		assert.Equal(t, "DE", invoice.Sujetos.Destinatarios.IDDestinatario[0].IDOtro.CodigoPais)
+		assert.Equal(t, "DE123456789", invoice.Sujetos.Destinatarios.IDDestinatario[0].IDOtro.ID)
+		assert.Equal(t, "02", invoice.Sujetos.Destinatarios.IDDestinatario[0].IDOtro.IDType)
+		assert.Equal(t, "EU Co GmbH", invoice.Sujetos.Destinatarios.IDDestinatario[0].ApellidosNombreRazonSocial)
+	})
+
+	t.Run("non-EU customer tax ID is emitted as Foreign Identity (IDType 04)", func(t *testing.T) {
+		// The TicketBAI gateway rejects non-EU tax IDs sent as NIF-VAT
+		// with B4_2000013; they must be reported as foreign identity
+		// documents (IDType 04) instead. GB qualifies since 2020-01-31.
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
+		goblInvoice.Customer.TaxID = &tax.Identity{Country: "GB", Code: "GB123456789"}
 		goblInvoice.Customer.Name = "Abroad Co LLC"
 
 		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 		assert.Equal(t, "GB", invoice.Sujetos.Destinatarios.IDDestinatario[0].IDOtro.CodigoPais)
-		assert.Equal(t, "PP-123456-S", invoice.Sujetos.Destinatarios.IDDestinatario[0].IDOtro.ID)
-		assert.Equal(t, "02", invoice.Sujetos.Destinatarios.IDDestinatario[0].IDOtro.IDType)
+		assert.Equal(t, "GB123456789", invoice.Sujetos.Destinatarios.IDDestinatario[0].IDOtro.ID)
+		assert.Equal(t, "04", invoice.Sujetos.Destinatarios.IDDestinatario[0].IDOtro.IDType)
 		assert.Equal(t, "Abroad Co LLC", invoice.Sujetos.Destinatarios.IDDestinatario[0].ApellidosNombreRazonSocial)
 	})
 

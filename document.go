@@ -62,8 +62,7 @@ func zoneFor(inv *bill.Invoice) l10n.Code {
 	// Figure out the zone
 	if inv == nil ||
 		inv.Tax == nil ||
-		inv.Tax.Ext.IsZero() ||
-		!inv.Tax.Ext.Has(tbai.ExtKeyRegion) {
+		inv.Tax.Ext.Get(tbai.ExtKeyRegion) == "" {
 		return ""
 	}
 	return l10n.Code(inv.Tax.Ext.Get(tbai.ExtKeyRegion))
