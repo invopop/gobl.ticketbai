@@ -27,7 +27,7 @@ func TestQRCodes(t *testing.T) {
 		Version: "1.0",
 	}
 
-	cert, err := xmldsig.LoadCertificate(test.Path("test", "certs", "EntitateOrdezkaria_RepresentanteDeEntidad.p12"), "IZDesa2021")
+	cert, err := xmldsig.LoadCertificate(test.Path("test", "certs", "EntitateOrdezkaria_RepresentanteDeEntidad.p12"), "IZDesa2025")
 	require.NoError(t, err)
 
 	beforeEach := func(t *testing.T) *TestCase {
@@ -59,10 +59,10 @@ func TestQRCodes(t *testing.T) {
 
 		assert.Equal(t, 39, len(codes.TBAICode))
 		assert.Equal(t, true, strings.HasPrefix(codes.TBAICode, "TBAI-"))
-		assert.Contains(t, codes.TBAICode, "-A99805194-")
+		assert.Contains(t, codes.TBAICode, "-S7836107H-")
 		assert.Contains(t, codes.TBAICode, "-020222-")
-		assert.Contains(t, codes.TBAICode, "-dcwFf8oAjbfkv-")
-		assert.Contains(t, codes.TBAICode, "-081")
+		assert.Contains(t, codes.TBAICode, "-j+D8qhLAJZiH8-")
+		assert.Contains(t, codes.TBAICode, "-079")
 	})
 
 	t.Run("should build QR code for an invoice", func(t *testing.T) {
@@ -72,11 +72,11 @@ func TestQRCodes(t *testing.T) {
 		codes := tbai.QRCodes(convert.ZoneBI)
 
 		assert.Equal(t, true, strings.HasPrefix(codes.QRCode, "https://batuz.eus/QRTBAI/"))
-		assert.Contains(t, codes.QRCode, "?id=TBAI-A99805194-020222-")
+		assert.Contains(t, codes.QRCode, "?id=TBAI-S7836107H-020222-")
 		assert.Contains(t, codes.QRCode, "&s=TEST")
 		assert.Contains(t, codes.QRCode, "&nf=001")
 		assert.Contains(t, codes.QRCode, "&i=1089.00")
-		assert.Contains(t, codes.QRCode, "&cr=219") // changes according to test data
+		assert.Contains(t, codes.QRCode, "&cr=097") // changes according to test data
 	})
 
 	t.Run("should build QR code for an invoice without series", func(t *testing.T) {
@@ -87,10 +87,10 @@ func TestQRCodes(t *testing.T) {
 		codes := tbai.QRCodes(convert.ZoneBI)
 
 		assert.Equal(t, true, strings.HasPrefix(codes.QRCode, "https://batuz.eus/QRTBAI/"))
-		assert.Contains(t, codes.QRCode, "?id=TBAI-A99805194-020222-")
+		assert.Contains(t, codes.QRCode, "?id=TBAI-S7836107H-020222-")
 		assert.NotContains(t, codes.QRCode, "&s=TEST")
 		assert.Contains(t, codes.QRCode, "&nf=001")
 		assert.Contains(t, codes.QRCode, "&i=1089.00")
-		assert.Contains(t, codes.QRCode, "&cr=129")
+		assert.Contains(t, codes.QRCode, "&cr=069")
 	})
 }
