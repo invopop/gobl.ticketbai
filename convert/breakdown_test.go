@@ -451,12 +451,13 @@ func TestDesgloseConversion(t *testing.T) {
 
 	t.Run("should mark tax details if there is reverse charge", func(t *testing.T) {
 		goblInvoice := invoiceFromCountry("ES")
-		goblInvoice.SetTags(tax.TagReverseCharge)
 		goblInvoice.Lines = []*bill.Line{{
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
 			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
-			Taxes:    tax.Set{&tax.Combo{Category: tax.CategoryVAT, Rate: "standard"}},
+			Taxes: tax.Set{
+				&tax.Combo{Category: tax.CategoryVAT, Key: tax.KeyReverseCharge},
+			},
 		}}
 		_ = goblInvoice.Calculate()
 

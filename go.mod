@@ -4,7 +4,7 @@ go 1.24.0
 
 require (
 	github.com/go-resty/resty/v2 v2.13.1
-	github.com/invopop/gobl v0.403.1-0.20260514155436-473617a26111
+	github.com/invopop/gobl v0.403.1-0.20260518201647-1c8899e5fdc4
 	github.com/invopop/xmldsig v0.14.0
 	github.com/joho/godotenv v1.5.1
 	github.com/lestrrat-go/libxml2 v0.0.0-20231124114421-99c71026c2f5

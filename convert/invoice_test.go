@@ -240,34 +240,6 @@ func TestFacturaConversion(t *testing.T) {
 		assert.Equal(t, "07", claves.IDClave[0].ClaveRegimenIvaOpTrascendencia)
 	})
 
-	t.Run("should fall back to legacy inference when no extension is set", func(t *testing.T) {
-		// Simulates an invoice that hasn't been normalized by the
-		// es-tbai-v1 addon — the legacy invoice-level rules still apply.
-		goblInvoice := test.LoadInvoice("sample-invoice.json")
-		goblInvoice.Customer.TaxID.Country = "GB"
-		require.NoError(t, goblInvoice.Calculate())
-		stripRegimeExt(goblInvoice)
-
-		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
-
-		claves := invoice.Factura.DatosFactura.Claves
-		assert.Equal(t, "02", claves.IDClave[0].ClaveRegimenIvaOpTrascendencia)
-	})
-}
-
-func stripRegimeExt(inv *bill.Invoice) {
-	for _, line := range inv.Lines {
-		for _, c := range line.Taxes {
-			c.Ext = c.Ext.Delete(tbai.ExtKeyRegime)
-		}
-	}
-	if inv.Totals != nil && inv.Totals.Taxes != nil {
-		for _, cat := range inv.Totals.Taxes.Categories {
-			for _, r := range cat.Rates {
-				r.Ext = r.Ext.Delete(tbai.ExtKeyRegime)
-			}
-		}
-	}
 }
 
 func DiscountOf(amount int) *bill.LineDiscount {

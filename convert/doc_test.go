@@ -89,9 +89,6 @@ func TestInvoiceConversion(t *testing.T) {
 	})
 
 	t.Run("non-EU customer tax ID is emitted as Foreign Identity (IDType 04)", func(t *testing.T) {
-		// The TicketBAI gateway rejects non-EU tax IDs sent as NIF-VAT
-		// with B4_2000013; they must be reported as foreign identity
-		// documents (IDType 04) instead. GB qualifies since 2020-01-31.
 		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Customer.TaxID = &tax.Identity{Country: "GB", Code: "GB123456789"}
 		goblInvoice.Customer.Name = "Abroad Co LLC"
@@ -123,6 +120,7 @@ func TestInvoiceConversion(t *testing.T) {
 				Code: "PP123456S",
 			},
 		}
+		require.NoError(t, goblInvoice.Calculate())
 		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 		dest := invoice.Sujetos.Destinatarios.IDDestinatario[0]
@@ -137,6 +135,7 @@ func TestInvoiceConversion(t *testing.T) {
 		goblInvoice.Customer.Identities = []*org.Identity{
 			{Key: org.IdentityKeyPassport, Code: "PP123456S"},
 		}
+		require.NoError(t, goblInvoice.Calculate())
 		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 		dest := invoice.Sujetos.Destinatarios.IDDestinatario[0]
@@ -152,6 +151,7 @@ func TestInvoiceConversion(t *testing.T) {
 		goblInvoice.Customer.Identities = []*org.Identity{
 			{Country: "ES", Key: org.IdentityKeyPassport, Code: "PP123456S"},
 		}
+		require.NoError(t, goblInvoice.Calculate())
 		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 		dest := invoice.Sujetos.Destinatarios.IDDestinatario[0]
@@ -160,36 +160,7 @@ func TestInvoiceConversion(t *testing.T) {
 		assert.Equal(t, "ES", dest.IDOtro.CodigoPais)
 	})
 
-	t.Run("es-tbai-identity-type extension is preferred over key fallback", func(t *testing.T) {
-		// When both an addon-set extension and a legacy key are present
-		// on an identity, the extension code wins. Mirrors what the addon
-		// normalizer does: Merge overwrites identity.Key-derived codes
-		// with whatever the addon decided, and the converter then reads
-		// that ext directly without re-running the key map.
-		goblInvoice := test.LoadInvoice("sample-invoice.json")
-		goblInvoice.Customer.TaxID = nil
-		goblInvoice.Customer.Identities = []*org.Identity{
-			{
-				Key:     org.IdentityKeyOther, // legacy map → "06"
-				Country: "FR",
-				Code:    "FR-ID-99",
-				Ext: tax.ExtensionsOf(cbc.CodeMap{
-					tbai.ExtKeyIdentityType: "05", // ext wins
-				}),
-			},
-		}
-		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
-
-		dest := invoice.Sujetos.Destinatarios.IDDestinatario[0]
-		assert.Equal(t, "05", dest.IDOtro.IDType)
-		assert.Equal(t, "FR-ID-99", dest.IDOtro.ID)
-		assert.Equal(t, "FR", dest.IDOtro.CodigoPais)
-	})
-
-	t.Run("es-tbai-identity-type extension works without an identity key", func(t *testing.T) {
-		// The main use case for setting the extension explicitly: an
-		// identity without a recognised key (so the legacy idTypeCodeMap
-		// would skip it) but with an L7 code provided via the extension.
+	t.Run("es-tbai-identity-type extension is honoured directly", func(t *testing.T) {
 		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Customer.TaxID = nil
 		goblInvoice.Customer.Identities = []*org.Identity{
@@ -210,9 +181,6 @@ func TestInvoiceConversion(t *testing.T) {
 	})
 
 	t.Run("es-tbai-identity-type extension honours each L7 code", func(t *testing.T) {
-		// Round-trip every L7 code the addon defines (02 NIF-VAT,
-		// 03 passport, 04 foreign, 05 resident, 06 other) through the
-		// converter via the extension path.
 		for _, code := range []cbc.Code{"02", "03", "04", "05", "06"} {
 			t.Run("code "+code.String(), func(t *testing.T) {
 				goblInvoice := test.LoadInvoice("sample-invoice.json")
@@ -237,10 +205,6 @@ func TestInvoiceConversion(t *testing.T) {
 	})
 
 	t.Run("invoice-es-ch-tbai-other-identity fixture emits IDType=06", func(t *testing.T) {
-		// End-to-end fixture exercising the canonical use case for the
-		// extension: an identity with no key and an explicit
-		// es-tbai-identity-type=06 ("other"). The corresponding XML
-		// golden lives at test/data/out/invoice-es-ch-tbai-other-identity.xml.
 		goblInvoice := test.LoadInvoice("invoice-es-ch-tbai-other-identity.json")
 		invoice, err := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 		require.NoError(t, err)
@@ -254,8 +218,6 @@ func TestInvoiceConversion(t *testing.T) {
 	})
 
 	t.Run("identity with unknown key and no extension is skipped", func(t *testing.T) {
-		// Fallback path: no extension, key not in legacy map → identity
-		// is ignored and the customer block is left empty (B2C).
 		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Customer.TaxID = nil
 		goblInvoice.Customer.Identities = []*org.Identity{
@@ -264,6 +226,7 @@ func TestInvoiceConversion(t *testing.T) {
 				Code: "X-001",
 			},
 		}
+		require.NoError(t, goblInvoice.Calculate())
 		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 		assert.Nil(t, invoice.Sujetos.Destinatarios)

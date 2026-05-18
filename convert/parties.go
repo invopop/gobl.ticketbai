@@ -2,17 +2,9 @@ package convert
 
 import (
 	"github.com/invopop/gobl/addons/es/tbai"
-	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
 )
-
-var idTypeCodeMap = map[cbc.Key]string{
-	org.IdentityKeyPassport: tbai.ExtCodeIdentityTypePassport.String(),
-	org.IdentityKeyForeign:  tbai.ExtCodeIdentityTypeForeign.String(),
-	org.IdentityKeyResident: tbai.ExtCodeIdentityTypeResident.String(),
-	org.IdentityKeyOther:    tbai.ExtCodeIdentityTypeOther.String(),
-}
 
 // Sujetos contains invoice parties info
 type Sujetos struct {
@@ -81,49 +73,38 @@ func newDestinatario(party *org.Party) *IDDestinatario {
 }
 
 func otherIdentity(party *org.Party) *IDOtro {
-	oid := new(IDOtro)
-	if party.TaxID != nil {
+	if party.TaxID != nil && party.TaxID.Code != "" {
+		return &IDOtro{
+			CodigoPais: party.TaxID.Country.String(),
+			IDType:     taxIDType(party.TaxID.Country),
+			ID:         party.TaxID.Code.String(),
+		}
+	}
+	id := org.IdentityForExtKey(party.Identities, tbai.ExtKeyIdentityType)
+	if id == nil || id.Code == "" {
+		return nil
+	}
+	oid := &IDOtro{
+		IDType: id.Ext.Get(tbai.ExtKeyIdentityType).String(),
+		ID:     id.Code.String(),
+	}
+	switch {
+	case id.Country != "":
+		oid.CodigoPais = id.Country.String()
+	case party.TaxID != nil:
 		oid.CodigoPais = party.TaxID.Country.String()
 	}
+	return oid
+}
 
-	if party.TaxID != nil && party.TaxID.Code != "" {
-		// EU customers get IDType=02 (NIF-VAT, validated against VIES);
-		// non-EU customers' tax IDs (RFC, EIN, ...) are reported as
-		// foreign identity documents (IDType=04). The TicketBAI gateway
-		// rejects a non-EU tax ID submitted as NIF-VAT with B4_2000013.
-		if l10n.Union(l10n.EU).HasMember(party.TaxID.Country.Code()) {
-			oid.IDType = tbai.ExtCodeIdentityTypeVAT.String()
-		} else {
-			oid.IDType = tbai.ExtCodeIdentityTypeForeign.String()
-		}
-		oid.ID = party.TaxID.Code.String()
-		return oid
+// taxIDType maps a non-Spanish customer tax ID to its TicketBAI IDType:
+// EU members → NIF-VAT (02), others → foreign document (04). The gateway
+// rejects non-EU tax IDs sent as 02 with B4_2000013.
+func taxIDType(country l10n.TaxCountryCode) string {
+	if l10n.Union(l10n.EU).HasMember(country.Code()) {
+		return tbai.ExtCodeIdentityTypeVAT.String()
 	}
-
-	for _, id := range party.Identities {
-		if id == nil || id.Code == "" {
-			continue
-		}
-		code := id.Ext.Get(tbai.ExtKeyIdentityType).String()
-		if code == "" {
-			// Fallback to the legacy key map for documents not normalized
-			// through the tbai addon.
-			it, ok := idTypeCodeMap[id.Key]
-			if !ok {
-				continue
-			}
-			code = it
-		}
-
-		oid.IDType = code
-		oid.ID = id.Code.String()
-		if id.Country != "" {
-			oid.CodigoPais = id.Country.String()
-		}
-		return oid
-	}
-
-	return nil
+	return tbai.ExtCodeIdentityTypeForeign.String()
 }
 
 func partyCountry(party *org.Party) l10n.TaxCountryCode {
