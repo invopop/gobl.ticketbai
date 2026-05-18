@@ -1,8 +1,10 @@
 package ticketbai_test
 
 import (
+	"bytes"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -13,9 +15,6 @@ import (
 	"github.com/invopop/gobl.ticketbai/internal/gateways"
 	"github.com/invopop/gobl.ticketbai/test"
 	"github.com/invopop/xmldsig"
-	"github.com/lestrrat-go/libxml2"
-	"github.com/lestrrat-go/libxml2/xsd"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -25,8 +24,13 @@ const (
 )
 
 func TestXMLGeneration(t *testing.T) {
-	schema, err := loadSchema()
-	require.NoError(t, err)
+	xmllint, err := exec.LookPath("xmllint")
+	if err != nil {
+		t.Skip("xmllint not installed; install libxml2 to enable XSD validation")
+	}
+
+	schemaPath := test.Path("test", "schema", "schema.xsd")
+	catalogPath := test.Path("test", "schema", "catalog.xml")
 
 	examples, err := lookupExamples()
 	require.NoError(t, err)
@@ -41,12 +45,9 @@ func TestXMLGeneration(t *testing.T) {
 			data, err := convertExample(tbai, example)
 			require.NoError(t, err)
 
-			// Always validate the generated XML against the
-			// TicketBAI XSD so CI catches schema regressions
-			// even without -update.
-			for _, e := range validateDoc(schema, data) {
-				assert.NoError(t, e)
-			}
+			// Validate against the TicketBAI XSD on every run so
+			// CI catches schema regressions even without --update.
+			require.NoError(t, validateDoc(xmllint, schemaPath, catalogPath, data))
 
 			outPath := test.Path("test", "data", "out",
 				strings.TrimSuffix(example, ".json")+".xml",
@@ -65,16 +66,6 @@ func TestXMLGeneration(t *testing.T) {
 			require.Equal(t, string(expected), string(data), msgUnmatchingOutFile, filepath.Base(outPath))
 		})
 	}
-}
-
-func loadSchema() (*xsd.Schema, error) {
-	schemaPath := test.Path("test", "schema", "schema.xsd")
-	schema, err := xsd.ParseFromFile(schemaPath)
-	if err != nil {
-		return nil, err
-	}
-
-	return schema, nil
 }
 
 func loadTBAIClient() (*ticketbai.Client, error) {
@@ -154,16 +145,18 @@ func convertExample(tc *ticketbai.Client, example string) ([]byte, error) {
 	return td.BytesIndent()
 }
 
-func validateDoc(schema *xsd.Schema, doc []byte) []error {
-	xmlDoc, err := libxml2.ParseString(string(doc))
-	if err != nil {
-		return []error{err}
+// validateDoc validates doc against the TicketBAI XSD by shelling out
+// to xmllint. The catalog maps the W3C xmldsig schema URL to the local
+// copy in test/schema/, so --nonet can stay on (newer libxml2 builds
+// disable HTTP fetching by default).
+func validateDoc(xmllint, schemaPath, catalogPath string, doc []byte) error {
+	cmd := exec.Command(xmllint, "--noout", "--nonet", "--schema", schemaPath, "-")
+	cmd.Stdin = bytes.NewReader(doc)
+	cmd.Env = append(os.Environ(), "XML_CATALOG_FILES="+catalogPath)
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("xmllint: %w\n%s", err, stderr.String())
 	}
-
-	err = schema.Validate(xmlDoc)
-	if err != nil {
-		return err.(xsd.SchemaValidationError).Errors()
-	}
-
 	return nil
 }
