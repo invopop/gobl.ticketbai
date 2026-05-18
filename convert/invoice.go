@@ -146,13 +146,8 @@ func newRetencionSoportada(inv *bill.Invoice) string {
 	return totalRetention.String()
 }
 
-// newClaves builds the IDClave list following the same pattern verifactu and
-// the (unreleased) GOBL es-tbai addon use for ClaveRegimen: per-combo signals
-// (export key → 02, surcharge → 51) plus an invoice-wide signal for the
-// simplified scheme (→ 52). The customer's country is irrelevant — the
-// operation type is what drives the regime, so a reverse-charge sale to an EU
-// customer ends up under the general regime (01) and a goods export to a
-// non-EU customer is 02.
+// newClaves builds the IDClave list with distinct ClaveRegimen codes derived
+// from each VAT rate on the invoice.
 func newClaves(inv *bill.Invoice) []IDClave {
 	claves := []IDClave{}
 	seen := make(map[string]bool)
@@ -181,9 +176,7 @@ func newClaves(inv *bill.Invoice) []IDClave {
 	return claves
 }
 
-// claveForRate mirrors the per-combo regime fallback chain applied by the
-// GOBL es-tbai addon: export key → 02, surcharge → 51, simplified scheme →
-// 52, everything else → 01.
+// claveForRate returns the ClaveRegimen code for a single VAT rate.
 func claveForRate(rate *tax.RateTotal, simplified bool) string {
 	if rate == nil {
 		return ""
