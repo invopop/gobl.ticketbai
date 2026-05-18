@@ -146,34 +146,57 @@ func newRetencionSoportada(inv *bill.Invoice) string {
 	return totalRetention.String()
 }
 
+// newClaves builds the IDClave list following the same pattern verifactu and
+// the (unreleased) GOBL es-tbai addon use for ClaveRegimen: per-combo signals
+// (export key → 02, surcharge → 51) plus an invoice-wide signal for the
+// simplified scheme (→ 52). The customer's country is irrelevant — the
+// operation type is what drives the regime, so a reverse-charge sale to an EU
+// customer ends up under the general regime (01) and a goods export to a
+// non-EU customer is 02.
 func newClaves(inv *bill.Invoice) []IDClave {
 	claves := []IDClave{}
-
-	if inv.Customer != nil && partyCountry(inv.Customer) != "ES" {
-		claves = append(claves, IDClave{
-			ClaveRegimenIvaOpTrascendencia: "02",
-		})
+	seen := make(map[string]bool)
+	add := func(code string) {
+		if code == "" || seen[code] {
+			return
+		}
+		seen[code] = true
+		claves = append(claves, IDClave{ClaveRegimenIvaOpTrascendencia: code})
 	}
-
-	if hasSurchargedLines(inv) {
-		claves = append(claves, IDClave{
-			ClaveRegimenIvaOpTrascendencia: "51",
-		})
+	simplified := inv.HasTags(es.TagSimplifiedScheme)
+	if inv.Totals != nil && inv.Totals.Taxes != nil {
+		if cat := inv.Totals.Taxes.Category(tax.CategoryVAT); cat != nil {
+			for _, rate := range cat.Rates {
+				add(claveForRate(rate, simplified))
+			}
+		}
 	}
-
-	if underSimplifiedRegime(inv) {
-		claves = append(claves, IDClave{
-			ClaveRegimenIvaOpTrascendencia: "52",
-		})
-	}
-
 	if len(claves) == 0 {
-		claves = append(claves, IDClave{
-			ClaveRegimenIvaOpTrascendencia: "01",
-		})
+		if simplified {
+			add("52")
+		} else {
+			add("01")
+		}
 	}
-
 	return claves
+}
+
+// claveForRate mirrors the per-combo regime fallback chain applied by the
+// GOBL es-tbai addon: export key → 02, surcharge → 51, simplified scheme →
+// 52, everything else → 01.
+func claveForRate(rate *tax.RateTotal, simplified bool) string {
+	if rate == nil {
+		return ""
+	}
+	switch {
+	case rate.Key == tax.KeyExport:
+		return "02"
+	case rate.Surcharge != nil:
+		return "51"
+	case simplified:
+		return "52"
+	}
+	return "01"
 }
 
 func newFacturaRectificativa(inv *bill.Invoice) *FacturaRectificativa {
@@ -205,26 +228,4 @@ func newFacturasRectificadasSustituidas(inv *bill.Invoice) *FacturasRectificadas
 			},
 		},
 	}
-}
-
-func hasSurchargedLines(inv *bill.Invoice) bool {
-	if inv.Totals == nil || inv.Totals.Taxes == nil {
-		return false
-	}
-	vat := inv.Totals.Taxes.Category(tax.CategoryVAT)
-	if vat == nil {
-		return false
-	}
-
-	for _, rate := range vat.Rates {
-		if rate.Ext.Get(tbai.ExtKeyProduct) == "resale" {
-			return true
-		}
-	}
-
-	return false
-}
-
-func underSimplifiedRegime(inv *bill.Invoice) bool {
-	return inv.HasTags(es.TagSimplifiedScheme)
 }

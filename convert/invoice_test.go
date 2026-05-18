@@ -158,9 +158,22 @@ func TestFacturaConversion(t *testing.T) {
 		assert.Equal(t, "01", claves.IDClave[0].ClaveRegimenIvaOpTrascendencia)
 	})
 
-	t.Run("should add export (02) if the client is foreign", func(t *testing.T) {
+	t.Run("should add export (02) when a line uses the export tax key", func(t *testing.T) {
 		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Customer.TaxID.Country = "GB"
+		goblInvoice.Lines = []*bill.Line{{
+			Index:    1,
+			Quantity: num.MakeAmount(1, 0),
+			Item:     &org.Item{Key: org.ItemKeyGoods, Name: "A", Price: num.NewAmount(100, 0)},
+			Taxes: tax.Set{
+				&tax.Combo{
+					Category: tax.CategoryVAT,
+					Key:      tax.KeyExport,
+					Ext:      tax.MakeExtensions().Set(tbai.ExtKeyExempt, "E2"),
+				},
+			},
+		}}
+		_ = goblInvoice.Calculate()
 
 		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
@@ -168,7 +181,31 @@ func TestFacturaConversion(t *testing.T) {
 		assert.Equal(t, "02", claves.IDClave[0].ClaveRegimenIvaOpTrascendencia)
 	})
 
-	t.Run("should add surcharge key (51) if any line is surcharged", func(t *testing.T) {
+	t.Run("should keep general regime (01) for reverse-charge to EU customer", func(t *testing.T) {
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
+		goblInvoice.Customer.TaxID.Country = "PT"
+		goblInvoice.Customer.TaxID.Code = "517562332"
+		goblInvoice.Lines = []*bill.Line{{
+			Index:    1,
+			Quantity: num.MakeAmount(1, 0),
+			Item:     &org.Item{Name: "A", Price: num.NewAmount(100, 0)},
+			Taxes: tax.Set{
+				&tax.Combo{
+					Category: tax.CategoryVAT,
+					Key:      tax.KeyReverseCharge,
+					Ext:      tax.MakeExtensions().Set(tbai.ExtKeyExempt, "S2"),
+				},
+			},
+		}}
+		_ = goblInvoice.Calculate()
+
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
+
+		claves := invoice.Factura.DatosFactura.Claves
+		assert.Equal(t, "01", claves.IDClave[0].ClaveRegimenIvaOpTrascendencia)
+	})
+
+	t.Run("should add surcharge key (51) if any line carries a surcharge", func(t *testing.T) {
 		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Lines = []*bill.Line{{
 			Index:    1,
@@ -181,7 +218,7 @@ func TestFacturaConversion(t *testing.T) {
 			Taxes: tax.Set{
 				&tax.Combo{
 					Category: tax.CategoryVAT,
-					Rate:     "standard",
+					Rate:     tax.RateGeneral.With(es.TaxRateEquivalence),
 					Ext:      tax.MakeExtensions().Set(tbai.ExtKeyProduct, "resale"),
 				},
 			},
@@ -198,12 +235,22 @@ func TestFacturaConversion(t *testing.T) {
 		func(t *testing.T) {
 			goblInvoice := test.LoadInvoice("sample-invoice.json")
 			goblInvoice.SetTags(es.TagSimplifiedScheme)
+			goblInvoice.Lines = []*bill.Line{{
+				Index:    1,
+				Quantity: num.MakeAmount(1, 0),
+				Item:     &org.Item{Name: "A", Price: num.NewAmount(100, 0)},
+				Taxes: tax.Set{
+					&tax.Combo{Category: tax.CategoryVAT, Rate: "standard"},
+				},
+			}}
+			_ = goblInvoice.Calculate()
 
 			invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 
 			claves := invoice.Factura.DatosFactura.Claves
 			assert.Equal(t, "52", claves.IDClave[0].ClaveRegimenIvaOpTrascendencia)
 		})
+
 }
 
 func DiscountOf(amount int) *bill.LineDiscount {
