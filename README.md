@@ -67,7 +67,7 @@ func main() {
 
 	// Load sample certificate:
 	cert, err := xmldsig.LoadCertificate(
-		"./test/certs/EnpresaZigilua_SelloDeEmpresa.p12", "IZDesa2021")
+		"./test/certs/EnpresaZigilua_SelloDeEmpresa.p12", "IZDesa2025")
 	if err != nil {
 		panic(err)
 	}
@@ -136,13 +136,15 @@ We recommend using a `.env` file to prepare configuration settings, although all
 
 ```
 CERTIFICATE_PATH="./test/certs/EntitateOrdezkaria_RepresentanteDeEntidad.p12"
-CERTIFICATE_PASSWORD=IZDesa2021
-SOFTWARE_COMPANY_NIF=B85905495
-SOFTWARE_COMPANY_NAME="Invopop S.L."
+CERTIFICATE_PASSWORD=IZDesa2025
+SOFTWARE_COMPANY_NIF=A99800005
+SOFTWARE_COMPANY_NAME="SOFTWARE GARANTE TICKETBAI PRUEBA"
 SOFTWARE_NAME="Invopop"
 SOFTWARE_LICENSE="TBAIBI00000000PRUEBA" # BI & SS
 SOFTWARE_VERSION="1.0"
 ```
+
+The `SOFTWARE_*` values above are the public test identity published by Batuz alongside the sandbox licence `TBAIBI00000000PRUEBA`. Using any other combination with this licence will be rejected.
 
 To convert a document to XML, run:
 
@@ -161,8 +163,6 @@ gobl.ticketbai send ./test/data/sample-invoice.json
 - Tickebai allows more than one customer per invoice, but GOBL only has one possible customer.
 
 - Invoices should have a note of type general that will be used as a general description of the invoice. If an invoice is missing this info, it will be rejected with an error.
-
-- Currently GOBL does not allow to distinguish between different VAT regimes. Ticketbai format requires a list of the different regimes applied to the invoice so currently only equivalence surcharge and general regime are available (for a complete list of the other possibilities you can check the documentation on https://www.batuz.eus/es/documentacion-tecnica)
 
 - GOBL's corrective invoices aren't supported at the moment. Only credit and debit notes are, and they are converted into "Facturas Rectificativas por Diferencias" with either positive or inverted quantities depending on whether it is a debit or a credit note.
 
@@ -237,10 +237,75 @@ Under what situations should the TicketBAI system be expected to function:
 
 ## Test Data
 
-Some sample test data is available in the `./test` directory. To update the JSON documents and regenerate the XML files for testing, use the following command:
+Sample GOBL envelopes live in `test/data/*.json` and their converted XML
+counterparts in `test/data/out/*.xml`. The fixtures use the Bizkaia sandbox
+test entity (`S7836107H`, "ZIURTAPEN ZERBITZU ENPRESA-EMPRESA CERTIFICACION
+Y SERVICIOS IZENPE SA") so they can be sent against Batuz' developer
+endpoint without further editing.
+
+### Regenerating the fixtures
+
+If you edit any of the JSON inputs (for example to change the supplier),
+the envelope `head.dig` and the converted XML need refreshing. Run:
 
 ```bash
-go test ./examples_test.go --update
+go test . --update
 ```
 
-All generate XML documents will be validated against the TicketBAI XSD documents.
+That recomputes the digests in `test/data/*.json` and rewrites every
+`test/data/out/*.xml` from the converted output. `TestXMLGeneration`
+also validates each generated XML against the TicketBAI XSD on every
+run, regardless of `--update`. Use `go test .` rather than
+`go test ./...` because `--update` is only defined for the root and
+`convert` test binaries.
+
+XSD validation is pure Go via [`lestrrat-go/helium`][helium] — no
+cgo, no system libraries. The wrapper schema in `test/schema/schema.xsd`
+pre-imports a local copy of the W3C `xmldsig-core-schema.xsd` so no
+network access is required at test time.
+
+[helium]: https://github.com/lestrrat-go/helium
+
+### Sending to the Bizkaia sandbox
+
+`send-test.sh` at the repo root wraps `gobl-tbai send` with the Bizkaia
+sandbox cert and the public Batuz test licence baked in:
+
+```bash
+./send-test.sh test/data/sample-invoice.json
+```
+
+It rebuilds `bin/gobl-tbai` on each invocation and POSTs to
+`https://pruesarrerak.bizkaia.eus`. Any extra flags after the filename are
+forwarded to the CLI (e.g. `--prev '{...}'` to chain).
+
+The script expects:
+
+- **Cert:** `test/certs/EntitateOrdezkaria_RepresentanteDeEntidad.p12`,
+  password `IZDesa2025`. This is an Izenpe sandbox cert representing the
+  fictitious entity `S7836107H`. Izenpe rotates these every ~4 years; when
+  they expire (currently 2029) grab a fresh pack from the Izenpe
+  "Garatzaileak / Desarrolladores" download page and update both the
+  `.p12` and the `*_pin.txt` files in `test/certs/`.
+- **Software identity:** the public Batuz test values
+  (`A99800005` / `SOFTWARE GARANTE TICKETBAI PRUEBA`) paired with licence
+  `TBAIBI00000000PRUEBA`. Batuz validates this combination on submission.
+- **Supplier:** the invoice's supplier must use the cert's entity — that's
+  why all bundled fixtures use `S7836107H` and the matching legal name. A
+  mismatch triggers `N3_0000001` (cert not trusted for the supplier) or
+  `N3_0000002` (legal-name mismatch).
+
+Common rejection codes when iterating:
+
+| Code | Meaning | Where to look |
+|------|---------|---------------|
+| `N3_0000001` | Signature not trusted for the supplier NIF | Cert expired, or the cert's `organizationIdentifier` doesn't match the invoice's `supplier.tax_id.code` |
+| `N3_0000002` | Supplier legal name doesn't match the NIF | Update `supplier.name` to whatever Batuz returns in the error |
+| `B4_2000013` | `NIF-IVA tiene un formato erróneo` | EU customer VATs are validated live against VIES; the bundled `invoice-es-nl-tbai-exempt.json` uses a placeholder NL VAT (`000099995B57`) that fails VIES and is not submittable — substitute a known-valid VAT from your own test data if you need to round-trip this fixture through the sandbox. |
+| `B4_2000026` | `Las Claves indicadas no son compatibles` | The Bizkaia gateway rejects regime codes `19`, `51`, `52` and `53` — even though the TicketBAI XSD allows them and the Gipuzkoa/Araba gateways accept them. This is why `sample-invoice.json` (which legitimately produces `51` via its `general+eqs` rate, and is our regression case for the surcharge bug) won't round-trip through Bizkaia; use one of the `general`-rate fixtures (e.g. `sample-invoice2.json`) for submission tests. |
+| `pkcs12: decryption password incorrect` | Wrong cert password | Check `test/certs/*_pin.txt` for the current pin (it's `IZDesa2025` for the 2025–2029 pack) |
+
+The Araba and Gipuzkoa sandboxes need their own cert + licence packs;
+`send-test.sh` only covers Bizkaia. (In practice the Gipuzkoa sandbox
+currently accepts the Bizkaia developer software identity, but don't
+rely on it.)

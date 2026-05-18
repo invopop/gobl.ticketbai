@@ -15,7 +15,7 @@ func TestSignatureGeneration(t *testing.T) {
 	ts, err := time.Parse(time.RFC3339, "2022-02-01T04:00:00Z")
 	require.NoError(t, err)
 
-	cert, err := xmldsig.LoadCertificate(test.Path("test", "certs", "EntitateOrdezkaria_RepresentanteDeEntidad.p12"), "IZDesa2021")
+	cert, err := xmldsig.LoadCertificate(test.Path("test", "certs", "EntitateOrdezkaria_RepresentanteDeEntidad.p12"), "IZDesa2025")
 	require.NoError(t, err)
 
 	t.Run("should set the proper signer role", func(t *testing.T) {
