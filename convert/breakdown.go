@@ -89,7 +89,6 @@ type DetalleNoSujeta struct {
 
 type taxInfo struct {
 	simplifiedRegime bool
-	reverseCharge    bool
 	customerRates    bool
 }
 
@@ -145,7 +144,7 @@ func newDesgloseFactura(taxInfo taxInfo, rates []*tax.RateTotal) *DesgloseFactur
 			})
 		} else {
 			dne := df.Sujeta.NoExenta.appendDetalle(&DetalleNoExenta{
-				TipoNoExenta: taxInfo.nonExemptedType(rate),
+				TipoNoExenta: nonExemptedType(rate),
 				DesgloseIVA:  &DesgloseIVA{},
 			})
 
@@ -219,7 +218,7 @@ func (di *DesgloseIVA) appendDetalle(d *DetalleIVA) *DetalleIVA {
 }
 
 func newDetalleIVA(taxInfo taxInfo, rate *tax.RateTotal) *DetalleIVA {
-	percent := num.PercentageZero // S2 reverse-charge rates have no percent
+	percent := num.PercentageZero
 	if rate.Percent != nil {
 		percent = *rate.Percent
 	}
@@ -253,28 +252,22 @@ func formatPercent(percent num.Percentage) string {
 func newTaxInfo(gobl *bill.Invoice) taxInfo {
 	return taxInfo{
 		simplifiedRegime: gobl.HasTags(es.TagSimplifiedScheme),
-		reverseCharge:    gobl.HasTags(tax.TagReverseCharge),
 		customerRates:    gobl.HasTags(tax.TagCustomerRates),
 	}
 }
 
-// notSubjectExemptionCodes are the es-tbai-exemption values that the
-// es-tbai-v1 addon assigns to "outside-scope" tax combos; they map to
-// DetalleNoSujeta/Causa in the TicketBAI XML.
+// notSubjectExemptionCodes lists the es-tbai-exemption codes that map to
+// DetalleNoSujeta/Causa.
 var notSubjectExemptionCodes = []cbc.Code{"OT", "RL", "VT", "IE"}
 
-// reverseChargeExemptionCodes are the es-tbai-exemption values that map
-// to DetalleNoExenta/TipoNoExenta = S2 (subject to VAT with reverse
-// charge) in the TicketBAI XML.
+// reverseChargeExemptionCodes lists the es-tbai-exemption codes that map to
+// DetalleNoExenta/TipoNoExenta = S2.
 var reverseChargeExemptionCodes = []cbc.Code{"S2"}
 
-// nonExemptedType returns the TBAI TipoNoExenta value for a "subject and
-// non-exempt" tax rate. The new path consults the es-tbai-exemption
-// extension set by the es-tbai-v1 addon normalizer; the legacy fallback
-// relies on the invoice-wide reverse-charge tag for callers that have
-// not been normalized through the addon.
-func (t taxInfo) nonExemptedType(r *tax.RateTotal) string {
-	if t.reverseCharge || r.Ext.Get(tbai.ExtKeyExempt).In(reverseChargeExemptionCodes...) {
+// nonExemptedType returns the TBAI TipoNoExenta value for a subject,
+// non-exempt tax rate.
+func nonExemptedType(r *tax.RateTotal) string {
+	if r.Ext.Get(tbai.ExtKeyExempt).In(reverseChargeExemptionCodes...) {
 		return "S2"
 	}
 	return "S1"

@@ -449,23 +449,6 @@ func TestDesgloseConversion(t *testing.T) {
 		assert.Equal(t, "S", desgloseIVA.DetalleIVA[0].OperacionEnRecargoDeEquivalenciaORegimenSimplificado)
 	})
 
-	t.Run("should mark tax details if there is reverse charge", func(t *testing.T) {
-		goblInvoice := invoiceFromCountry("ES")
-		goblInvoice.SetTags(tax.TagReverseCharge)
-		goblInvoice.Lines = []*bill.Line{{
-			Index:    1,
-			Quantity: num.MakeAmount(100, 0),
-			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
-			Taxes:    tax.Set{&tax.Combo{Category: tax.CategoryVAT, Rate: "standard"}},
-		}}
-		_ = goblInvoice.Calculate()
-
-		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
-
-		desglose := invoice.Factura.TipoDesglose.DesgloseFactura
-		assert.Equal(t, "S2", desglose.Sujeta.NoExenta.DetalleNoExenta[0].TipoNoExenta)
-	})
-
 	t.Run("should route es-tbai-exemption=S2 to Sujeta.NoExenta with TipoNoExenta=S2", func(t *testing.T) {
 		goblInvoice := invoiceFromCountry("ES")
 		goblInvoice.Lines = []*bill.Line{{
@@ -499,8 +482,6 @@ func TestDesgloseConversion(t *testing.T) {
 	})
 
 	t.Run("should route es-tbai-exemption=S2 set via extension only to Sujeta.NoExenta", func(t *testing.T) {
-		// Caller sets the exemption code directly via the extension;
-		// the es-tbai-v1 addon normalizer maps it back to KeyReverseCharge.
 		goblInvoice := invoiceFromCountry("ES")
 		goblInvoice.Lines = []*bill.Line{{
 			Index:    1,
