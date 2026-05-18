@@ -259,16 +259,12 @@ run, regardless of `--update`. Use `go test .` rather than
 `go test ./...` because `--update` is only defined for the root and
 `convert` test binaries.
 
-XSD validation shells out to the `xmllint` binary (shipped with
-libxml2), so make sure it's on `PATH`:
+XSD validation is pure Go via [`lestrrat-go/helium`][helium] — no
+cgo, no system libraries. The wrapper schema in `test/schema/schema.xsd`
+pre-imports a local copy of the W3C `xmldsig-core-schema.xsd` so no
+network access is required at test time.
 
-- **Debian/Ubuntu:** `apt install libxml2-utils`
-- **macOS:** `brew install libxml2` (or use the Xcode-provided one)
-
-If `xmllint` isn't found the validation step is skipped with a notice;
-the converted XML still gets written but won't be schema-checked. The
-test loads the W3C `xmldsig-core-schema.xsd` from `test/schema/`
-via an XML catalog so no network access is required.
+[helium]: https://github.com/lestrrat-go/helium
 
 ### Sending to the Bizkaia sandbox
 

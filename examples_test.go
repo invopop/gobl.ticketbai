@@ -1,10 +1,9 @@
 package ticketbai_test
 
 import (
-	"bytes"
+	"context"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -15,6 +14,8 @@ import (
 	"github.com/invopop/gobl.ticketbai/internal/gateways"
 	"github.com/invopop/gobl.ticketbai/test"
 	"github.com/invopop/xmldsig"
+	"github.com/lestrrat-go/helium"
+	"github.com/lestrrat-go/helium/xsd"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,13 +25,11 @@ const (
 )
 
 func TestXMLGeneration(t *testing.T) {
-	xmllint, err := exec.LookPath("xmllint")
-	if err != nil {
-		t.Skip("xmllint not installed; install libxml2 to enable XSD validation")
-	}
-
-	schemaPath := test.Path("test", "schema", "schema.xsd")
-	catalogPath := test.Path("test", "schema", "catalog.xml")
+	schema, err := xsd.NewCompiler().CompileFile(
+		context.Background(),
+		test.Path("test", "schema", "schema.xsd"),
+	)
+	require.NoError(t, err)
 
 	examples, err := lookupExamples()
 	require.NoError(t, err)
@@ -47,7 +46,7 @@ func TestXMLGeneration(t *testing.T) {
 
 			// Validate against the TicketBAI XSD on every run so
 			// CI catches schema regressions even without --update.
-			require.NoError(t, validateDoc(xmllint, schemaPath, catalogPath, data))
+			require.NoError(t, validateDoc(schema, data))
 
 			outPath := test.Path("test", "data", "out",
 				strings.TrimSuffix(example, ".json")+".xml",
@@ -145,18 +144,27 @@ func convertExample(tc *ticketbai.Client, example string) ([]byte, error) {
 	return td.BytesIndent()
 }
 
-// validateDoc validates doc against the TicketBAI XSD by shelling out
-// to xmllint. The catalog maps the W3C xmldsig schema URL to the local
-// copy in test/schema/, so --nonet can stay on (newer libxml2 builds
-// disable HTTP fetching by default).
-func validateDoc(xmllint, schemaPath, catalogPath string, doc []byte) error {
-	cmd := exec.Command(xmllint, "--noout", "--nonet", "--schema", schemaPath, "-")
-	cmd.Stdin = bytes.NewReader(doc)
-	cmd.Env = append(os.Environ(), "XML_CATALOG_FILES="+catalogPath)
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("xmllint: %w\n%s", err, stderr.String())
+// validateDoc parses the generated XML and validates it against the
+// pre-compiled TicketBAI XSD. The schema's wrapper file pre-imports the
+// W3C xmldsig schema from a local copy in test/schema/, so no network
+// access is needed at compile time. Individual validation errors are
+// collected so failures surface every issue, not just "validation failed".
+func validateDoc(schema *xsd.Schema, data []byte) error {
+	ctx := context.Background()
+	doc, err := helium.NewParser().Parse(ctx, data)
+	if err != nil {
+		return fmt.Errorf("parse: %w", err)
+	}
+	collector := helium.NewErrorCollector(ctx, helium.ErrorLevelNone)
+	if err := xsd.NewValidator(schema).ErrorHandler(collector).Validate(ctx, doc); err != nil {
+		msgs := make([]string, 0, len(collector.Errors()))
+		for _, e := range collector.Errors() {
+			msgs = append(msgs, e.Error())
+		}
+		if len(msgs) == 0 {
+			return fmt.Errorf("validate: %w", err)
+		}
+		return fmt.Errorf("validate:\n  %s", strings.Join(msgs, "\n  "))
 	}
 	return nil
 }
