@@ -139,7 +139,7 @@ func newDesgloseFactura(rates []*tax.RateTotal) *DesgloseFactura {
 			})
 		default:
 			dne := df.Sujeta.NoExenta.appendDetalle(&DetalleNoExenta{
-				TipoNoExenta: nonExemptedType(rate),
+				TipoNoExenta: code.String(), // S1 or S2
 				DesgloseIVA:  &DesgloseIVA{},
 			})
 
@@ -247,14 +247,3 @@ var notSubjectExemptionCodes = []cbc.Code{"OT", "RL", "VT", "IE"}
 
 // es-tbai-exemption codes routed to Sujeta.Exenta.
 var exemptExemptionCodes = []cbc.Code{"E1", "E2", "E3", "E4", "E5", "E6"}
-
-// es-tbai-exemption codes routed to DetalleNoExenta with TipoNoExenta=S2.
-var reverseChargeExemptionCodes = []cbc.Code{"S2"}
-
-// nonExemptedType returns the TipoNoExenta value for a non-exempt rate.
-func nonExemptedType(r *tax.RateTotal) string {
-	if r.Ext.Get(tbai.ExtKeyExempt).In(reverseChargeExemptionCodes...) {
-		return "S2"
-	}
-	return "S1"
-}

@@ -1,20 +1,20 @@
 module github.com/invopop/gobl.ticketbai
 
-go 1.24.0
+go 1.26.1
 
 require (
 	github.com/go-resty/resty/v2 v2.13.1
 	github.com/invopop/gobl v0.403.1-0.20260518201647-1c8899e5fdc4
 	github.com/invopop/xmldsig v0.14.0
 	github.com/joho/godotenv v1.5.1
-	github.com/lestrrat-go/libxml2 v0.0.0-20231124114421-99c71026c2f5
+	github.com/lestrrat-go/helium v0.0.1
 	github.com/magefile/mage v1.15.0
 	github.com/nbio/xml v0.0.0-20241028124227-eac89c735a80
 	github.com/sigurn/crc8 v0.0.0-20220107193325-2243fe600f9f
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.6
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/net v0.48.0
+	golang.org/x/net v0.52.0
 )
 
 require (
@@ -32,13 +32,13 @@ require (
 	github.com/invopop/jsonschema v0.14.0 // indirect
 	github.com/invopop/yaml v0.3.1 // indirect
 	github.com/jonboulle/clockwork v0.5.0 // indirect
+	github.com/lestrrat-go/pdebug v0.0.0-20210111095411-35b07dbf089b // indirect
 	github.com/pb33f/ordered-map/v2 v2.3.1 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/russellhaering/goxmldsig v1.5.0 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.2 // indirect
-	golang.org/x/crypto v0.47.0 // indirect
-	golang.org/x/text v0.34.0 // indirect
+	golang.org/x/crypto v0.49.0 // indirect
+	golang.org/x/text v0.35.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	software.sslmate.com/src/go-pkcs12 v0.7.0 // indirect
 )

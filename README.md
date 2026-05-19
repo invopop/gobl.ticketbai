@@ -250,22 +250,25 @@ endpoint without further editing.
 ### Regenerating the fixtures
 
 If you edit any of the JSON inputs (for example to change the supplier),
-the envelope `head.dig` and the converted XML need refreshing.
+the envelope `head.dig` and the converted XML need refreshing. Run:
 
 ```bash
-# Recompute envelope digests on every test/data/*.json.
-go run ./cmd/regen-fixtures
-
-# Convert each JSON to the matching XML in test/data/out/. Local stand-in
-# for `go test -update ./...` that skips XSD schema validation (so it works
-# without a working libxml2).
-go run ./cmd/regen-xmls
+go test . --update
 ```
 
-CI runs `go test -tags unit -race ./...` against a real libxml2, and
-`TestXMLGeneration` validates each generated XML against the TicketBAI
-XSD on every test run — the `-update` flag only controls whether the
-fixtures on disk are rewritten.
+That recomputes the digests in `test/data/*.json` and rewrites every
+`test/data/out/*.xml` from the converted output. `TestXMLGeneration`
+also validates each generated XML against the TicketBAI XSD on every
+run, regardless of `--update`. Use `go test .` rather than
+`go test ./...` because `--update` is only defined for the root and
+`convert` test binaries.
+
+XSD validation is pure Go via [`lestrrat-go/helium`][helium] — no
+cgo, no system libraries. The wrapper schema in `test/schema/schema.xsd`
+pre-imports a local copy of the W3C `xmldsig-core-schema.xsd` so no
+network access is required at test time.
+
+[helium]: https://github.com/lestrrat-go/helium
 
 ### Sending to the Bizkaia sandbox
 
