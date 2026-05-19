@@ -138,15 +138,13 @@ func newDesgloseFactura(rates []*tax.RateTotal) *DesgloseFactura {
 				BaseImponible: rate.Base.Rescale(2).String(),
 			})
 		default:
-			tipo := code.String()
-			if tipo == "" {
-				tipo = "S1"
+			if code.String() == "" {
+				code = cbc.Code("S1")
 			}
 			dne := df.Sujeta.NoExenta.appendDetalle(&DetalleNoExenta{
-				TipoNoExenta: tipo,
+				TipoNoExenta: code.String(),
 				DesgloseIVA:  &DesgloseIVA{},
 			})
-
 			dne.DesgloseIVA.appendDetalle(newDetalleIVA(rate))
 		}
 	}
