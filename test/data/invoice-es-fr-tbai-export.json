@@ -1,0 +1,115 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "019e3fdd-8a5e-74f4-a259-5fdf940a5859",
+		"dig": {
+			"alg": "sha256",
+			"val": "6154e4b98480f9019e08e80b63fc51d19395503655e590953467bbe99c1560a4"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "ES",
+		"$addons": [
+			"es-tbai-v1"
+		],
+		"uuid": "019e3fdd-8a5e-74f4-a259-5fe030e9a927",
+		"type": "standard",
+		"series": "EXPORT",
+		"code": "0010",
+		"issue_date": "2024-03-12",
+		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"es-tbai-region": "BI"
+			}
+		},
+		"supplier": {
+			"name": "ZIURTAPEN ZERBITZU ENPRESA-EMPRESA CERTIFICACION Y SERVICIOS IZENPE SA",
+			"tax_id": {
+				"country": "ES",
+				"code": "S7836107H"
+			},
+			"addresses": [
+				{
+					"num": "42",
+					"street": "San Frantzisko",
+					"locality": "Bilbo",
+					"region": "Bizkaia",
+					"code": "48003",
+					"country": "ES"
+				}
+			],
+			"emails": [
+				{
+					"addr": "billing@example.com"
+				}
+			]
+		},
+		"customer": {
+			"name": "Client Atelier SAS",
+			"tax_id": {
+				"country": "FR",
+				"code": "39356000000"
+			}
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "5",
+				"item": {
+					"key": "goods",
+					"name": "Crafted leather goods",
+					"price": "120.00"
+				},
+				"sum": "600.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "export",
+						"ext": {
+							"es-tbai-exemption": "E2",
+							"es-tbai-product": "goods",
+							"es-tbai-regime": "02"
+						}
+					}
+				],
+				"total": "600.00"
+			}
+		],
+		"totals": {
+			"sum": "600.00",
+			"total": "600.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "export",
+								"ext": {
+									"es-tbai-exemption": "E2",
+									"es-tbai-product": "goods",
+									"es-tbai-regime": "02"
+								},
+								"base": "600.00",
+								"amount": "0.00"
+							}
+						],
+						"amount": "0.00"
+					}
+				],
+				"sum": "0.00"
+			},
+			"tax": "0.00",
+			"total_with_tax": "600.00",
+			"payable": "600.00"
+		},
+		"notes": [
+			{
+				"key": "general",
+				"text": "Goods exported to France."
+			}
+		]
+	}
+}
