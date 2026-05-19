@@ -8,7 +8,7 @@ import (
 
 var regime = tax.RegimeDefFor("ES")
 
-// DetallesFactura constains a list of detail lines info
+// DetallesFactura contains a list of detail lines info
 type DetallesFactura struct {
 	IDDetalleFactura []IDDetalleFactura
 }
