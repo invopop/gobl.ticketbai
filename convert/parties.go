@@ -1,6 +1,8 @@
 package convert
 
 import (
+	"strings"
+
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
@@ -92,7 +94,14 @@ func otherIdentity(party *org.Party) *IDOtro {
 
 	if party.TaxID != nil && party.TaxID.Code != "" {
 		oid.IDType = taxIDType(party.TaxID.Country)
-		oid.ID = party.TaxID.Code.String()
+		id := party.TaxID.Code.String()
+		if oid.IDType == idTypeCodeNIFVAT {
+			country := party.TaxID.Country.String()
+			if !strings.HasPrefix(id, country) {
+				id = country + id
+			}
+		}
+		oid.ID = id
 		return oid
 	}
 
@@ -116,9 +125,6 @@ func otherIdentity(party *org.Party) *IDOtro {
 	return nil
 }
 
-// taxIDType maps a non-Spanish customer tax ID to its TicketBAI IDType:
-// EU members → NIF-VAT (02), others → foreign document (04). The gateway
-// rejects non-EU tax IDs sent as 02 with B4_2000013.
 func taxIDType(country l10n.TaxCountryCode) string {
 	if l10n.Union(l10n.EU).HasMember(country.Code()) {
 		return idTypeCodeNIFVAT
