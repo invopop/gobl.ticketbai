@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	idTypeCodeTaxID = "02"
+	idTypeCodeNIFVAT  = "02"
+	idTypeCodeForeign = "04"
 )
 
 var idTypeCodeMap = map[cbc.Key]string{
@@ -92,11 +93,13 @@ func otherIdentity(party *org.Party) *IDOtro {
 	}
 
 	if party.TaxID != nil && party.TaxID.Code != "" {
-		oid.IDType = idTypeCodeTaxID
-		country := party.TaxID.Country.String()
+		oid.IDType = taxIDType(party.TaxID.Country)
 		id := party.TaxID.Code.String()
-		if !strings.HasPrefix(id, country) {
-			id = country + id
+		if oid.IDType == idTypeCodeNIFVAT {
+			country := party.TaxID.Country.String()
+			if !strings.HasPrefix(id, country) {
+				id = country + id
+			}
 		}
 		oid.ID = id
 		return oid
@@ -120,6 +123,13 @@ func otherIdentity(party *org.Party) *IDOtro {
 	}
 
 	return nil
+}
+
+func taxIDType(country l10n.TaxCountryCode) string {
+	if l10n.Union(l10n.EU).HasMember(country.Code()) {
+		return idTypeCodeNIFVAT
+	}
+	return idTypeCodeForeign
 }
 
 func partyCountry(party *org.Party) l10n.TaxCountryCode {
