@@ -1,6 +1,8 @@
 package convert
 
 import (
+	"strings"
+
 	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
@@ -74,10 +76,16 @@ func newDestinatario(party *org.Party) *IDDestinatario {
 
 func otherIdentity(party *org.Party) *IDOtro {
 	if party.TaxID != nil && party.TaxID.Code != "" {
+		country := party.TaxID.Country.String()
+		idType := taxIDType(party.TaxID.Country)
+		id := party.TaxID.Code.String()
+		if idType == tbai.ExtCodeIdentityTypeVAT.String() && !strings.HasPrefix(id, country) {
+			id = country + id
+		}
 		return &IDOtro{
-			CodigoPais: party.TaxID.Country.String(),
-			IDType:     taxIDType(party.TaxID.Country),
-			ID:         party.TaxID.Code.String(),
+			CodigoPais: country,
+			IDType:     idType,
+			ID:         id,
 		}
 	}
 	id := org.IdentityForExtKey(party.Identities, tbai.ExtKeyIdentityType)
