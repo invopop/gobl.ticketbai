@@ -1,6 +1,8 @@
 package convert
 
 import (
+	"strings"
+
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
@@ -91,7 +93,12 @@ func otherIdentity(party *org.Party) *IDOtro {
 
 	if party.TaxID != nil && party.TaxID.Code != "" {
 		oid.IDType = idTypeCodeTaxID
-		oid.ID = party.TaxID.Code.String()
+		country := party.TaxID.Country.String()
+		id := party.TaxID.Code.String()
+		if !strings.HasPrefix(id, country) {
+			id = country + id
+		}
+		oid.ID = id
 		return oid
 	}
 
