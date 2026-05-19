@@ -149,22 +149,28 @@ func newRetencionSoportada(inv *bill.Invoice) string {
 // es-tbai-regime extension.
 func newClaves(inv *bill.Invoice) []IDClave {
 	claves := []IDClave{}
-	seen := make(map[string]bool)
-	add := func(code string) {
-		if code == "" || seen[code] {
-			return
-		}
-		seen[code] = true
-		claves = append(claves, IDClave{ClaveRegimenIvaOpTrascendencia: code})
-	}
+
 	if inv.Totals != nil && inv.Totals.Taxes != nil {
 		if cat := inv.Totals.Taxes.Category(tax.CategoryVAT); cat != nil {
 			for _, rate := range cat.Rates {
-				add(rate.Ext.Get(tbai.ExtKeyRegime).String())
+				code := rate.Ext.Get(tbai.ExtKeyRegime).String()
+				if code == "" || hasClave(claves, code) {
+					continue
+				}
+				claves = append(claves, IDClave{ClaveRegimenIvaOpTrascendencia: code})
 			}
 		}
 	}
 	return claves
+}
+
+func hasClave(claves []IDClave, code string) bool {
+	for _, c := range claves {
+		if c.ClaveRegimenIvaOpTrascendencia == code {
+			return true
+		}
+	}
+	return false
 }
 
 func newFacturaRectificativa(inv *bill.Invoice) *FacturaRectificativa {
