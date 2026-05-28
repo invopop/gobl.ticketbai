@@ -48,6 +48,7 @@ func TestFacturaConversion(t *testing.T) {
 	t.Run("should mark an invoice as simplified (ticket)", func(t *testing.T) {
 		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.SetTags(tax.TagSimplified)
+		require.NoError(t, goblInvoice.Calculate())
 
 		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
 

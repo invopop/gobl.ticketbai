@@ -68,9 +68,9 @@ type IDFacturaRectificadaSustituida struct {
 }
 
 func newCabeceraFactura(inv *bill.Invoice) *CabeceraFactura {
-	simplifiedInvoice := "N"
-	if inv.HasTags(tax.TagSimplified) {
-		simplifiedInvoice = "S"
+	simplifiedInvoice := tbai.ExtValueSimplifiedNo.String()
+	if isSimplified(inv) {
+		simplifiedInvoice = tbai.ExtValueSimplifiedYes.String()
 	}
 
 	return &CabeceraFactura{
@@ -80,6 +80,12 @@ func newCabeceraFactura(inv *bill.Invoice) *CabeceraFactura {
 		FacturaRectificativa:            newFacturaRectificativa(inv),
 		FacturasRectificadasSustituidas: newFacturasRectificadasSustituidas(inv),
 	}
+}
+
+// isSimplified reports whether the invoice carries the es-tbai-simplified=S
+// extension that the addon's normalizer sets from the GOBL simplified tag.
+func isSimplified(inv *bill.Invoice) bool {
+	return inv.Tax != nil && inv.Tax.Ext.Get(tbai.ExtKeySimplified) == tbai.ExtValueSimplifiedYes
 }
 
 func newDatosFactura(inv *bill.Invoice) (*DatosFactura, error) {
