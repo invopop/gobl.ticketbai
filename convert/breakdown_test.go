@@ -456,10 +456,7 @@ func TestDesgloseConversion(t *testing.T) {
 			Quantity: num.MakeAmount(100, 0),
 			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 			Taxes: tax.Set{
-				&tax.Combo{
-					Category: tax.CategoryVAT,
-					Key:      tax.KeyReverseCharge,
-				},
+				&tax.Combo{Category: tax.CategoryVAT, Key: tax.KeyReverseCharge},
 			},
 		}}
 		_ = goblInvoice.Calculate()

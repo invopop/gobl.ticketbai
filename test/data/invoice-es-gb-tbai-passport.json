@@ -1,10 +1,10 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0192fd51-6cd8-73f2-a182-8c4d3901d125",
+		"uuid": "019e3fdd-8a5f-7213-9f3b-84844f692fc5",
 		"dig": {
 			"alg": "sha256",
-			"val": "04d54c6d613fa315808fe936a60fb7c26915acff052930e3b5189812f4b1872d"
+			"val": "5d174c61eb56151c417444423806d0c4d703c486157e37766c1d5333dbc964f5"
 		}
 	},
 	"doc": {
@@ -13,15 +13,18 @@
 		"$addons": [
 			"es-tbai-v1"
 		],
-		"uuid": "0192fd50-b568-7819-acf7-c2cfc5478b18",
+		"$tags": [
+			"customer-rates"
+		],
+		"uuid": "019e3fdd-8a5f-7213-9f3b-8485cf692b71",
 		"type": "standard",
-		"series": "TEST",
-		"code": "004",
-		"issue_date": "2022-02-01",
+		"series": "PASS",
+		"code": "0003",
+		"issue_date": "2024-07-19",
 		"currency": "EUR",
 		"tax": {
 			"ext": {
-				"es-tbai-region": "VI"
+				"es-tbai-region": "BI"
 			}
 		},
 		"supplier": {
@@ -32,11 +35,11 @@
 			},
 			"addresses": [
 				{
-					"num": "18",
-					"street": "Calle Postas",
-					"locality": "Vitoria-Gasteiz",
-					"region": "Araba",
-					"code": "01001",
+					"num": "42",
+					"street": "San Frantzisko",
+					"locality": "Bilbo",
+					"region": "Bizkaia",
+					"code": "48003",
 					"country": "ES"
 				}
 			],
@@ -47,43 +50,28 @@
 			]
 		},
 		"customer": {
-			"name": "Sample Customer",
-			"tax_id": {
-				"country": "ES",
-				"code": "54387763P"
-			},
-			"addresses": [
+			"name": "Jane Doe",
+			"identities": [
 				{
-					"num": "13",
-					"street": "Calle del Barro",
-					"locality": "Alcañiz",
-					"region": "Teruel",
-					"code": "44600",
-					"country": "ES"
-				}
-			],
-			"emails": [
-				{
-					"addr": "customer@example.com"
+					"country": "GB",
+					"key": "passport",
+					"code": "543210987",
+					"ext": {
+						"es-tbai-identity-type": "03"
+					}
 				}
 			]
 		},
 		"lines": [
 			{
 				"i": 1,
-				"quantity": "10",
+				"quantity": "2",
 				"item": {
 					"key": "services",
-					"name": "Item being purchased",
-					"price": "100.00"
+					"name": "Guided tour booking fee",
+					"price": "75.00"
 				},
-				"sum": "1000.00",
-				"discounts": [
-					{
-						"percent": "10%",
-						"amount": "100.00"
-					}
-				],
+				"sum": "150.00",
 				"taxes": [
 					{
 						"cat": "VAT",
@@ -91,17 +79,18 @@
 						"rate": "general",
 						"percent": "21.0%",
 						"ext": {
+							"es-tbai-exemption": "RL",
 							"es-tbai-product": "services",
 							"es-tbai-regime": "01"
 						}
 					}
 				],
-				"total": "900.00"
+				"total": "150.00"
 			}
 		],
 		"totals": {
-			"sum": "900.00",
-			"total": "900.00",
+			"sum": "150.00",
+			"total": "150.00",
 			"taxes": {
 				"categories": [
 					{
@@ -110,27 +99,28 @@
 							{
 								"key": "standard",
 								"ext": {
+									"es-tbai-exemption": "RL",
 									"es-tbai-product": "services",
 									"es-tbai-regime": "01"
 								},
-								"base": "900.00",
+								"base": "150.00",
 								"percent": "21.0%",
-								"amount": "189.00"
+								"amount": "31.50"
 							}
 						],
-						"amount": "189.00"
+						"amount": "31.50"
 					}
 				],
-				"sum": "189.00"
+				"sum": "31.50"
 			},
-			"tax": "189.00",
-			"total_with_tax": "1089.00",
-			"payable": "1089.00"
+			"tax": "31.50",
+			"total_with_tax": "181.50",
+			"payable": "181.50"
 		},
 		"notes": [
 			{
 				"key": "general",
-				"text": "Some random description"
+				"text": "Tourist booking identified by passport."
 			}
 		]
 	}
