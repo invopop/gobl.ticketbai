@@ -97,7 +97,7 @@ func newTipoDesglose(gobl *bill.Invoice) *TipoDesglose {
 
 	desglose := &TipoDesglose{}
 
-	if gobl.Customer == nil || partyCountry(gobl.Customer) == l10n.ES.Tax() {
+	if gobl.Customer == nil || partyCountry(gobl.Customer) == l10n.ES.Tax() || gobl.HasTags(tax.TagSimplified) {
 		desglose.DesgloseFactura = newDesgloseFactura(catTotal.Rates)
 	} else {
 		goods, services := splitByTBAIProduct(catTotal.Rates)

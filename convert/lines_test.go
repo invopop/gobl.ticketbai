@@ -9,6 +9,7 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -75,6 +76,26 @@ func TestLines(t *testing.T) {
 		line := out.Factura.DatosFactura.DetallesFactura.IDDetalleFactura[0]
 		assert.Equal(t, "100.00", line.ImporteUnitario)
 		assert.Equal(t, "1210.00", line.ImporteTotal)
+	})
+
+	t.Run("should exclude retained taxes (IRPF) from line ImporteTotal", func(t *testing.T) {
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
+		goblInvoice.Lines = []*bill.Line{{
+			Index:    1,
+			Quantity: num.MakeAmount(100, 0),
+			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
+			Taxes: tax.Set{
+				&tax.Combo{Category: tax.CategoryVAT, Rate: "standard"},
+				&tax.Combo{Category: es.TaxCategoryIRPF, Rate: "pro"},
+			},
+		}}
+		_ = goblInvoice.Calculate()
+
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
+
+		line := invoice.Factura.DatosFactura.DetallesFactura.IDDetalleFactura[0]
+		assert.Equal(t, "1210.00", line.ImporteTotal)
+		assert.Equal(t, "1210.00", invoice.Factura.DatosFactura.ImporteTotalFactura)
 	})
 
 	t.Run("should return error if more than 1000 lines included and not Vizcaya", func(t *testing.T) {

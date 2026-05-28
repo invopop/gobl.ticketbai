@@ -3,9 +3,12 @@ package convert
 import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/num"
+	"github.com/invopop/gobl/tax"
 )
 
-// DetallesFactura constains a list of detail lines info
+var regime = tax.RegimeDefFor("ES")
+
+// DetallesFactura contains a list of detail lines info
 type DetallesFactura struct {
 	IDDetalleFactura []IDDetalleFactura
 }
@@ -51,12 +54,13 @@ func calculateTotal(line *bill.Line) num.Amount {
 
 func calculateTaxes(line *bill.Line) num.Amount {
 	total := num.MakeAmount(0, 0)
-
-	for _, tax := range line.Taxes {
-		if tax.Percent != nil {
-			total = total.Add(tax.Percent.Of(*line.Total))
+	for _, t := range line.Taxes {
+		if regime.CategoryDef(t.Category).Retained {
+			continue
+		}
+		if t.Percent != nil {
+			total = total.Add(t.Percent.Of(*line.Total))
 		}
 	}
-
 	return total
 }
